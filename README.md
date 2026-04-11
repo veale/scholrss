@@ -126,7 +126,7 @@ When a filter is set, ScholRSS switches that journal's fetch path from CrossRef 
 filter=primary_location.source.issn:1556-5068,
        from_publication_date:2025-04-01,
        title_and_abstract.search:privacy|regulation,
-       authorships.author.display_name.search:lilian+edwards
+       authorships.author.display_name.search:jane+smith
 ```
 
 Only matching works transit the wire — one request per refresh, no client-side culling. OpenAlex usually returns abstracts inline; anything still missing goes through the normal Semantic Scholar → OpenAlex enrichment fallback. Clearing all fields reverts the journal to the standard CrossRef pipeline.

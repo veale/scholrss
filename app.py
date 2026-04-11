@@ -981,6 +981,21 @@ def api_set_journal_filter(issn):
     return jsonify({"ok": True, "filter": journals[issn].get("filter")})
 
 
+@app.route("/api/journal/<issn>/title", methods=["PUT"])
+def api_rename_journal(issn):
+    """Rename a journal/feed title."""
+    data = request.get_json() or {}
+    title = (data.get("title") or "").strip()
+    if not title:
+        return jsonify({"error": "title required"}), 400
+    journals = load_journals()
+    if issn not in journals:
+        return jsonify({"error": "not found"}), 404
+    journals[issn]["title"] = title
+    save_journals(journals)
+    return jsonify({"ok": True, "title": title})
+
+
 @app.route("/api/journal/<issn>", methods=["DELETE"])
 def api_delete_journal(issn):
     journals = load_journals()

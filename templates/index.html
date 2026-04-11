@@ -844,7 +844,7 @@
       <input type="text" id="ffKeywords" placeholder="e.g. privacy, regulation, GDPR"
              style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);margin-bottom:0.5rem;">
       <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">Authors (comma-separated)</label>
-      <input type="text" id="ffAuthors" placeholder="e.g. Lilian Edwards, Michael Veale"
+      <input type="text" id="ffAuthors" placeholder="e.g. Jane Smith, John Doe"
              style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);margin-bottom:0.5rem;">
       <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">OpenAlex source ID (optional — use instead of ISSN for sources like SSRN that map poorly)</label>
       <input type="text" id="ffSourceId" placeholder="e.g. S4210172589 (SSRN) — find at openalex.org/sources"
@@ -884,8 +884,9 @@
     <div class="journal-card" id="card-{{ issn }}">
       <div class="jc-header" onclick="toggleJournalExpand(event, '{{ issn }}')">
         <div class="jc-top">
-          <div class="jc-title"><span class="jc-expand-indicator">▶</span>{{ info.title }}</div>
+          <div class="jc-title" id="title-{{ issn }}"><span class="jc-expand-indicator">▶</span>{{ info.title }}</div>
           <div class="jc-actions" onclick="event.stopPropagation()">
+            <button class="btn btn-sm" onclick="renameJournal('{{ issn }}')" title="Edit feed title">✎</button>
             <button class="btn btn-sm" onclick="toggleFilterForm('{{ issn }}')" title="Keyword / author filter">⌕ Filter</button>
             <button class="btn btn-sm" onclick="refreshJournal('{{ issn }}', this)">↻ Refresh</button>
             <button class="btn btn-sm btn-danger" onclick="deleteJournal('{{ issn }}')">Remove</button>
@@ -930,7 +931,7 @@
         <input type="text" id="fk-{{ issn }}" placeholder="e.g. privacy, regulation, GDPR"
                value="{{ (info.filter.keywords or []) | join(', ') if info.filter else '' }}">
         <label for="fa-{{ issn }}">Authors (comma-separated — matched against author display names)</label>
-        <input type="text" id="fa-{{ issn }}" placeholder="e.g. Lilian Edwards, Michael Veale"
+        <input type="text" id="fa-{{ issn }}" placeholder="e.g. Jane Smith, John Doe"
                value="{{ (info.filter.authors or []) | join(', ') if info.filter else '' }}">
         <label for="fs-{{ issn }}">OpenAlex source ID (optional — overrides ISSN for source matching)</label>
         <input type="text" id="fs-{{ issn }}" placeholder="e.g. S4210172589 (SSRN)"
@@ -1301,6 +1302,31 @@ async function addJournal(issn, title, publisher) {
       setTimeout(() => location.reload(), 2000);
     } else {
       toast(data.error || 'Failed to add', true);
+    }
+  } catch (e) {
+    toast(`Error: ${e.message}`, true);
+  }
+}
+
+async function renameJournal(issn) {
+  const titleEl = document.getElementById(`title-${issn}`);
+  if (!titleEl) return;
+  // Strip the expand indicator text to get just the title
+  const current = titleEl.textContent.replace(/^▶\s*/, '').trim();
+  const newTitle = prompt('Edit feed title:', current);
+  if (newTitle === null || newTitle.trim() === '' || newTitle.trim() === current) return;
+  try {
+    const r = await fetch(`/api/journal/${issn}/title`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ title: newTitle.trim() }),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      titleEl.innerHTML = `<span class="jc-expand-indicator">▶</span>${escHtml(data.title)}`;
+      toast('Title updated');
+    } else {
+      toast(data.error || 'Failed to rename', true);
     }
   } catch (e) {
     toast(`Error: ${e.message}`, true);
