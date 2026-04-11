@@ -1,0 +1,472 @@
+"""
+Test suite for ScholRSS.
+
+Run with: pytest tests/ -v
+Run integration tests (hits real APIs): pytest tests/ -v -m integration
+Run unit tests only: pytest tests/ -v -m "not integration"
+"""
+
+import json
+import os
+import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
+from unittest.mock import patch, MagicMock
+
+import pytest
+
+# Set test data dir before importing app
+_test_dir = tempfile.mkdtemp()
+os.environ["DATA_DIR"] = _test_dir
+os.environ["_SCHOLRSS_SCHEDULER_STARTED"] = "1"  # prevent scheduler from starting
+
+import app as scholrss
+
+
+@pytest.fixture
+def client():
+    """Flask test client with clean data directory."""
+    scholrss.DATA_DIR = Path(_test_dir)
+    scholrss.JOURNALS_FILE = scholrss.DATA_DIR / "journals.json"
+    scholrss.CACHE_DIR = scholrss.DATA_DIR / "cache"
+    scholrss.ensure_dirs()
+
+    # Clean up between tests
+    if scholrss.JOURNALS_FILE.exists():
+        scholrss.JOURNALS_FILE.unlink()
+    for f in scholrss.CACHE_DIR.iterdir():
+        f.unlink()
+
+    scholrss.app.config["TESTING"] = True
+    with scholrss.app.test_client() as client:
+        yield client
+
+
+@pytest.fixture
+def sample_cache(client):
+    """Create a sample journal with cached data."""
+    journals = {
+        "0028-0836": {
+            "title": "Nature",
+            "publisher": "Springer",
+            "added": "2026-01-01T00:00:00+00:00",
+        }
+    }
+    scholrss.save_journals(journals)
+
+    cache = {
+        "issn": "0028-0836",
+        "journal": journals["0028-0836"],
+        "updated": "2026-04-10T12:00:00+00:00",
+        "works": [
+            {
+                "doi": "10.1038/s41586-026-00001-1",
+                "title": "Test Article One",
+                "authors": ["Alice Smith", "Bob Jones"],
+                "date": "2026-04-08T00:00:00+00:00",
+                "abstract": "This is a test abstract.",
+                "url": "https://doi.org/10.1038/s41586-026-00001-1",
+                "source": "crossref+semanticscholar",
+            },
+            {
+                "doi": "10.1038/s41586-026-00002-2",
+                "title": "Test Article Two",
+                "authors": ["Carol White"],
+                "date": "2026-04-07T00:00:00+00:00",
+                "abstract": "",
+                "url": "https://doi.org/10.1038/s41586-026-00002-2",
+                "source": "crossref",
+            },
+        ],
+    }
+    cache_path = scholrss.journal_cache_path("0028-0836")
+    cache_path.write_text(json.dumps(cache, indent=2))
+    return cache
+
+
+# ── Unit Tests ─────────────────────────────────────────────────────────────
+
+
+class TestHelpers:
+    def test_journal_cache_path(self):
+        path = scholrss.journal_cache_path("0028-0836")
+        assert "00280836.json" in str(path)
+
+    def test_load_save_journals(self, client):
+        journals = scholrss.load_journals()
+        assert journals == {}
+
+        scholrss.save_journals({"1234-5678": {"title": "Test"}})
+        journals = scholrss.load_journals()
+        assert "1234-5678" in journals
+        assert journals["1234-5678"]["title"] == "Test"
+
+    def test_reconstruct_abstract(self):
+        inv_index = {"Hello": [0], "world": [1], "this": [2], "is": [3], "a": [4], "test": [5]}
+        result = scholrss.reconstruct_abstract(inv_index)
+        assert result == "Hello world this is a test"
+
+    def test_reconstruct_abstract_empty(self):
+        assert scholrss.reconstruct_abstract(None) == ""
+        assert scholrss.reconstruct_abstract({}) == ""
+
+
+class TestRoutes:
+    def test_homepage_empty(self, client):
+        rv = client.get("/")
+        assert rv.status_code == 200
+        assert b"ScholRSS" in rv.data
+        assert b"No journals tracked yet" in rv.data
+
+    def test_homepage_with_journals(self, client, sample_cache):
+        rv = client.get("/")
+        assert rv.status_code == 200
+        assert b"Nature" in rv.data
+        assert b"0028-0836" in rv.data
+
+    def test_feed_not_found(self, client):
+        rv = client.get("/feed/9999-9999")
+        assert rv.status_code == 404
+
+    def test_feed_atom(self, client, sample_cache):
+        rv = client.get("/feed/0028-0836")
+        assert rv.status_code == 200
+        assert "application/atom+xml" in rv.content_type
+        assert b"Nature" in rv.data
+        assert b"Test Article One" in rv.data
+
+    def test_feed_rss(self, client, sample_cache):
+        rv = client.get("/feed/0028-0836?format=rss")
+        assert rv.status_code == 200
+        assert "application/rss+xml" in rv.content_type
+        assert b"Nature" in rv.data
+
+    def test_feed_json(self, client, sample_cache):
+        rv = client.get("/feed/0028-0836/json")
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert data["issn"] == "0028-0836"
+        assert len(data["works"]) == 2
+        assert data["works"][0]["title"] == "Test Article One"
+
+    def test_feed_json_not_found(self, client):
+        rv = client.get("/feed/9999-9999/json")
+        assert rv.status_code == 404
+
+    def test_opml_empty(self, client):
+        rv = client.get("/opml")
+        assert rv.status_code == 200
+        assert b"opml" in rv.data
+
+    def test_opml_with_journals(self, client, sample_cache):
+        rv = client.get("/opml")
+        assert rv.status_code == 200
+        assert b"Nature" in rv.data
+        assert b"0028-0836" in rv.data
+
+
+class TestAutocomplete:
+    def test_autocomplete_too_short(self, client):
+        rv = client.get("/api/autocomplete?q=a")
+        assert rv.status_code == 200
+        assert rv.get_json() == []
+
+    def test_autocomplete_empty(self, client):
+        rv = client.get("/api/autocomplete?q=")
+        assert rv.status_code == 200
+        assert rv.get_json() == []
+
+    def test_autocomplete_no_db(self, client):
+        """Returns empty when DB doesn't exist (graceful fallback)."""
+        import app as scholrss
+        orig = scholrss.JOURNALS_DB
+        scholrss.JOURNALS_DB = Path("/nonexistent/journals.db")
+        rv = client.get("/api/autocomplete?q=nature")
+        assert rv.status_code == 200
+        assert rv.get_json() == []
+        scholrss.JOURNALS_DB = orig
+
+
+class TestAPIRoutes:
+    def test_search_empty_query(self, client):
+        rv = client.get("/api/search/journal?q=")
+        assert rv.status_code == 200
+        assert rv.get_json() == []
+
+    def test_doi_search_no_doi(self, client):
+        rv = client.get("/api/search/doi?doi=")
+        assert rv.status_code == 400
+
+    def test_add_journal_no_issn(self, client):
+        rv = client.post("/api/journal",
+                         json={"issn": "", "title": "Test"})
+        assert rv.status_code == 400
+
+    def test_add_journal(self, client):
+        with patch.object(scholrss.threading.Thread, "start"):
+            rv = client.post("/api/journal",
+                             json={"issn": "1234-5678", "title": "Test Journal", "publisher": "Test"})
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert data["ok"] is True
+        assert data["issn"] == "1234-5678"
+
+        # Verify saved
+        journals = scholrss.load_journals()
+        assert "1234-5678" in journals
+        assert journals["1234-5678"]["title"] == "Test Journal"
+
+    def test_delete_journal(self, client, sample_cache):
+        rv = client.delete("/api/journal/0028-0836")
+        assert rv.status_code == 200
+        assert rv.get_json()["ok"] is True
+
+        # Verify removed
+        journals = scholrss.load_journals()
+        assert "0028-0836" not in journals
+        assert not scholrss.journal_cache_path("0028-0836").exists()
+
+    def test_delete_nonexistent_journal(self, client):
+        rv = client.delete("/api/journal/9999-9999")
+        assert rv.status_code == 200  # idempotent
+
+    def test_refresh_not_found(self, client):
+        rv = client.post("/api/refresh/9999-9999")
+        assert rv.status_code == 404
+
+    def test_refresh_journal(self, client, sample_cache):
+        with patch.object(scholrss.threading.Thread, "start"):
+            rv = client.post("/api/refresh/0028-0836")
+        assert rv.status_code == 200
+        assert rv.get_json()["ok"] is True
+
+    def test_refresh_all(self, client):
+        with patch.object(scholrss.threading.Thread, "start"):
+            rv = client.post("/api/refresh-all")
+        assert rv.status_code == 200
+        assert rv.get_json()["ok"] is True
+
+    def test_bulk_import_empty(self, client):
+        rv = client.post("/api/journal/bulk", json={"issns": []})
+        assert rv.status_code == 400
+
+    def test_bulk_import(self, client):
+        with patch.object(scholrss.threading.Thread, "start"):
+            rv = client.post("/api/journal/bulk",
+                             json={"issns": ["0028-0836", "1932-6203"]})
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert data["ok"] is True
+        assert "2" in data["message"]
+
+
+class TestFeedGeneration:
+    def test_feed_has_required_fields(self, client, sample_cache):
+        fg = scholrss.generate_feed("0028-0836")
+        assert fg is not None
+        xml = fg.atom_str(pretty=True).decode()
+        assert "Test Article One" in xml
+        assert "Test Article Two" in xml
+        assert "Alice Smith" in xml
+        assert "This is a test abstract" in xml
+        assert "10.1038/s41586-026-00001-1" in xml
+
+    def test_feed_caps_at_50_entries(self, client):
+        """Feed should cap at 50 entries even if cache has more."""
+        journals = {"0000-0000": {"title": "Big Journal", "publisher": "Test"}}
+        scholrss.save_journals(journals)
+
+        works = []
+        for i in range(75):
+            works.append({
+                "doi": f"10.1234/test-{i:04d}",
+                "title": f"Article {i}",
+                "authors": ["Author"],
+                "date": "2026-04-01T00:00:00+00:00",
+                "abstract": f"Abstract {i}",
+                "url": f"https://doi.org/10.1234/test-{i:04d}",
+                "source": "crossref",
+            })
+
+        cache = {
+            "issn": "0000-0000",
+            "journal": journals["0000-0000"],
+            "updated": "2026-04-10T12:00:00+00:00",
+            "works": works,
+        }
+        scholrss.journal_cache_path("0000-0000").write_text(json.dumps(cache))
+
+        fg = scholrss.generate_feed("0000-0000")
+        xml = fg.atom_str(pretty=True).decode()
+        # Should have 50 entries, not 75
+        assert xml.count("<entry>") == 50
+
+    def test_feed_returns_none_for_missing_cache(self):
+        assert scholrss.generate_feed("9999-9999") is None
+
+
+class TestSemanticScholar:
+    def test_batch_abstracts_empty(self):
+        result = scholrss.semantic_scholar_batch_abstracts([])
+        assert result == {}
+
+    def test_batch_abstracts_success(self):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = [
+            {
+                "abstract": "Test abstract text",
+                "externalIds": {"DOI": "10.1234/test-001"},
+            },
+            None,  # some papers may not be found
+            {
+                "abstract": None,
+                "externalIds": {"DOI": "10.1234/test-002"},
+            },
+        ]
+        with patch("app.requests.post", return_value=mock_response):
+            result = scholrss.semantic_scholar_batch_abstracts(
+                ["10.1234/test-001", "10.1234/test-002"]
+            )
+        assert "10.1234/test-001" in result
+        assert result["10.1234/test-001"] == "Test abstract text"
+        assert "10.1234/test-002" not in result  # no abstract
+
+    def test_batch_abstracts_rate_limited(self):
+        mock_response = MagicMock()
+        mock_response.status_code = 429
+        with patch("app.requests.post", return_value=mock_response):
+            result = scholrss.semantic_scholar_batch_abstracts(["10.1234/test"])
+        assert result == {}
+
+
+class TestOpenAlexEnrich:
+    def test_enrich_abstract_success(self):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "abstract_inverted_index": {"Hello": [0], "world": [1]}
+        }
+        with patch("app.requests.get", return_value=mock_response):
+            result = scholrss.openalex_enrich_abstract("10.1234/test")
+        assert result == "Hello world"
+
+    def test_enrich_abstract_not_found(self):
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        with patch("app.requests.get", return_value=mock_response):
+            result = scholrss.openalex_enrich_abstract("10.1234/nonexistent")
+        assert result == ""
+
+    def test_enrich_abstract_no_abstract(self):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"abstract_inverted_index": None}
+        with patch("app.requests.get", return_value=mock_response):
+            result = scholrss.openalex_enrich_abstract("10.1234/test")
+        assert result == ""
+
+
+# ── Integration Tests (hit real APIs) ──────────────────────────────────────
+
+
+@pytest.mark.integration
+class TestCrossRefIntegration:
+    def test_search_journal(self):
+        results = scholrss.crossref_search_journal("nature")
+        assert len(results) > 0
+        assert any("issn" in r for r in results)
+
+    def test_journal_from_doi(self):
+        result = scholrss.crossref_journal_from_doi("10.1038/s41586-024-07386-0")
+        assert result is not None
+        assert result["title"]
+        assert len(result["issn"]) > 0
+
+    def test_latest_works(self):
+        works = scholrss.crossref_latest_works("0028-0836", "2026-03-01")
+        assert len(works) > 0
+        work = works[0]
+        assert "doi" in work
+        assert "title" in work
+        assert "authors" in work
+        assert "date" in work
+        assert "url" in work
+        assert "source" in work
+        assert work["source"] == "crossref"
+
+
+@pytest.mark.integration
+class TestSemanticScholarIntegration:
+    def test_batch_abstracts(self):
+        # Use well-known DOIs that should have abstracts
+        dois = [
+            "10.1038/s41586-024-07386-0",
+            "10.1371/journal.pone.0000000",  # likely not found
+        ]
+        result = scholrss.semantic_scholar_batch_abstracts(dois)
+        # At least one should come back (the Nature one)
+        assert isinstance(result, dict)
+
+
+@pytest.mark.integration
+class TestOpenAlexIntegration:
+    def test_enrich_abstract(self):
+        # PLOS ONE articles typically have abstracts in OpenAlex
+        result = scholrss.openalex_enrich_abstract("10.1371/journal.pone.0309800")
+        # May or may not have abstract, but should not error
+        assert isinstance(result, str)
+
+
+@pytest.mark.integration
+class TestEndToEndIntegration:
+    def test_full_flow(self, client):
+        """Test the complete add -> refresh -> feed flow."""
+        # Search for a journal
+        rv = client.get("/api/search/journal?q=PLOS+ONE")
+        assert rv.status_code == 200
+        results = rv.get_json()
+        assert len(results) > 0
+
+        # Add journal
+        rv = client.post("/api/journal",
+                         json={"issn": "1932-6203", "title": "PLOS ONE", "publisher": "PLOS"})
+        assert rv.status_code == 200
+        assert rv.get_json()["ok"]
+
+        # Wait briefly for background thread, then manually update
+        import time
+        time.sleep(1)
+
+        # Manually update (synchronous)
+        journals = scholrss.load_journals()
+        scholrss.update_journal_feed("1932-6203", journals["1932-6203"])
+
+        # Check feed
+        rv = client.get("/feed/1932-6203")
+        assert rv.status_code == 200
+        assert b"PLOS ONE" in rv.data
+
+        # Check JSON
+        rv = client.get("/feed/1932-6203/json")
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert len(data["works"]) > 0
+        assert data["journal"]["title"] == "PLOS ONE"
+
+        # Check some works have abstracts
+        with_abstract = sum(1 for w in data["works"] if w.get("abstract"))
+        assert with_abstract > 0, "Expected at least some abstracts"
+
+        # Check OPML includes the journal
+        rv = client.get("/opml")
+        assert rv.status_code == 200
+        assert b"1932-6203" in rv.data
+
+        # Delete journal
+        rv = client.delete("/api/journal/1932-6203")
+        assert rv.status_code == 200
+
+        # Feed should be gone
+        rv = client.get("/feed/1932-6203")
+        assert rv.status_code == 404

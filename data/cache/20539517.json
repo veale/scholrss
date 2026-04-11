@@ -1,0 +1,1237 @@
+{
+  "issn": "2053-9517",
+  "journal": {
+    "title": "Big Data & Society",
+    "publisher": "SAGE",
+    "added": "2026-04-11T09:32:16.434309+00:00"
+  },
+  "updated": "2026-04-11T09:35:06.220616+00:00",
+  "works": [
+    {
+      "doi": "10.1177/20539517261442421",
+      "title": "The data of care: Intergenerational lives between support and surveillance",
+      "authors": [
+        "Zuzana Tala\u0161ov\u00e1"
+      ],
+      "date": "2026-06-01T00:00:00+00:00",
+      "abstract": "This commentary analyzes how the digitalization and datafication of informal care transform the temporal, gendered, and intergenerational dynamics of family caregiving. Technologies such as sensors, apps, and AI-driven platforms promise support and efficiency, yet they introduce new temporal regimes that redefine what counts as \u201cgood care.\u201d Building on feminist ethics of care, feminist data studies, and theories of temporality, the text argues that digital systems create a form of moral temporalization: caregivers are evaluated through their speed of response to algorithmic alerts rather than through presence or relational attentiveness. These transformations can also be situated within broader processes of value individualization, whereby responsibility for care becomes increasingly personalized, monitored, and moralized at the level of individual family members. These shifts carry social consequences. Digital care generates invisible technical and temporal labor\u2014particularly borne by women\u2014while reshaping intergenerational relations by granting younger, technologically skilled family members greater temporal authority over older adults. As care becomes increasingly governed by algorithmic time, the boundary between support and surveillance blurs. The commentary calls for rethinking temporality as a central ethical dimension of datafied care.",
+      "url": "https://doi.org/10.1177/20539517261442421",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517251381686",
+      "title": "Web scraping for research: Legal, ethical, institutional, and scientific considerations",
+      "authors": [
+        "Megan A Brown",
+        "Andrew Gruen",
+        "Gabe Maldoff",
+        "Solomon Messing",
+        "Zeve Sanderson",
+        "Michael Zimmer"
+      ],
+      "date": "2025-12-01T00:00:00+00:00",
+      "abstract": "Scientists across disciplines often use data from the internet to conduct research, generating valuable insights about human behavior. However, as generative artificial intelligence relying on massive text corpora becomes increasingly valuable, platforms have greatly restricted access to data through official channels. As a result, researchers will likely engage in more web scraping to collect data, introducing new challenges and concerns for researchers. This paper proposes a comprehensive framework for web scraping in social science research for U.S.-based researchers, examining the legal, ethical, institutional, and scientific factors that we recommend researchers consider when scraping the web. We present an overview of the current regulatory environment impacting when and how researchers can access, collect, store, and share data via scraping. We then provide researchers with recommendations to conduct scraping in a scientifically legitimate and ethical manner. We aim to equip researchers with the relevant information to mitigate risks and maximize the impact of their research amid this evolving data access landscape.",
+      "url": "https://doi.org/10.1177/20539517251381686",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517251398728",
+      "title": "Mosaic of state power: How \u2018New\u2019 state capitalism shapes global tech capital",
+      "authors": [
+        "Weidi Zheng"
+      ],
+      "date": "2025-12-01T00:00:00+00:00",
+      "abstract": "This article investigates how China's platform and data infrastructure expand globally amid shifting state-capital relations at home and abroad. Moving beyond the dichotomy of \u2018democratic free market capitalism\u2019 and \u2018authoritarian state capitalism\u2019, it situates China within a broader shift towards \u2018new state capitalism\u2019, where states act increasingly as promoters, regulators and owners of capital. Drawing on multi-sited fieldwork in Shenzhen and Jakarta (2022\u20132023) and a statistical analysis of Alibaba, Tencent and ByteDance investments (2013\u20132023), the article argues that internationalisation by Chinese tech capital is best understood as reactive adaptation rather than proactive geopolitical design: domestically, antitrust actions, data securitisation and industrial upgrading pushed private firms outwards; externally, U.S. neo-mercantilist policy and economic nationalism in the Global South \u2013 such as in India and Indonesia \u2013 reveal strategies of exclusion, redirection and selective absorption that reroute foreign tech capital alongside national agendas. In an era of declining multi-stakeholder governance, the article theorises contemporary global cyberspace as a \u2018mosaic of state power\u2019, where sovereigns pursue their developmental agendas and reshape capital flows in line with their national interests. It also advances a relational, ecological account of \u2018new state capitalism\u2019 that explains how confrontation and emulation among states drive a new digital order.",
+      "url": "https://doi.org/10.1177/20539517251398728",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517251338742",
+      "title": "A song for each moment: Identifying listening modes as reflexive practices in music streaming",
+      "authors": [
+        "Sebastian Cole"
+      ],
+      "date": "2025-06-01T00:00:00+00:00",
+      "abstract": "In addition to personal and contextual reasons for listening to music, users of music streaming services also receive constant recommendations from these platforms\u2019 algorithmic systems. In this article, I explore, from a critical realist perspective, how users reflect on and decide what to listen to in various contexts. First, the article develops a framework for understanding reflexive decision-making in the context of music streaming. Then, based on interviews with Spotify users and an analysis of their donated streaming histories, three listening modes are identified based on what motivates music choices and how the users interact with the platform's content. Findings suggest that in addition to the platform's recommendations, users reflexively choose music to fit their contexts, emotions and goals based on their previous experiences, striking a balance between conscious and habitual music listening.",
+      "url": "https://doi.org/10.1177/20539517251338742",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517251349170",
+      "title": "Indigenous peoples and artificial intelligence: A systematic review and future directions",
+      "authors": [
+        "Maneesha Perera",
+        "Rajith Vidanaarachchi",
+        "Sangeetha Chandrashekeran",
+        "Melissa Kennedy",
+        "Brendan Kennedy",
+        "Saman Halgamuge"
+      ],
+      "date": "2025-06-01T00:00:00+00:00",
+      "abstract": "This systematic literature review addresses the intersection of two rapidly evolving areas of knowledge and practice: Indigenous Knowledge Systems (IKS) and artificial intelligence (AI). There is growing scholarly recognition of the rich and diverse nature of IKS, which are unique intergenerational understandings of worldly relations from an Indigenous standpoint. There is now a vast literature on the promise and pitfalls of AI. However, there is a lack of systematic reviews showing how these two dynamic literatures are intersecting, and what the major themes are. AI has the potential to assist the promotion of IKS; however, there are also potential risks arising from AI for Indigenous peoples, such as the erosion of cultural knowledge, and data-grabbing that fails to respect the principles of Indigenous Data Sovereignty. These risks can exacerbate existing knowledge hierarchies and socio-economic inequalities. In this paper, we conducted a systematic review of articles published between 2012 and 2023 (January) on Indigenous peoples and AI. We shed light upon four unique overlapping categories into which existing literature can be classified and comprehensively discuss literature under each category. The first two categories discuss AI\u2019s role in assisting the promotion of IKS and the third focuses on the pitfalls of using AI for Indigenous peoples. The final category discusses how IKS itself can enrich the development of AI. We further identify several gaps in the literature and highlight avenues requiring attention on AI\u2019s role with Indigenous peoples and their knowledge systems.",
+      "url": "https://doi.org/10.1177/20539517251349170",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517251340603",
+      "title": "The ethics of AI value chains",
+      "authors": [
+        "Blair Attard-Frost",
+        "David Gray Widder"
+      ],
+      "date": "2025-06-01T00:00:00+00:00",
+      "abstract": "Researchers, practitioners, and policymakers with an interest in the ethics of artificial intelligence (AI) need more integrative approaches for studying and intervening in AI systems across many contexts and scales of activity. This paper presents\n                    AI value chains\n                    as an integrative concept that satisfies that need. To more clearly theorize AI value chains and conceptually distinguish them from supply chains, we review theories of value chains and AI value chains from strategic management, service science, economic geography, industry, government, and applied research literature. We then conduct an integrative review of a sample of 67 sources that cover the ethical concerns implicated in AI value chains. Building upon the findings of our integrative review, we recommend three future directions that researchers, practitioners, and policymakers can take to advance more ethical practices across AI value chains. We urge AI ethics researchers and practitioners to move toward value chain perspectives that situate actors in context, account for the many types of resources involved in cocreating AI systems, and integrate a wider range of ethical concerns across contexts and scales.",
+      "url": "https://doi.org/10.1177/20539517251340603",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241304678",
+      "title": "Artificial intelligence for development (AI4D): A contested notion",
+      "authors": [
+        "Sophie Toupin",
+        "Roda Siad"
+      ],
+      "date": "2025-06-01T00:00:00+00:00",
+      "abstract": "Recently, the notion of artificial intelligence for development (AI4D) has been mobilized by various actors in the global South and North. We identify five analytical categories to help us understand the different and often contested perspectives on AI4D. They are (a) a developmentalist framework that emphasizes discourses around modernity and progress through a technoliberal lens of \u2018catching up\u2019; (b) an economic development framework taken up by African states, private sector and civil society, highlighting a positive and more future-looking outlook on AI's potential for development; (c) an international policy framework tied to globally agreed on policies such as the Sustainable Development Goals; (d) a colonial and extractivist framework that articulates how AI4D reinforces old processes of oppression in new ways; and (e) decolonial AI discourses grounded in Latin American, African and Indigenous approaches. Our critical review of literature on AI4D and related expressions shows that while the notion applies broadly to the global South, the majority of publications use the term in reference to AI development on the African continent. This commentary enriches our understanding of the plurality of meanings, where they come from, what they do, and what they leave unaddressed.",
+      "url": "https://doi.org/10.1177/20539517241304678",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517251340600",
+      "title": "Global data empires: Analysing artificial intelligence data annotation in China and the USA",
+      "authors": [
+        "Tongyu Wu",
+        "James Muldoon",
+        "Bingqing Xia"
+      ],
+      "date": "2025-06-01T00:00:00+00:00",
+      "abstract": "As the two leading countries in the development of artificial intelligence (AI) systems, China and the United States largely rely on separate AI infrastructure and data annotation ecosystems. Studies have focussed almost exclusively on data annotation associated with American and European companies, limiting our understanding of how this contrasts with the Chinese development of AI. This article provides a comparative analysis of the political economy of the Chinese and American/European AI data annotation ecosystems, focusing on the role of the state and the practice of outsourcing to data annotation institutions. It finds that while the US state plays a protectionist role concerning AI infrastructure such as semiconductors and data centres, it adopts a laissez-faire approach to data annotation. The Chinese state, however, understands it has a comparative advantage in data and invests heavily in its own data ecosystem while maintaining stringent regulations for Chinese tech companies. Secondly, many US companies outsource data annotation work to business process outsourcing centres and digital platforms, whereas Chinese companies maintain these activities in-house or, through a process of \u2018inland-sourcing\u2019, send this work to \u2018third-tier\u2019 cities in Chinese provinces to data labelling bases, often jointly managed by local government and private companies.",
+      "url": "https://doi.org/10.1177/20539517251340600",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241303118",
+      "title": "Toward cultural interpretability: A linguistic anthropological framework for describing and evaluating large language models",
+      "authors": [
+        "Graham M Jones",
+        "Shai Satran",
+        "Arvind Satyanarayan"
+      ],
+      "date": "2025-03-01T00:00:00+00:00",
+      "abstract": "This article proposes a new integration of linguistic anthropology and machine learning (ML) around convergent interests in both the underpinnings of language and making language technologies more socially responsible. While linguistic anthropology focuses on interpreting the cultural basis for human language use, the ML field of interpretability is concerned with uncovering the patterns that Large Language Models (LLMs) learn from human verbal behavior. Through the analysis of a conversation between a human user and an LLM-powered chatbot, we demonstrate the theoretical feasibility of a new, conjoint field of inquiry, cultural interpretability (CI). By focusing attention on the communicative competence involved in the way human users and AI chatbots coproduce meaning in the articulatory interface of human-computer interaction, CI emphasizes how the dynamic relationship between language and culture makes contextually sensitive, open-ended conversation possible. We suggest that, by examining how LLMs internally \u201crepresent\u201d relationships between language and culture, CI can: (1) provide insight into long-standing linguistic anthropological questions about the patterning of those relationships; and (2) aid model developers and interface designers in improving value alignment between language models and stylistically diverse speakers and culturally diverse speech communities. Our discussion proposes three critical research axes: relativity, variation, and indexicality.",
+      "url": "https://doi.org/10.1177/20539517241303118",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241289440",
+      "title": "Que(e)rying artificial intelligence use for infectious disease surveillance: The need for a reparative algorithmic praxis",
+      "authors": [
+        "Elise E. Racine"
+      ],
+      "date": "2025-03-01T00:00:00+00:00",
+      "abstract": "The increasing likelihood of pandemics highlights the need for superior tools at our disposal. By robustly and efficiently analyzing vast datasets, artificial intelligence (AI) has the potential to help decision-makers better respond to, manage, and even avert infectious disease outbreaks. However, these systems could also stigmatize, discriminate, exclude, exploit, and/or otherwise oppress vulnerable populations. In doing so, they could amplify allocative and representational harms. Given the possible far-reaching consequences, critical ethical reflection and oversight are essential. Such reflection would be incomplete without considering the impacts on queer people. From HIV/AIDS to COVID-19, outbreaks have disproportionately affected sexual and gender minorities (SGMs), reflecting a long history of structural oppression and injustices. AI could further exacerbate inequalities\u2014like anti-queer bias\u2014particularly amid the omission of marginalized and minoritized perspectives from algorithmic fairness efforts. Adopting an Intersectional, reparative approach, this paper que(e)ries the use of AI for infectious disease surveillance purposes. Placing this technology within patterns of power, privilege, marginalization, and disadvantage, it interrogates how to achieve algorithmic justice for SGMs. It proposes concrete steps towards a reparative algorithmic praxis, including: (1) exploring how these systems reproduce inequalities, (2) centering sexual and gender diversity to disrupt problematic epistemic positions, and (3) combating opacity through participatory governance mechanisms. This work is necessary to understand how AI systems reproduce major health disparities and hold them accountable. By contemplating how to begin redressing harms, it offers a starting point for further deliberation and action towards inclusive, justice-oriented algorithmic systems in practice. I anticipate these lessons being deeply transferrable across contexts.",
+      "url": "https://doi.org/10.1177/20539517241289440",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241299732",
+      "title": "The emergence of artificial intelligence ethics auditing",
+      "authors": [
+        "Daniel S Schiff",
+        "Stephanie Kelley",
+        "Javier Camacho Ib\u00e1\u00f1ez"
+      ],
+      "date": "2024-12-01T00:00:00+00:00",
+      "abstract": "The emerging ecosystem of artificial intelligence (AI) ethics and governance auditing has grown rapidly in recent years in anticipation of impending regulatory efforts that encourage both internal and external auditing. Yet, there is limited understanding of this evolving landscape. We conduct an interview-based study of 34 individuals in the AI ethics auditing ecosystem across seven countries to examine the motivations, key auditing activities, and challenges associated with AI ethics auditing in the private sector. We find that AI ethics audits follow financial auditing stages, but tend to lack robust stakeholder involvement, measurement of success, and external reporting. Audits are hyper-focused on technically oriented AI ethics principles of bias, privacy, and explainability, to the exclusion of other principles and socio-technical approaches, reflecting a regulatory emphasis on technical risk management. Auditors face challenges, including competing demands across interdisciplinary functions, firm resource and staffing constraints, lack of technical and data infrastructure to enable auditing, and significant ambiguity in interpreting regulations and standards given limited (or absent) best practices and tractable regulatory guidance. Despite these roadblocks, AI ethics and governance auditors are playing a critical role in the early ecosystem: building auditing frameworks, interpreting regulations, curating practices, and sharing learnings with auditees, regulators, and other stakeholders.",
+      "url": "https://doi.org/10.1177/20539517241299732",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241306365",
+      "title": "Digital platforms in the agricultural sector: Dynamics of oligopolistic platformisation",
+      "authors": [
+        "Monja Sauvagerd",
+        "Maximilian Mayer",
+        "Monika Hartmann"
+      ],
+      "date": "2024-12-01T00:00:00+00:00",
+      "abstract": "This paper introduces the concept of \u2018oligopolistic platformisation\u2019 to capture the specific dynamics of collaboration and competition between multinational upstream agribusinesses and Big Tech companies in the agricultural (ag) sector. We examine this phenomenon through the lens of Van Dijck et al.\u2019s platform mechanisms: datafication, selection and commodification. Multinational agribusinesses operate sectoral ag platforms that analyse spatial, weather and agronomic data to optimise farming operations, whilst Big Tech companies provide the digital infrastructure, including cloud computing, data analytics and artificial intelligence. We explore how these pre-existing oligopolistic market structures influence the process and outcomes of platformisation in the ag sector. Using expert interviews, field observations, economic relationship mapping and an extensive literature review, we investigate relationships amongst multinational agribusinesses and between agribusinesses and Big Tech companies. Our findings reveal that Big Tech and multinational agribusinesses are collaboratively establishing digital platforms as the core organisational form of digital agriculture, aiming to consolidate most services. This collaboration blurs the lines between traditionally distinct industries, fostering overlapping ecosystems and mutually beneficial economic relationships in an already highly concentrated market. This dynamic has the potential to reinforce the market position of established companies, increase farmers\u2019 dependency on agribusinesses and contribute to fragmented and siloed data systems.",
+      "url": "https://doi.org/10.1177/20539517241306365",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241255108",
+      "title": "In Palantir we trust? Regulation of data analysis platforms in public security",
+      "authors": [
+        "Lena Ulbricht",
+        "Simon Egbert"
+      ],
+      "date": "2024-09-01T00:00:00+00:00",
+      "abstract": "Organizations increasingly rely on digital technologies to perform tasks. To do so, they have to integrate data banks to make the data usable. We argue that there is a growing, academically underexplored market consisting of data integration and analysis platforms. We explain that, especially in the public sector, the regulatory implications of data integration and analysis must be studied because they affect vulnerable citizens and because it is not just a matter of state agencies overseeing technology companies but also of the state overseeing itself. We propose a platform-theory-based conceptual approach that directs our attention towards the specific characteristics of platforms\u2014such as datafication, modularity, and multilaterality and the associated regulatory challenges. Due to a scarcity of empirical analyses about how public sector platforms are regulated, we undertake an in-depth case study of a data integration and analysis platform operated by Palantir Technologies in the German federal state of Hesse. Our analysis of the regulatory activities and conflicts uncovers many obstacles to effective platform regulation. Drawing on recent initiatives to improve intermediary liability, we ultimately point to additional paths for regulating public sector platforms. Our findings also highlight the importance of political factors in platform regulation-as-a-practice. We conclude that platform regulation in the public sector is not only about technology-specific regulation but also about general mechanisms of democratic control, such as the separation of power, public transparency, and civil rights.",
+      "url": "https://doi.org/10.1177/20539517241255108",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241270663",
+      "title": "Privacy resignation, apathy, and cynicism: Introduction to a special theme",
+      "authors": [
+        "Nora A Draper",
+        "Christian Pieter Hoffmann",
+        "Christoph Lutz",
+        "Giulia Ranzini",
+        "Joseph Turow"
+      ],
+      "date": "2024-09-01T00:00:00+00:00",
+      "abstract": "The growing trend of collecting data about individuals to track past actions and infer future attitudes and behaviors has fueled popular and scholarly interest in the erosion of privacy. Recent shifts in technologies around machine learning and artificial intelligence have intensified these concerns. This editorial introduces the articles in the special theme on digital resignation and privacy cynicism: concepts developed in the past decade to explain the growing powerlessness individuals feel in relation to their digital privacy even as they continue to experience consternation over the collection and use of their personal information. The papers in this special theme engage and extend existing research on these topics. The original articles and commentaries pose theoretical and practical questions related to the ways people confront the powerful institutional forces that increasingly shape many aspects of the information environment. They employ several methodologies and theoretical perspectives and extend the range of geographic, political, cultural, and institutional contexts in which privacy cynicism and digital resignation can be identified and examined. In addition to contextualizing these contributions, this editorial maps a range of related concepts including digital resignation, privacy cynicism, privacy apathy, surveillance realism, privacy fatigue, and privacy helplessness. It concludes by identifying key themes across the papers in this collection and provides directions for future research.",
+      "url": "https://doi.org/10.1177/20539517241270663",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241252131",
+      "title": "Generative AI and the politics of visibility",
+      "authors": [
+        "Tarleton Gillespie"
+      ],
+      "date": "2024-06-01T00:00:00+00:00",
+      "abstract": "Proponents of generative AI tools claim they will supplement, even replace, the work of cultural production. This raises questions about the politics of visibility: what kinds of stories do these tools tend to generate, and what do they generally not? Do these tools match the kind of diversity of representation that marginalized populations and non-normative communities have fought to secure in publishing and broadcast media? I tested three widely available generative AI tools with prompts designed to reveal these normative assumptions; I prompted the tools multiple times with each, to track the diversity of the outputs to the same query. I demonstrate that, as currently designed and trained, generative AI tools tend to reproduce normative identities and narratives, rarely representing less common arrangements and perspectives. When they do generate variety, it is often narrow, maintaining deeper normative assumptions in what remains absent.",
+      "url": "https://doi.org/10.1177/20539517241252131",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241237488",
+      "title": "Navigating the ethical landscape behind ChatGPT",
+      "authors": [
+        "Lizhi Peng",
+        "Bo Zhao"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "In this commentary, we examine the key ethical concerns arising from the rapid penetration and proliferation of generative artificial intelligence (AI), with ChatGPT as a prominent case study. Our analysis is structured around four pivotal themes: the debates on plagiarism and authorship in AI-generated content; the underlying power dynamics that shape biases in AI development; the dynamic, complex relationships between humans and machines; and the growing concerns over unchecked progress and the absence of accountability in the rapidly intensifying AI \u201cArms Race.\u201d Recognizing the necessity for ethical alignment in AI, yet without a clear consensus of \u201chuman interests,\u201d gives room for further exacerbating global inequalities, we advocate for enhanced transparency and increased public involvement in AI development and deployment processes. This article underscores the importance of engaging a diverse range of voices, especially those from communities traditionally uninvolved or excluded from the dialogue on AI development. By doing so, we aim to foster a more inclusive and multidisciplinary approach to understanding and shaping the trajectory of AI technologies, ensuring that their benefits are equitably shared, and their risks carefully managed.",
+      "url": "https://doi.org/10.1177/20539517241237488",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241232630",
+      "title": "Big AI: Cloud infrastructure dependence and the industrialisation of artificial intelligence",
+      "authors": [
+        "Fernando van der Vlist",
+        "Anne Helmond",
+        "Fabian Ferrari"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "Critical scholars contend that \u2018There is no AI without Big Tech\u2019. This study delves into the substantial role played by major technology conglomerates, including Amazon, Microsoft, and Google (Alphabet), in the \u2018industrialisation of artificial intelligence\u2019. This concept encapsulates the shift of AI technologies from the research and development stage to practical, real-world applications across diverse industry sectors, resulting in new dependencies and associated investments. We employ the term \u2018Big AI\u2019 to encapsulate the structural convergence of AI and Big Tech, characterised by the profound interdependence of AI with the infrastructure, resources, and investments of these major technology companies. Using a \u2018technographic\u2019 approach, our study scrutinises the infrastructural support and investments of Big Tech in the AI sector, focussing on corporate partnerships, acquisitions, and financial investments. Additionally, we conduct a detailed examination of the complete spectrum of cloud platform products and services offered by Amazon, Microsoft, and Google. We demonstrate that AI is not merely an abstract idea but an actual technology stack encompassing infrastructure, models, applications, and an ecosystem of applications and companies relying on this stack. Significantly, these tech giants have seamlessly integrated all three components of the stack into their cloud offerings. Furthermore, they have developed industry-focussed solutions and marketplaces aimed at attracting third-party developers and businesses, fostering the growth of a broader AI ecosystem. This analysis underscores the intricate interdependence between AI and cloud infrastructure, emphasising the industry-specific aspects of cloud AI.",
+      "url": "https://doi.org/10.1177/20539517241232630",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241231277",
+      "title": "Synthetic data protection: Towards a paradigm change in data regulation?",
+      "authors": [
+        "Ana Beduschi"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "Synthetic data generated through machine learning algorithms from original real-world data is gaining prominence across sectors due to their potential to provide privacy-preserving alternatives to traditional data sources. However, recent studies have raised concerns about the re-identification risks of synthetic data. This article examines the legal challenges surrounding synthetic data protection, with a focus on the European Union's General Data Protection Regulation (GDPR). After briefly explaining the methods of synthetic data generation and discussing their potential for privacy preservation, the article analyses the shortcomings of the personal/non-personal dualist approach under the GDPR. It then assesses the possibility of a paradigm change in data protection legislation, moving beyond this binary categorisation. The article argues in favour of establishing clear guidelines for the generation and processing of synthetic data, prioritising the principles of transparency, accountability and fairness.",
+      "url": "https://doi.org/10.1177/20539517241231277",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241231270",
+      "title": "Super SDKs: Tracking personal data and platform monopolies in the mobile",
+      "authors": [
+        "Jennifer Pybus",
+        "Mark Cot\u00e9"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "In this article we address the question \u2018what is tracking in the mobile ecosystem\u2019 through a comprehensive overview of the Software Development Kit (SDK). Our research reveals a complex infrastructural role for these technical objects connecting end-user data with app developers, third parties and dominant advertising platforms like Google and Facebook. We present an innovative theoretical framework which we call a data monadology to foreground this interrelationship, predicated on an economic model that exchanges personal data for the infrastructural services used to build applications. Our main contribution is an SDK taxonomy, which renders them more transparent and observable. We categorise SDK services into three main categories: (i) Programmatic AdTech for monetisation; (ii) App Development, for building, maintaining and offering additional artificial intelligence features and (iii) App Extensions which more visibly embed third parties into apps like maps, wallets or other payment services. A major finding of our analysis is the special category of the Super SDK, reserved for platforms like Google and Facebook. Not only do they offer a vast array of services across all three categories, making them indispensable to developers, they are super conduits for personal data and the primary technical means for the expansion of platform monopolisation across the mobile ecosystem.",
+      "url": "https://doi.org/10.1177/20539517241231270",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231221758",
+      "title": "After the algorithms: A study of meta-algorithmic judgments and diversity in the hiring process at a large multisite company",
+      "authors": [
+        "Moa Bursell",
+        "Lambros Roumbanis"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "In recent years, both private and public organizations across contexts have begun implementing AI technologies in their recruitment processes. This transition is typically justified by improved efficiency as well as more objective, performance-based ranking, and inclusive selection of job candidates. However, this rapid development has also raised concerns that the use of these emerging technologies will instead increase discrimination or enhance the already existing inequality. In the present study, we first develop the concept of meta-algorithmic judgment to understand how recruiting managers may respond to automation of the hiring process. Second, we draw on this concept in the empirical assessment of the actual consequences of this type of transition by drawing on two large and unique datasets on employment records and job applications from one of Sweden's largest food retail companies. By comparing the outcomes of traditional and algorithmic job recruitment during this technological transition, we find that, contrary to the company's intentions, algorithmic recruitment decreases diversity. However, in contrast to what is often assumed, this is primarily not because the algorithms are biased, but because of what we identify as an unintended human\u2013algorithmic interaction effect.",
+      "url": "https://doi.org/10.1177/20539517231221758",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231221780",
+      "title": "Tech workers\u2019 perspectives on ethical issues in AI development: Foregrounding feminist approaches",
+      "authors": [
+        "Jude Browne",
+        "Eleanor Drage",
+        "Kerry McInerney"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "While tech workers are essential stakeholders in ethical artificial intelligence (AI) development and deployment, they are rarely consulted about their understanding of the development of ethical AI. In light of this, we present the findings of our 2020 to 2021 empirical research study in which we collected data from tech workers in a major AI company to better understand what they consider to be the most pressing ethical issues when developing AI-powered products. While there is a nascent body of literature that examines how AI ethics principles are operationalised on the ground, this study differs in that we explicitly draw on feminist insights to inform our analysis, and have put a particular focus on allowing the voices and narratives of tech workers to lead the work forward. Our study generated three main findings: first, the term \u2018bias\u2019 creates real confusion among tech workers, meaning that the term is unable to do the ethical work it is intended to do; second, tech workers do not necessarily see a relationship between diversity, equality and inclusion (DEI) agendas and AI development, undermining AI ethics initiatives; and third, tech workers were particularly concerned about the monitoring and maintenance of unwieldy \u2018legacy systems\u2019 that generated serious challenges to creating and deploying new and more ethical AI products. This study thus creates a \u2018thicker\u2019 and more nuanced picture of tech workers\u2019 perspectives on the ethical issues that arise when developing and maintaining AI systems, while simultaneously demonstrating the utility of feminist approaches in the field of AI ethics.",
+      "url": "https://doi.org/10.1177/20539517231221780",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241232632",
+      "title": "A typology of artificial intelligence data work",
+      "authors": [
+        "James Muldoon",
+        "Callum Cant",
+        "Boxi Wu",
+        "Mark Graham"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "This article provides a new typology for understanding human labour integrated into the production of artificial intelligence systems through data preparation and model evaluation. We call these forms of labour \u2018AI data work\u2019 and show how they are an important and necessary element of the artificial intelligence production process. We draw on fieldwork with an artificial intelligence data business process outsourcing centre specialising in computer vision data, alongside a decade of fieldwork with microwork platforms, business process outsourcing, and artificial intelligence companies to help dispel confusion around the multiple concepts and frames that encompass artificial intelligence data work including \u2018ghost work\u2019, \u2018microwork\u2019, \u2018crowdwork\u2019 and \u2018cloudwork\u2019. We argue that these different frames of reference obscure important differences between how this labour is organised in different contexts. The article provides a conceptual division between the different types of artificial intelligence data work institutions and the different stages of what we call the artificial intelligence data pipeline. This article thus contributes to our understanding of how the practices of workers become a valuable commodity integrated into global artificial intelligence production networks.",
+      "url": "https://doi.org/10.1177/20539517241232632",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241235869",
+      "title": "Participatory action research in critical data studies: Interrogating AI from a South\u2013North approach",
+      "authors": [
+        "Andrea Medrado",
+        "Pieter Verdegem"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "In this article, we draw inspiration from participatory action research (PAR) and the work of Latin American thinkers such as Freire and Fals Borda to interrogate artificial intelligence (AI). We propose a South-North flow by utilising PAR approaches that stem from Latin America, challenging how the North's centrality is taken for granted regarding AI epistemologies, experiences, and understandings. Conducting workshops in London with a diverse group of students, tech workers and activists, we argue that PAR can not only empower marginalised communities in the Global South; we can also learn more from its application in the Global North, in contexts where people deal with different struggles. Our analysis delves into three specific concepts around AI and data (in)justice: autonomy, empathy and dialogue. First, inspired by PAR principles, participants started to problematise what they called an empty interpretation of empathy, establishing parallels with transnational dynamics of data capitalism, which disadvantage marginalised communities in the Global South. Second, PAR offered a critical lens to analyse issues of AI and autonomy in ways that are less individualistic and more collective and politically engaged. Third, PAR's dialogical spirit enabled participants to locate various intersections between AI and dialogue. Critiquing the idea of a superior AI, participants were reminded of the possibilities offered by human intelligence and the combination of thinking, making and feeling or what Fals Borda (2003. Ante la crisis del pa\u00eds: I deas acci\u00f3n para el cambio, 1st. Ed. Bogot\u00e1: Panamericana) calls our sentipensante nature.",
+      "url": "https://doi.org/10.1177/20539517241235869",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241237485",
+      "title": "The interplay of rational evaluation and motivated reasoning in privacy helplessness: An integrative approach",
+      "authors": [
+        "Hichang Cho"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "This study investigated the factors that influence individuals\u2019 privacy helplessness in the context of social media and mobile application use. An integrative research model was proposed, simultaneously examining both rational evaluation processes and directional motivated reasoning. The integrative research model was tested using national survey data collected from Facebook users (Study 1, n\u2009=\u2009660) and mobile application users (Study 2, n\u2009=\u2009385) in the US. The findings demonstrated significant associations between privacy helplessness and factors related to directional motivated reasoning (e.g. perceived rewards, costs, and benefits) as well as the rational evaluation model (e.g. perceived privacy control, trust in the provider, and response efficacy). Moreover, the interaction effects observed in the studies suggest that the two mechanisms either reinforced or attenuated each other's influence. In conclusion, the results emphasize that privacy research should explore both theoretical mechanisms concurrently, as opposed to independently, since they not only operate in conjunction but also interact to define boundary conditions for one another.",
+      "url": "https://doi.org/10.1177/20539517241237485",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241232629",
+      "title": "Inequalities in privacy cynicism: An intersectional analysis of agency constraints",
+      "authors": [
+        "Christian Pieter Hoffmann",
+        "Christoph Lutz",
+        "Giulia Ranzini"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "A growing body of research highlights a trend toward widespread attitudes of privacy cynicism, apathy and resignation among Internet users. In this work, we extend these discussions by concentrating on the concept of user agency. Specifically, we examine how five types of structural constraints\u2014interpersonal, cultural, technological, economic and political\u2014restrict user agency and contribute to the prevalence of privacy cynicism as a common response. Drawing on critical data studies and adopting an intersectional lens, we demonstrate how these constraints disproportionately impact various social groups unequally, leading to a disparate distribution of agency and privacy cynicism. Furthermore, we contend that the sense of powerlessness engendered by excessive constraints on user agency can, in turn, exacerbate user vulnerability to such constraints, potentially initiating a vicious cycle of disempowerment. The article enriches the field of privacy research by linking the traditionally individual-focused and psychological dimensions of privacy with critical surveillance studies and by proposing potential interventions to mitigate privacy cynicism.",
+      "url": "https://doi.org/10.1177/20539517241232629",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517241227875",
+      "title": "Critical data studies with Latin America: Theorizing beyond data colonialism",
+      "authors": [
+        "Jonas C. L. Valente",
+        "Rafael Grohmann"
+      ],
+      "date": "2024-03-01T00:00:00+00:00",
+      "abstract": "The article aims to theorize about critical data studies with Latin America beyond the framework of data colonialism, arguing that the long history of social thought in the region can contribute to a more nuanced understanding of the datafication. It discusses views around dependence, oppressions, and liberation, debating how Latin American authors can be useful for current critical data studies, in a more nuanced and complex vision. It presents the theoretical contributions of Lelia Gonzalez, dependency theorists and Enrique Dussel. Dependency theorists criticize evolutionary frameworks of development and can contribute to discussions around data sovereignty and overexploitation of labor. Gonzalez contributes to a complex vision of Amefrica Ladina, articulating multiple forms of oppression. Enrique Dussel presents a theory of technology considering totality and proposes an ethics of liberation that can be related to alternatives toward data justice and data commons. All theoretical frameworks contribute to thinking about datafication with Latin America not as an isolated phenomenon, but in relation to other countries in the world, and as an analytical key for the construction of alternatives. All perspectives are related to current debates on critical data studies and can make an important contribution to the construction of critical theories about data that consider Latin America also as a site of knowledge production.",
+      "url": "https://doi.org/10.1177/20539517241227875",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231210273",
+      "title": "Structured like a language model: Analysing AI as an automated subject",
+      "authors": [
+        "Liam Magee",
+        "Vanicka Arora",
+        "Luke Munn"
+      ],
+      "date": "2023-07-01T00:00:00+00:00",
+      "abstract": "Drawing from the resources of psychoanalysis and critical media studies, in this article we develop an analysis of large language models (LLMs) as \u2018automated subjects\u2019. We argue the intentional fictional projection of subjectivity onto LLMs can yield an alternate frame through which artificial intelligence (AI) behaviour, including its productions of bias and harm, can be analysed. First, we introduce language models, discuss their significance and risks, and outline our case for interpreting model design and outputs with support from psychoanalytic concepts. We trace a brief history of language models, culminating with the releases, in 2022, of systems that realise \u2018state-of-the-art\u2019 natural language processing performance. We engage with one such system, OpenAI's InstructGPT, as a case study, detailing the layers of its construction and conducting exploratory and semi-structured interviews with chatbots. These interviews probe the model's moral imperatives to be \u2018helpful\u2019, \u2018truthful\u2019 and \u2018harmless\u2019 by design. The model acts, we argue, as the condensation of often competing social desires, articulated through the internet and harvested into training data, which must then be regulated and repressed. This foundational structure can however be redirected via prompting, so that the model comes to identify with, and transfer , its commitments to the immediate human subject before it. In turn, these automated productions of language can lead to the human subject projecting agency upon the model, effecting occasionally further forms of countertransference. We conclude that critical media methods and psychoanalytic theory together offer a productive frame for grasping the powerful new capacities of AI-driven language systems.",
+      "url": "https://doi.org/10.1177/20539517231210273",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231188725",
+      "title": "From rules to examples: Machine learning's type of authority",
+      "authors": [
+        "Alexander Campolo",
+        "Katia Schwerzmann"
+      ],
+      "date": "2023-07-01T00:00:00+00:00",
+      "abstract": "This paper analyzes the effects of a perceived transition from a rule-based computer programming paradigm to an example-based paradigm associated with machine learning. While both paradigms coexist in practice, we critically discuss the distinctive epistemological and ethical implications of machine learning's \u201cexemplary\u201d type of authority. To capture its logic, we compare it to computer programming rules that date to the middle of the 20th century, showing how rules and examples have regulated human conduct in significantly different ways. In contrast to the highly constructed, explicit, and prescriptive form of authority imposed by programming rules, machine learning models are trained using data that has been made into examples. These examples elicit norms in an implicit, emergent manner to make prediction and classification possible. We analyze three ways that examples are produced in machine learning: labeling, feature engineering, and scaling. We use the phrase \u201cartificial naturalism\u201d to characterize the tensions of this type of authority, in which examples sit ambiguously between data and norm.",
+      "url": "https://doi.org/10.1177/20539517231188725",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231188723",
+      "title": "The problem with annotation. Human labour and outsourcing between France and Madagascar",
+      "authors": [
+        "Cl\u00e9ment Le Ludec",
+        "Maxime Cornet",
+        "Antonio A Casilli"
+      ],
+      "date": "2023-07-01T00:00:00+00:00",
+      "abstract": "Artificial intelligence advancements have reignited job displacement debates that focus on how the use of artificial intelligence affects labour, without considering how the production of this technology influences labour division. The generalisation of machine learning has created an increased demand for outsourced data workers. Outsourcing companies and crowdwork platforms are both used to generate, annotate, and enrich data. This data tasks are performed by workers from low-income countries, who often earn poverty wages. As with traditional outsourcing, workers must integrate complex multinational subcontracting networks. In this article, we examine how France outsources artificial intelligence-related tasks to workers in the African island nation of Madagascar. For our study, we interviewed 26 data workers, eight employees of French start-ups, and conducted secondary research on two artificial intelligence systems \u2013 a canteen checkout terminal and an algorithm to detect shoplifters in stores. The data collected allowed us to reconstruct an end-to-end artificial intelligence production value chain, revealing the need for data classification and artificial intelligence problematisation. Commercial artificial intelligence, therefore, does not displace employment by automating service jobs. Rather, by delocalising labour into the Global South, it lengthens the externalisation chain.",
+      "url": "https://doi.org/10.1177/20539517231188723",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231206794",
+      "title": "The uncontroversial \u2018thingness\u2019 of AI",
+      "authors": [
+        "Lucy Suchman"
+      ],
+      "date": "2023-07-01T00:00:00+00:00",
+      "abstract": "This commentary starts with the question \u2018How is it that AI has come to be figured uncontroversially as a thing, however many controversies \u201cit\u201d may engender?\u2019 Addressing this question takes us to knowledge practices that philosopher of science Helen Verran has named a \u2018hardening of the categories\u2019, processes that not only characterise the onto-epistemology of AI but also are central to its constituent techniques and technologies. In a context where the stabilization of AI as a figure enables further investments in associated techniques and technologies, AI's status as controversial works to reiterate both its ontological status and its agency. It follows that interventions into the field of AI controversies that fail to trouble and destabilise the figure of AI risk contributing to its uncontroversial reproduction. This is not to deny the proliferating data and compute-intensive techniques and technologies that travel under the sign of AI but rather to call for a keener focus on their locations, politics, material-semiotic specificity, and effects, including their ongoing enactment as a singular and controversial object.",
+      "url": "https://doi.org/10.1177/20539517231206794",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231221739",
+      "title": "Dimensionalizing privacy to advance the study of digital disempowerment",
+      "authors": [
+        "Kelly Quinn",
+        "Dmitry Epstein"
+      ],
+      "date": "2023-07-01T00:00:00+00:00",
+      "abstract": "In this essay, we call attention to privacy as the foundational construct that underpins digital disempowerment. We argue that to better understand the processes of disempowerment, scholars must critically engage with the dimensionality of privacy conceptualizations and privacy-dependent constructs such as privacy concerns and privacy-protecting behavior, and the way in which these are measured. We focus on privacy's horizontal and vertical dimensions as a way to offer a more nuanced understanding of power in computationally mediated environments and potentially enable a more refined and meaningful understanding of privacy resignation and disengagement.",
+      "url": "https://doi.org/10.1177/20539517231221739",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231219241",
+      "title": "AI Empire: Unraveling the interlocking systems of oppression in generative AI's global order",
+      "authors": [
+        "Jasmina Tacheva",
+        "Srividya Ramasubramanian"
+      ],
+      "date": "2023-07-01T00:00:00+00:00",
+      "abstract": "As artificial intelligence (AI) continues to captivate the collective imagination through the latest generation of generative AI models such as DALL-E and ChatGPT, the dehumanizing and harmful features of the technology industry that have plagued it since its inception only seem to deepen and intensify. Far from a \u201cglitch\u201d or unintentional error, these endemic issues are a function of the interlocking systems of oppression upon which AI is built. Using the analytical framework of \u201cEmpire,\u201d this paper demonstrates that we live not simply in the \u201cage of AI\u201d but in the age of AI Empire. Specifically, we show that this networked and distributed global order is rooted in heteropatriarchy, racial capitalism, white supremacy, and coloniality and perpetuates its influence through the mechanisms of extractivism, automation, essentialism, surveillance, and containment. Therefore, we argue that any attempt at reforming AI from within the same interlocking oppressive systems that created it is doomed to failure and, moreover, risks exacerbating existing harm. Instead, to advance justice, we must radically transform not just the technology itself, but our ideas about it, and develop it from the bottom up, from the perspectives of those who stand the most risk of being harmed.",
+      "url": "https://doi.org/10.1177/20539517231219241",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231215361",
+      "title": "Meaningful disinformation: Narrative rituals and affective folktales",
+      "authors": [
+        "Marco Bastos",
+        "Marc Tuters"
+      ],
+      "date": "2023-07-01T00:00:00+00:00",
+      "abstract": "In this article, we review the epistemological boundaries of disinformation studies and argue that they are informed by network and transmission models where the unit of analysis (i.e., disinformation) is assumed to follow contagion growth patterns typical of population models. This framework reduces disinformation to a behavioral problem that downplays the participatory and ritualistic dimension of disinformation, which we argue cannot be reduced, and therefore cannot be corrected, by targeting individual behavior. We review seminal contributions to information and communication studies to foreground disinformation as de facto alternative social contracts that organize the overflow of information in meaningful narratives. We conclude by arguing that disinformation studies would benefit from tracing the resonance of narratives informed by lived experiences to achieve a higher-level principle that can negotiate conflicting realities.",
+      "url": "https://doi.org/10.1177/20539517231215361",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231177620",
+      "title": "Dislocated accountabilities in the  \u201cAI supply chain\u201d: Modularity and developers\u2019 notions of responsibility",
+      "authors": [
+        "David Gray Widder",
+        "Dawn Nafus"
+      ],
+      "date": "2023-01-01T00:00:00+00:00",
+      "abstract": "Responsible artificial intelligence guidelines ask engineers to consider how their systems might harm. However, contemporary artificial intelligence systems are built by composing many preexisting software modules that pass through many hands before becoming a finished product or service. How does this shape responsible artificial intelligence practice? In interviews with 27 artificial intelligence engineers across industry, open source, and academia, our participants often did not see the questions posed in responsible artificial intelligence guidelines to be within their agency, capability, or responsibility to address. We use Suchman's \u201clocated accountability\u201d to show how responsible artificial intelligence labor is currently organized and to explore how it could be done differently. We identify cross-cutting social logics, like modularizability, scale, reputation, and customer orientation, that organize which responsible artificial intelligence actions do take place and which are relegated to low status staff or believed to be the work of the next or previous person in the imagined \u201csupply chain.\u201d We argue that current responsible artificial intelligence interventions, like ethics checklists and guidelines that assume panoptical knowledge and control over systems, could be improved by taking a located accountability approach, recognizing where relations and obligations might intertwine inside and outside of this supply chain.",
+      "url": "https://doi.org/10.1177/20539517231177620",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231166887",
+      "title": "Machine learning, meaning making: On reading computer science texts",
+      "authors": [
+        "Louise Amoore",
+        "Alexander Campolo",
+        "Benjamin Jacobsen",
+        "Ludovico Rella"
+      ],
+      "date": "2023-01-01T00:00:00+00:00",
+      "abstract": "Computer science tends to foreclose the reading of its texts by social science and humanities scholars \u2013 via code and scale, mathematics, black box opacities, secret or proprietary models. Yet, when computer science papers are read in order to better understand what machine learning means for societies, a form of reading is brought to bear that is not primarily about excavating the hidden meaning of a text or exposing underlying truths about science. Not strictly reading to make sense or to discern definitive meaning of computer science texts, reading is an engagement with the sense-making and meaning-making that takes place. We propose a strategy for reading computer science that is attentive to the act of reading itself, that stays close to the difficulty involved in all forms of reading, and that works with the text as already properly belonging to the ethico-politics that this difficulty engenders. Addressing a series of three \u201creading problems\u201d \u2013 genre, readability, and meaning \u2013 we discuss machine learning textbooks and papers as sites where today's algorithmic models are actively giving accounts of their paradigmatic worldview. Much more than matters of technical definition or proof of concept, texts are sites where concepts are forged and contested. In our times, when the political application of AI and machine learning is so commonly geared to settle or predict difficult societal problems in advance, a reading strategy must open the gaps and difficulties of that which cannot be settled or resolved.",
+      "url": "https://doi.org/10.1177/20539517231166887",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231158631",
+      "title": "\u2018I started seeing shadows everywhere\u2019: The diverse chilling effects of surveillance in Zimbabwe",
+      "authors": [
+        "Amy Stevens",
+        "Pete Fussey",
+        "Daragh Murray",
+        "Kuda Hove",
+        "Otto Saki"
+      ],
+      "date": "2023-01-01T00:00:00+00:00",
+      "abstract": "Recent years have witnessed growing ubiquity and potency of state surveillance measures with heightened implications for human rights and social justice. While impacts of surveillance are routinely framed through \u2018privacy\u2019 narratives, emphasising \u2018chilling effects\u2019 surfaces a more complex range of harms and rights implications for those who are, or believe they are, subjected to surveillance. Although first emphasised during the McCarthy era, surveillance \u2018chilling effects\u2019 remain under-researched, particularly in Africa. Drawing on rare interview data from participants subjected to state-sponsored surveillance in Zimbabwe, the paper reveals complex assemblages of state and non-state actors involved in diverse and expansive hybrid online\u2013offline monitoring. While scholarship has recently emphasised the importance of large-scale digital mass surveillance, the Zimbabwean context reveals complex assemblages of \u2018big data\u2019, social media and other digital monitoring combining with more traditional human surveillance practices. Such inseparable online\u2013offline imbrications compound the scale, scope and impact of surveillance and invite analyses as an integrated ensemble. The paper evidences how these surveillance activities exert chilling effects that vary in form, scope and intensity, and implicate rights essential to the development of personal identity and effective functioning of participatory democracy. Moreover, the data reveals impacts beyond the individual to the vicarious and collective. These include gendered dimensions, eroded interpersonal trust and the depleted ability of human rights defenders to organise and particulate in democratic processes. Overall, surveillance chilling effects exert a wide spectrum of outcomes which consequently interfere with enjoyment of multiple rights and hold both short- and long-term implications for democratic participation.",
+      "url": "https://doi.org/10.1177/20539517231158631",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231156127",
+      "title": "Social media advertising for clinical studies: Ethical and data protection implications of online targeting",
+      "authors": [
+        "Rainer M\u00fchlhoff",
+        "Theresa Willem"
+      ],
+      "date": "2023-01-01T00:00:00+00:00",
+      "abstract": "Social media advertising has revolutionised the advertising world by providing data-driven targeting methods. One area where social media advertising is just gaining a foothold is in the recruitment of clinical study participants. Here, as everywhere, social media advertising promises more yield per money spent because the technology can better reach highly specialised groups. In this article, we point out severe societal risks posed by advertising for clinical studies on social media. We show that social media advertising for clinical studies in many cases violates the privacy of individual users (R1), creates collective privacy risks by helping platform companies train predictive models of medical information that can be applied to all their users (R2), exploits the weaknesses of existing guidelines in (biomedical) research ethics (R3) and is detrimental to the quality of (biomedical) research (R4). We argue that the well-intentioned promises, which are often associated with the use of social media advertising for clinical studies, are untenable from a balanced point of view. Consequently, we call for updates of research ethics guidelines and better regulation of Big Data and inferential analytics. We conclude that social media advertising \u2013 especially with vulnerable patient populations \u2013 is not suitable as a recruitment tool for clinical studies as long as the processing of (even anonymised) social media usage data and the training of predictive models by data analytics and artificial intelligence companies is not sufficiently regulated.",
+      "url": "https://doi.org/10.1177/20539517231156127",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231153808",
+      "title": "How platforms govern: Social regulation in digital capitalism",
+      "authors": [
+        "Petter T\u00f6rnberg"
+      ],
+      "date": "2023-01-01T00:00:00+00:00",
+      "abstract": "The rise of digital platforms has in recent years redefined contemporary capitalism\u2014provoking discussions on whether platformization should be understood as bringing an altogether new form of capitalism, or as merely a continuation and intensification of existing neoliberal trends. This paper draws on regulation theory to examine social regulation in digital capitalism, arguing for understanding digital capitalism as continuities of existing capitalist trends coming to produce discontinuities. The paper makes three main arguments. First, it situates digital capitalism as a continuation of longer running post-Fordist trends of financialization, digitalization, and privatization\u2014converging in the emergence of digital proprietary markets, owned and regulated by transnational platform companies. Second, as the platform model is founded on monopolizing regulation, platforms come into direct competition with states and public institutions, which they pursue through a set of distinct technopolitical strategies to claim power to govern\u2014resulting in a geographically variegated process of institutional transformation. Third, while the digital proprietary markets are continuities of existing trends, they bring new pressures and affordances, thus producing discontinuities in social regulation. We examine such discontinuities in relation to three aspects of social regulation: (a) from neoliberalism to techno-feudalism; (b) from Taylorist hierarchies toward algorithmic herds and technoliberal subjectivity; and (c) from postmodernity toward an automated consumer culture.",
+      "url": "https://doi.org/10.1177/20539517231153808",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221145372",
+      "title": "Machine learning and the politics  of synthetic data",
+      "authors": [
+        "Benjamin N Jacobsen"
+      ],
+      "date": "2023-01-01T00:00:00+00:00",
+      "abstract": "Machine-learning algorithms have become deeply embedded in contemporary society. As such, ample attention has been paid to the contents, biases, and underlying assumptions of the training datasets that many algorithmic models are trained on. Yet, what happens when algorithms are trained on data that are not real, but instead data that are \u2018synthetic\u2019, not referring to real persons, objects, or events? Increasingly, synthetic data are being incorporated into the training of machine-learning algorithms for use in various societal domains. There is currently little understanding, however, of the role played by and the ethicopolitical implications of synthetic training data for machine-learning algorithms. In this article, I explore the politics of synthetic data through two central aspects: first, synthetic data promise to emerge as a rich source of exposure to variability for the algorithm. Second, the paper explores how synthetic data promise to place algorithms beyond the realm of risk. I propose that an analysis of these two areas will help us better understand the ways in which machine-learning algorithms are envisioned in the light of synthetic data, but also how synthetic training data actively reconfigure the conditions of possibility for machine learning in contemporary society.",
+      "url": "https://doi.org/10.1177/20539517221145372",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231177617",
+      "title": "Data arenas: The relational dynamics of data activism",
+      "authors": [
+        "Bartosz \u015alosarski"
+      ],
+      "date": "2023-01-01T00:00:00+00:00",
+      "abstract": "The article proposes the theoretical category of data arenas as a relational field for strategic actors in diverse areas of the contentious politics of data (Beraldo and Milan, 2019). The paper argues that the conceptualization of data activism needs to be related to the immediate data arena in which the action takes place, in order to select the interactive opportunities and threats for emerging data-driven repertoires of action. To fully work through the relational dynamics of data activism, it is necessary to move from a conceptualization of data infrastructure to the notion of data arenas as an \u2018open-ended bundle of rules and resources that allows certain kinds of interaction to proceed\u2019 (Jasper, 2006: 141). Using the case of environmental data activism, I highlight four key dimensions to study: (a) strategic use of data as capital that differentiates and positions actors, as well as influences their further choices; (b) practices of defining the boundaries of the problem on which the arena focuses and outlining the pool of actors who participate in the process of solving it; (3) sets of relationships among the outlined pool of actors which represent opportunities and threats for the actors, related to the position they occupy within an arena; and (4) power as the ability to control and shape an arena. Data arena approach shed new light on data activism as a relational practice, combining the latest developments in research on data contexts and the political situatedness of data with the emerging field of research on data activism.",
+      "url": "https://doi.org/10.1177/20539517231177617",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517231172424",
+      "title": "Ethical scaling for content moderation: Extreme speech and the (in)significance  of artificial intelligence",
+      "authors": [
+        "Sahana Udupa",
+        "Antonis Maronikolakis",
+        "Axel Wisiorek"
+      ],
+      "date": "2023-01-01T00:00:00+00:00",
+      "abstract": "In this article, we present new empirical evidence to demonstrate the severe limitations of existing machine learning content moderation methods to keep pace with, let alone stay ahead of, hateful language online. Building on the collaborative coding project \u201cAI4Dignity\u201d we outline the ambiguities and complexities of annotating problematic text in AI-assisted moderation systems. We diagnose the shortcomings of the content moderation and natural language processing approach as emerging from a broader epistemological trapping wrapped in the liberal-modern idea of \u201cthe human\u201d. Presenting a decolonial critique of the \u201chuman vs machine\u201d conundrum and drawing attention to the structuring effects of coloniality on extreme speech, we propose \u201cethical scaling\u201d to highlight moderation process as political praxis. As a normative framework for platform governance, ethical scaling calls for a transparent, reflexive, and replicable process of iteration for content moderation with community participation and global parity, which should evolve in conjunction with addressing algorithmic amplification of divisive content and resource allocation for content moderation.",
+      "url": "https://doi.org/10.1177/20539517231172424",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221115189",
+      "title": "Fairness perceptions of algorithmic decision-making: A systematic review  of the empirical literature",
+      "authors": [
+        "Christopher Starke",
+        "Janine Baleis",
+        "Birte Keller",
+        "Frank Marcinkowski"
+      ],
+      "date": "2022-07-01T00:00:00+00:00",
+      "abstract": "Algorithmic decision-making increasingly shapes people's daily lives. Given that such autonomous systems can cause severe harm to individuals and social groups, fairness concerns have arisen. A human-centric approach demanded by scholars and policymakers requires considering people's fairness perceptions when designing and implementing algorithmic decision-making. We provide a comprehensive, systematic literature review synthesizing the existing empirical insights on perceptions of algorithmic fairness from 58 empirical studies spanning multiple domains and scientific disciplines. Through thorough coding, we systemize the current empirical literature along four dimensions: (1) algorithmic predictors, (2) human predictors, (3) comparative effects (human decision-making vs. algorithmic decision-making), and (4) consequences of algorithmic decision-making. While we identify much heterogeneity around the theoretical concepts and empirical measurements of algorithmic fairness, the insights come almost exclusively from Western-democratic contexts. By advocating for more interdisciplinary research adopting a society-in-the-loop framework, we hope our work will contribute to fairer and more responsible algorithmic decision-making.",
+      "url": "https://doi.org/10.1177/20539517221115189",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221142824",
+      "title": "Artificial intelligence, human intelligence and hybrid intelligence based on mutual augmentation",
+      "authors": [
+        "Mohammad Hossein Jarrahi",
+        "Christoph Lutz",
+        "Gemma Newlands"
+      ],
+      "date": "2022-07-01T00:00:00+00:00",
+      "abstract": "There is little consensus on what artificial intelligence (AI) systems may or may not embrace. Although this may point to multiplicity of interpretations and backgrounds, a lack of conceptual clarity could thwart the development of common ground around the concept among researchers, practitioners and users of AI and pave the way for misinterpretation and abuse of the concept. This article argues that one of the effective ways to delineate the concept of AI is to compare and contrast it with human intelligence. In doing so, the article broaches the unique capabilities of humans and AI in relation to one another (human and machine tacit knowledge), as well as two types of AI systems: one that goes beyond human intelligence and one that is necessarily and inherently tied to it. It finally highlights how humans and AI can augment their capabilities and intelligence through synergistic human\u2013AI interactions (i.e., human-augmented AI and augmented human intelligence), resulting in hybrid intelligence, and concludes with a future-looking research agenda.",
+      "url": "https://doi.org/10.1177/20539517221142824",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221124585",
+      "title": "New geographies of platform capitalism: The case of digital monopolization in Turkey",
+      "authors": [
+        "Melih Ye\u015filba\u011f"
+      ],
+      "date": "2022-07-01T00:00:00+00:00",
+      "abstract": "The rise of digital platforms is growingly acknowledged as a pivotal characteristic of contemporary capitalism. A subset of the literature on digital platforms scrutinized the political economy of platform companies, their data-driven business models along with the economic, social, and political consequences of platformization. Yet, this strand has been overwhelmingly interested in Big Tech companies in the United States and China. In this article, I aim to expand the geographical span of this emerging literature by scrutinizing platformization dynamics in Turkey, a middle-income country that has not been systematically examined so far along these lines. To this end, I present an assessment on the overall platform landscape in Turkey by focusing on three highlight digital platforms (Trendyol, Hepsiburada, and Getir). My analysis on the trajectory of these three platforms indicates the following. First, these platforms have exhibited meteoric growth rates and have risen among the most valuable companies in Turkey in a tremendously short period of time. Second, their aggressive growth strategies based on data extraction and network externalities have led to a strong monopolization drive. Third, they have rapidly expanded into adjacent business areas, transforming themselves into infrastructural components of the domestic economy, with profound impacts on production, trade, and labor relations. Fourth, they remain dependent on the infrastructure laid by Big Techs. These findings suggest that platformization is rapidly transforming economic landscapes other than the United States and China as well, yet in an uneven and dependent form, underlining the need to broaden the geographical focus of the concerned literature.",
+      "url": "https://doi.org/10.1177/20539517221124585",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221113775",
+      "title": "Digital phenotyping \u2013 Editorial",
+      "authors": [
+        "Lukas Engelmann",
+        "Ger Wackers"
+      ],
+      "date": "2022-07-01T00:00:00+00:00",
+      "abstract": "There is an astonishing posthuman promise in digital phenotyping, as Beth Semel recently argued (Semel, 2022). The goal of digital phenotyping enthusiasts is no less than to bypass the human observer as a deeply flawed threshold of medical knowledge production. The second goal is then \u2013 ultimately \u2013 to rid the human body and mind of its frailty and to utilise technology for a \u2018world without disease\u2019 (Topol and Corr, 2019). This promissory rhetoric is not only geared towards the disruption of dated medical conventions but comes equipped with bold, revolutionary concepts. Objective knowledge, based on aggregated, automated, and sweeping data collection to deliver granular, minute, and personalised healthcare; digital phenotyping is a collection of ideas, technologies, and practices to realise a powerful and futuristic vision of a medicine far beyond human capacities. This posthuman promise might be naive and driven by an abundant positivism, but as a small movement, made up of medical researchers and digital disruptors alike, it has continuously gathered steam over the last decade. The purpose of this collection is foremost to take stock and to collect a range of critical questions for a first revision of what digital phenotyping might be and what it could potentially become. The meaning of digital phenotyping is not as well defined as the many publications in this growing body of scholarship might suggest. Some of that vagueness has been captured in the critical literature. Birk and Samuel, in their sociological analysis, have described the term recently in more general terms as an analytical concept that presumes simply that diseases and illness are by and large \u2018measurable by digital devices\u2019 (Birk and Samuel, 2020). This assumes that a person\u2019s experience of any kind of suffering is always in one way or another expressed in the digital traces of their behaviour. The leg injury that might result in a different mobility pattern; measurable tremors in the thumb control of smartphones as a sign of Parkinson\u2019s; sudden lack of social interaction as a sign of depression: digital phenotypes can in theory be defined for any illness and disease and captured by any of the sensors, devices, and technologies, through which humans leave digital traces. Loi, in his ethical and philosophical exploration of the digital phenotype, assumes it in more general terms to be \u2018an assemblage of information in digital form, that humans produce intentionally or as a by-product of other activities, and which affects human behaviour\u2019 (Loi, 2018). Many questions remain, not least why and how this concept seeks association with genetic terminology. What does the wholesale capturing of a human\u2019s digital traces as phenotype imply? What does it mean to group a sheer endless range of symptoms within the paradigm of inheritable traits and how does this framing structure research on and with digital phenotypes? The phrase itself was coined by the physician Sachin Jain and colleagues at Harvard in 2015 in a letter to Nature Biotechnology. Conceptually, they conceived of digital phenotyping with reference to Richard Dawkins\u2019 elaborations on the \u2018extended phenotype\u2019 (Jain et al., 2015; Dawkins, 1982). Not only did they see digital technologies equipped to deliver a never-before-seen mass of potentially valuable data for diagnostics and prognostics but importantly these data were produced beyond the brief and cursory encounters between patients and physicians. The full-scale exploitation of these data would enable new insight into disease expressions over a lifetime. This was not only an expansion of surveillance but would open a new paradigm of medical knowledge production: rather than just recording symptoms in a medical consultation, \u2018digital phenotypes redefine disease expression in terms of the lived experience of individuals, which expands our ability to classify and understand disease\u2019 (Jain et al., 2015). In a 2017 JAMA article, the American neuroscientist Thomas R. Insel conceptualized digital phenotyping into nothing less but a \u2018New Science of Behaviour\u2019 (Insel, 2017). Since then, the phrase has given",
+      "url": "https://doi.org/10.1177/20539517221113775",
+      "source": "crossref+semanticscholar"
+    },
+    {
+      "doi": "10.1177/20539517221089294",
+      "title": "Digital contact tracing in the pandemic cities: Problematizing the regime of traceability in South Korea",
+      "authors": [
+        "Chamee Yang"
+      ],
+      "date": "2022-01-01T00:00:00+00:00",
+      "abstract": "Since 2020, many countries worldwide have deployed digital contact tracing programs that rely on a range of digital sensors in the city to locate and map the routes of viral spread. Many critical commentaries have raised concerns about the privacy risks and trustworthiness of these programs. Extending these analyses, this paper opens up a different line of questioning that goes beyond privacy-centered single-axis critique of surveillance by considering digital contact tracing symptomatic of the broader changes in modes of urban governance that renders our cities traceable, knowable, and governable through data. Based on archival and real-time analysis of South Korean national and local COVID-19 dashboards, online forums, and interviews with South Korean public health practitioners, this paper offers a sociotechnical analysis of digital contact tracing that looks at the various intersections of state-political, bio-political, and techno-political power dynamics. In contrast to popular narratives that attributed the success of the Korean approach to digital contact tracing to its collectivist culture and smart city infrastructures, this paper suggests that the case can be better understood by looking at both the macro-level shift in the forms of governance that takes on a spatialized and networked character and the micro-level formation of moral responsibility that shape one's conduct as a health and safety-conscious citizens. As the latest realization of the expanding regime of traceability in digital/urban governance, the development of digital contract tracing is seen to parallel with concurrent changes occurring in multiple domains of life including knowledge production, cultural memory, and individual subjectivity.",
+      "url": "https://doi.org/10.1177/20539517221089294",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221089305",
+      "title": "Social impacts of algorithmic decision-making: A research agenda for the social sciences",
+      "authors": [
+        "Frederic Gerdon",
+        "Ruben L Bach",
+        "Christoph Kern",
+        "Frauke Kreuter"
+      ],
+      "date": "2022-01-01T00:00:00+00:00",
+      "abstract": "Academic and public debates are increasingly concerned with the question whether and how algorithmic decision-making (ADM) may reinforce social inequality. Most previous research on this topic originates from computer science. The social sciences, however, have huge potentials to contribute to research on social consequences of ADM. Based on a process model of ADM systems, we demonstrate how social sciences may advance the literature on the impacts of ADM on social inequality by uncovering and mitigating biases in training data, by understanding data processing and analysis, as well as by studying social contexts of algorithms in practice. Furthermore, we show that fairness notions need to be evaluated with respect to specific outcomes of ADM systems and with respect to concrete social contexts. Social sciences may evaluate how individuals handle algorithmic decisions in practice and how single decisions aggregate to macro social outcomes. In this overview, we highlight how social sciences can apply their knowledge on social stratification and on substantive domains of ADM applications to advance the understanding of social impacts of ADM.",
+      "url": "https://doi.org/10.1177/20539517221089305",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221092956",
+      "title": "Artificial intelligence ethics by design. Evaluating public perception on the importance of ethical design principles of artificial intelligence",
+      "authors": [
+        "Kimon Kieslich",
+        "Birte Keller",
+        "Christopher Starke"
+      ],
+      "date": "2022-01-01T00:00:00+00:00",
+      "abstract": "Despite the immense societal importance of ethically designing artificial intelligence, little research on the public perceptions of ethical artificial intelligence principles exists. This becomes even more striking when considering that ethical artificial intelligence development has the aim to be human-centric and of benefit for the whole society. In this study, we investigate how ethical principles (explainability, fairness, security, accountability, accuracy, privacy, and machine autonomy) are weighted in comparison to each other. This is especially important, since simultaneously considering ethical principles is not only costly, but sometimes even impossible, as developers must make specific trade-off decisions. In this paper, we give first answers on the relative importance of ethical principles given a specific use case\u2014the use of artificial intelligence in tax fraud detection. The results of a large conjoint survey ([Formula: see text]) suggest that, by and large, German respondents evaluate the ethical principles as equally important. However, subsequent cluster analysis shows that different preference models for ethically designed systems exist among the German population. These clusters substantially differ not only in the preferred ethical principles but also in the importance levels of the principles themselves. We further describe how these groups are constituted in terms of sociodemographics as well as opinions on artificial intelligence. Societal implications, as well as design challenges, are discussed.",
+      "url": "https://doi.org/10.1177/20539517221092956",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221101346",
+      "title": "\u2018Real-time\u2019 air quality channels: A technology review of emerging environmental alert systems",
+      "authors": [
+        "Kayla Schulte"
+      ],
+      "date": "2022-01-01T00:00:00+00:00",
+      "abstract": "Poor air quality is a pressing global challenge contributing to adverse health impacts around the world. In the past decade, there has been a rapid proliferation of air quality information delivered via sensors, apps, websites or other media channels in near real-time and at increasingly localized geographic scales. This paper explores the growing emphasis on self-monitoring and digital platforms to supply informational interventions for reducing pollution exposures and improving health outcomes at the individual level. It presents a technological case study that characterizes emerging air quality information communication mechanisms, or \u2018AQ channels\u2019, while drawing upon examples throughout the literature. The questions are posed: which air quality channels are \u2018freely\u2019 available to individuals in London, UK, and when and where are they accessed? Digital trace data and metadata associated with 54 air quality channels are synthesized narratively and graphically. Results reveal air quality channels derive air pollution estimates using common data sources, display disparate messaging, adopt variable geographic scales for reporting \u2018readings\u2019 and maintain psychosocial barriers to access and adoption of exposure-reducing behaviours. The results also point to a clear association between the publication of a high-profile news article about air pollution and increased air quality channel access. These findings illuminate a need for greater transparency around how air quality channels generate personalized air pollution exposure estimates and tailor messaging. The paper concludes by calling for air quality channel developers to exercise co-creative methods that can support sustainable, democratic data and knowledge production around air quality, while critically approaching disproportionate patterns of both pollution and information exposure.",
+      "url": "https://doi.org/10.1177/20539517221101346",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211069891",
+      "title": "The Thick Machine: Anthropological AI between explanation and explication",
+      "authors": [
+        "Anders Kristian Munk",
+        "Asger Gehrt Olesen",
+        "Mathieu Jacomy"
+      ],
+      "date": "2022-01-01T00:00:00+00:00",
+      "abstract": "According to Clifford Geertz, the purpose of anthropology is not to explain culture but to explicate it. That should cause us to rethink our relationship with machine learning. It is, we contend, perfectly possible that machine learning algorithms, which are unable to explain, and could even be unexplainable themselves, can still be of critical use in a process of explication. Thus, we report on an experiment with anthropological AI. From a dataset of 175K Facebook comments, we trained a neural network to predict the emoji reaction associated with a comment and asked a group of human players to compete against the machine. We show that a) the machine can reach the same (poor) accuracy as the players (51%), b) it fails in roughly the same ways as the players, and c) easily predictable emoji reactions tend to reflect unambiguous situations where interpretation is easy. We therefore repurpose the failures of the neural network to point us to deeper and more ambiguous situations where interpretation is hard and explication becomes both necessary and interesting. We use this experiment as a point of departure for discussing how experiences from anthropology, and in particular the tension between formalist ethnoscience and interpretive thick description, might contribute to debates about explainable AI.",
+      "url": "https://doi.org/10.1177/20539517211069891",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211065368",
+      "title": "The Chilling Effects of Digital Dataveillance: A Theoretical Model and an Empirical Research Agenda",
+      "authors": [
+        "Moritz B\u00fcchi",
+        "Noemi Festic",
+        "Michael Latzer"
+      ],
+      "date": "2022-01-01T00:00:00+00:00",
+      "abstract": "People's sense of being subject to digital dataveillance can cause them to restrict their digital communication behavior. Such a chilling effect is essentially a form of self-censorship in everyday digital media use with the attendant risks of undermining individual autonomy and well-being. This article combines the existing theoretical and limited empirical work on surveillance and chilling effects across fields with an analysis of novel data toward a research agenda. The institutional practice of dataveillance\u2014the automated, continuous, and unspecific collection, retention, and analysis of digital traces\u2014affects individual behavior. A mechanism-based causal model based on the theory of planned behavior is proposed for the micro level: An individual's increased sense of dataveillance causes their subjective probability assigned to negative outcomes of digital communication behavior to increase and attitudes toward this communication to become less favorable, ultimately decreasing the intention to engage in it. In aggregate and triggered through successive salience shocks such as data scandals, dataveillance is accordingly hypothesized to lower the baseline of free digital communication in a society through the chilling effects mechanism. From the developed theoretical model, a set of methodological consequences and questions for future studies are derived.",
+      "url": "https://doi.org/10.1177/20539517211065368",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221104087",
+      "title": "The ontology explorer: A method to make visible data infrastructures for population management",
+      "authors": [
+        "Wouter Van Rossem",
+        "Annalisa Pelizza"
+      ],
+      "date": "2022-01-01T00:00:00+00:00",
+      "abstract": "This article introduces the methodology of the \u2018Ontology Explorer\u2019, a semantic method and JavaScript-based open-source tool to analyse data models underpinning information systems. The Ontology Explorer has been devised and developed by the authors, who recognized a need to compare data models collected in different formats and used by diverse systems. The Ontology Explorer is distinctive firstly because it supports analyses of information systems that are not immediately comparable and, secondly, because it systematically and quantitatively supports discursive analysis of \u2018thin\u2019 data models \u2013 also by detecting differences and absences through comparison. When applied to data models underpinning systems for population management, the Ontology Explorer enables the apprehension of how people are \u2018inscribed\u2019 in information systems: which assumptions are made about them, and which possibilities are excluded by design. The Ontology Explorer thus constitutes a methodology to capture authorities\u2019 own imaginaries of populations and the \u2018scripts\u2019 through which they enact actual people. Furthermore, the method allows the comparison of scripts from diverse authorities. This is exemplified by illustrating its functioning with information systems for population management deployed at the European border. Our approach integrates a number of insights from early infrastructure studies and extends their methods and analytical depth to account for contemporary data infrastructures. By doing so, we hope to trigger a systematic discussion on how to extend those early methodical innovations at the semantic level to contemporary developments in digital methods.",
+      "url": "https://doi.org/10.1177/20539517221104087",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221099882",
+      "title": "Developing data capability with non-profit organisations using participatory methods",
+      "authors": [
+        "Anthony McCosker",
+        "Xiaofang Yao",
+        "Kath Albury",
+        "Alexia Maddox",
+        "Jane Farmer",
+        "Julia Stoyanovich"
+      ],
+      "date": "2022-01-01T00:00:00+00:00",
+      "abstract": "In this paper, we explore the methodologies underpinning two participatory research collaborations with Australian non-profit organisations that aimed to build data capability and social benefit in data use. We suggest that studying and intervening in data practices in situ, that is, in organisational data settings expands opportunities for improving the social value of data. These situated and collaborative approaches not only address the \u2018expertise lag\u2019 for non-profits but also help to realign the potential social value of organisational data use. We explore the relationship between data literacy, data expertise and data capability to test the idea that collaborative work with non-profit organisations can be a practical step towards addressing data equity and generating data-driven social outcomes. Rather than adopting approaches to data literacy that focus on individuals \u2013 or ideal \u2018data citizens\u2019 \u2013 we target the organisation-wide data settings, goals and practices of the non-profit sector. We conclude that participatory methods can embed social value-generating data capability where it can be sustained at an organisational level, aligning with community needs to promote collaborative data action.",
+      "url": "https://doi.org/10.1177/20539517221099882",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517221094002",
+      "title": "Carceral algorithms and the history of control: An analysis of the Pennsylvania additive classification tool",
+      "authors": [
+        "Vanessa A. Massaro",
+        "Swarup Dhar",
+        "Darakhshan Mir",
+        "Nathan C. Ryan"
+      ],
+      "date": "2022-01-01T00:00:00+00:00",
+      "abstract": "Scholars have focused on algorithms used during sentencing, bail, and parole, but little work explores what we term \u201ccarceral algorithms\u201d that are used during incarceration. This paper is focused on the Pennsylvania Additive Classification Tool (PACT) used to classify prisoners\u2019 custody levels while they are incarcerated. Algorithms that are used during incarceration warrant deeper attention by scholars because they have the power to enact the lived reality of the prisoner. The algorithm in this case determines the likelihood a person would endure additional disciplinary actions, can complete required programming, and gain experiences that, among other things, are distilled into variables feeding into the parole algorithm. Given such power, examining algorithms used on people currently incarcerated offers a unique analytic view to think about the dialectic relationship between data and algorithms. Our examination of the PACT is two-fold and complementary. First, our qualitative overview of the historical context surrounding PACT reveals that it is designed to prioritize incapacitation and control over rehabilitation. While it closely informs prisoner rehabilitation plans and parole considerations, it is rooted in population management for prison securitization. Second, on analyzing data for 146,793 incarcerated people in PA, along with associated metadata related to the PACT, we find it is replete with racial bias as well as errors, omissions, and inaccuracies. Our findings to date further caution against data-driven criminal justice reforms that rely on pre-existing data infrastructures and expansive, uncritical, data-collection routines.",
+      "url": "https://doi.org/10.1177/20539517221094002",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211059480",
+      "title": "Low on trust, high on use: Datafied  media, trust and everyday life",
+      "authors": [
+        "David Mathieu",
+        "Jannie M\u00f8ller Hartley"
+      ],
+      "date": "2021-07-01T00:00:00+00:00",
+      "abstract": "This article explores yet another paradox \u2013 aside from the privacy paradox \u2013 related to the datafication of media: citizens trust least the media they use most It investigates the role that daily life plays in shaping the trust that citizens place in datafied media. The study reveals five sets of heuristics guiding the trust assessments of citizens: (1) characteristics of media organisations, (2) old media standards, (3) context of use and purpose, (4) experiences of datafication and (5) understandings of datafication. The article discusses the use of these heuristics and the value that everyday life holds in assessing trust in datafied media. It concludes that, guided by a partial \u2018structure of perception\u2019 and enticed into trusting datafied media in the context of their daily lives, citizens may be highly concerned by the datafication of media but use them nevertheless.",
+      "url": "https://doi.org/10.1177/20539517211059480",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211054277",
+      "title": "Accounting for \u201cthe social\u201d in contact tracing applications: The paradox  between public health governance and mistrust of government's data use",
+      "authors": [
+        "Yao-Tai Li"
+      ],
+      "date": "2021-07-01T00:00:00+00:00",
+      "abstract": "This essay adopts three accounts (sociological, neoliberal, and cybernetic) of \u201cthe social\u201d to get a clearer picture of why there is a barrier faced by the government when implementing contact tracing mobile applications. In Hong Kong's context, the paradox involves declining trust of the government's protection of data privacy and growing concern about data surveillance since the 2019 social unrest I argue that exploring the idea of sociality is valuable in that it re-reconfigures the datafication of pandemic control by revealing different sets of social relations, particularly the asymmetrical power relation between the government and its people. The refusal to download or use the mobile app also shows that the public has a faith in human agency and human resistance in data-saturated cities.",
+      "url": "https://doi.org/10.1177/20539517211054277",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211053712",
+      "title": "Auto-essentialization: Gender in automated facial analysis as extended colonial project",
+      "authors": [
+        "Morgan Klaus Scheuerman",
+        "Madeleine Pape",
+        "Alex Hanna"
+      ],
+      "date": "2021-07-01T00:00:00+00:00",
+      "abstract": "Scholars are increasingly concerned about social biases in facial analysis systems, particularly with regard to the tangible consequences of misidentification of marginalized groups. However, few have examined how automated facial analysis technologies intersect with the historical genealogy of racialized gender\u2014the gender binary and its classification as a highly racialized tool of colonial power and control. In this paper, we introduce the concept of auto-essentialization: the use of automated technologies to re-inscribe the essential notions of difference that were established under colonial rule. We consider how the face has emerged as a legitimate site of gender classification, despite being historically tied to projects of racial domination. We examine the history of gendering the face and body, from colonial projects aimed at disciplining bodies which do not fit within the European gender binary, to sexology's role in normalizing that binary, to physiognomic practices that ascribed notions of inferiority to non-European groups and women. We argue that the contemporary auto-essentialization of gender via the face is both racialized and trans-exclusive: it asserts a fixed gender binary and it elevates the white face as the ultimate model of gender difference. We demonstrate that imperialist ideologies are reflected in modern automated facial analysis tools in computer vision through two case studies: (1) commercial gender classification and (2) the security of both small-scale (women-only online platforms) and large-scale (national borders) spaces. Thus, we posit a rethinking of ethical attention to these systems: not as immature and novel, but as mature instantiations of much older technologies.",
+      "url": "https://doi.org/10.1177/20539517211053712",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211020332",
+      "title": "Algorithmic management in a work context",
+      "authors": [
+        "Mohammad Hossein Jarrahi",
+        "Gemma Newlands",
+        "Min Kyung Lee",
+        "Christine T. Wolf",
+        "Eliscia Kinder",
+        "Will Sutherland"
+      ],
+      "date": "2021-07-01T00:00:00+00:00",
+      "abstract": "The rapid development of machine-learning algorithms, which underpin contemporary artificial intelligence systems, has created new opportunities for the automation of work processes and management functions. While algorithmic management has been observed primarily within the platform-mediated gig economy, its transformative reach and consequences are also spreading to more standard work settings. Exploring algorithmic management as a sociotechnical concept, which reflects both technological infrastructures and organizational choices, we discuss how algorithmic management may influence existing power and social structures within organizations. We identify three key issues. First, we explore how algorithmic management shapes pre-existing power dynamics between workers and managers. Second, we discuss how algorithmic management demands new roles and competencies while also fostering oppositional attitudes toward algorithms. Third, we explain how algorithmic management impacts knowledge and information exchange within an organization, unpacking the concept of opacity on both a technical and organizational level. We conclude by situating this piece in broader discussions on the future of work, accountability, and identifying future research steps.",
+      "url": "https://doi.org/10.1177/20539517211020332",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211043240",
+      "title": "Online Labour Index 2020: New ways to measure the world\u2019s remote freelancing market",
+      "authors": [
+        "Fabian Stephany",
+        "Otto K\u00e4ssi",
+        "Uma Rani",
+        "Vili Lehdonvirta"
+      ],
+      "date": "2021-07-01T00:00:00+00:00",
+      "abstract": "The Online Labour Index (OLI) was launched in 2016 to measure the global utilisation of online freelance work at scale. Five years after its creation, the OLI has become a point of reference for scholars and policy experts investigating the online gig economy. As the market for online freelancing work matures, a high volume of data and new analytical tools allow us to revisit half a decade of online freelance monitoring and extend the index's scope to more dimensions of the global online freelancing market. While (still) measuring the utilisation of online labour across countries and occupations by tracking the number of projects and tasks posted on major English-language platforms, the new Online Labour Index 2020 (OLI 2020) also tracks Spanish- and Russian-language platforms, reveals changes over time in the geography of labour supply and estimates female participation in the online gig economy. The rising popularity of software and tech work and the concentration of freelancers on the Indian subcontinent are examples of the insights that the OLI 2020 provides. The OLI 2020 delivers a more detailed picture of the world of online freelancing via an interactive online visualisation updated daily. It provides easy access to downloadable open data for policymakers, labour market researchers, and the general public ( www.onlinelabourobservatory.org ).",
+      "url": "https://doi.org/10.1177/20539517211043240",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211066452",
+      "title": "Precision medicine and digital phenotyping: Digital medicine's way from more data to better health",
+      "authors": [
+        "Renate Baumgartner"
+      ],
+      "date": "2021-07-01T00:00:00+00:00",
+      "abstract": "Precision medicine and digital phenotyping are two prominent data-based approaches within digital medicine. While precision medicine historically used primarily genetic data to find targeted treatment options, digital phenotyping relies on the usage of big data deriving from digital devices such as smartphones, wearables and other connected devices. This paper first focusses on the aspect of data type to explore differences and similarities between precision medicine and digital phenotyping. It outlines different ways of data collection and production and the consequences thereof. Second, it shows how these sorts of data influence dominant beliefs in the field: The field of precision medicine relying on the dominant understanding of \u2018genetic determinism\u2019 imported from genetics, digital phenotyping building on the logic of \u2018data fundamentalism\u2019. In the end, the analysis shows how digital data informs potentials as well as challenges of precision medicine and digital phenotyping: a better health care for (some) individuals connected with individualisation and responsibilisation for all, with a prognosed shift from reactive to preventive medicine. Additionally, data-based approaches might facilitate epistemological and ontological redirections for the whole field of medicine that will also affect knowledge production and a reassessment of the value of different types of knowledge (quantifiable vs. non-quantifiable) with all its consequences. Institutionally, it might lead to shifts in distribution of power to experts in big data related technologies, i.e. private companies.",
+      "url": "https://doi.org/10.1177/20539517211066452",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211044808",
+      "title": "Algorithmic reparation",
+      "authors": [
+        "Jenny L. Davis",
+        "Apryl Williams",
+        "Michael W. Yang"
+      ],
+      "date": "2021-07-01T00:00:00+00:00",
+      "abstract": "Machine learning algorithms pervade contemporary society. They are integral to social institutions, inform processes of governance, and animate the mundane technologies of daily life. Consistently, the outcomes of machine learning reflect, reproduce, and amplify structural inequalities. The field of fair machine learning has emerged in response, developing mathematical techniques that increase fairness based on anti-classification, classification parity, and calibration standards. In practice, these computational correctives invariably fall short, operating from an algorithmic idealism that does not, and cannot, address systemic, Intersectional stratifications. Taking present fair machine learning methods as our point of departure, we suggest instead the notion and practice of algorithmic reparation. Rooted in theories of Intersectionality, reparative algorithms name, unmask, and undo allocative and representational harms as they materialize in sociotechnical form. We propose algorithmic reparation as a foundation for building, evaluating, adjusting, and when necessary, omitting and eradicating machine learning systems.",
+      "url": "https://doi.org/10.1177/20539517211044808",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720983865",
+      "title": "The algorithm audit: Scoring the algorithms that score us",
+      "authors": [
+        "Shea Brown",
+        "Jovana Davidovic",
+        "Ali Hasan"
+      ],
+      "date": "2021-01-01T00:00:00+00:00",
+      "abstract": "In recent years, the ethical impact of AI has been increasingly scrutinized, with public scandals emerging over biased outcomes, lack of transparency, and the misuse of data. This has led to a growing mistrust of AI and increased calls for mandated ethical audits of algorithms. Current proposals for ethical assessment of algorithms are either too high level to be put into practice without further guidance, or they focus on very specific and technical notions of fairness or transparency that do not consider multiple stakeholders or the broader social context. In this article, we present an auditing framework to guide the ethical assessment of an algorithm. The audit instrument itself is comprised of three elements: a list of possible interests of stakeholders affected by the algorithm, an assessment of metrics that describe key ethically salient features of the algorithm, and a relevancy matrix that connects the assessed metrics to stakeholder interests. The proposed audit instrument yields an ethical evaluation of an algorithm that could be used by regulators and others interested in doing due diligence, while paying careful attention to the complex societal context within which the algorithm is deployed.",
+      "url": "https://doi.org/10.1177/2053951720983865",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720982012",
+      "title": "Data sovereignty: A review",
+      "authors": [
+        "Patrik Hummel",
+        "Matthias Braun",
+        "Max Tretter",
+        "Peter Dabrock"
+      ],
+      "date": "2021-01-01T00:00:00+00:00",
+      "abstract": "New data-driven technologies yield benefits and potentials, but also confront different agents and stakeholders with challenges in retaining control over their data. Our goal in this study is to arrive at a clear picture of what is meant by data sovereignty in such problem settings. To this end, we review 341 publications and analyze the frequency of different notions such as data sovereignty, digital sovereignty, and cyber sovereignty. We go on to map agents they concern, in which context they appear, and which values they allude to. While our sample reveals a considerable degree of divergence and an occasional lack of clarity about intended meanings of data sovereignty, we propose a conceptual grid to systematize different dimensions and connotations. Each of them relates in some way to meaningful control, ownership, and other claims to data articulated by a variety of agents ranging from individuals to countries. Data sovereignty alludes to a nuanced mixture of normative concepts such as inclusive deliberation and recognition of the fundamental rights of data subjects.",
+      "url": "https://doi.org/10.1177/2053951720982012",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211017308",
+      "title": "Data as asset? The measurement, governance, and valuation of digital personal data by Big Tech",
+      "authors": [
+        "Kean Birch",
+        "DT Cochrane",
+        "Callum Ward"
+      ],
+      "date": "2021-01-01T00:00:00+00:00",
+      "abstract": "Digital personal data is increasingly framed as the basis of contemporary economies, representing an important new asset class. Control over these data assets seems to explain the emergence and dominance of so-called \u201cBig Tech\u201d firms, consisting of Apple, Microsoft, Amazon, Google/Alphabet, and Facebook. These US-based firms are some of the largest in the world by market capitalization, a position that they retain despite growing policy and public condemnation\u2014or \u201ctechlash\u201d\u2014of their market power based on their monopolistic control of personal data. We analyse the transformation of personal data into an asset in order to explore how personal data is accounted for, governed, and valued by Big Tech firms and other political-economic actors (e.g., investors). However, our findings show that Big Tech firms turn \u201cusers\u201d and \u201cuser engagement\u201d into assets through the performative measurement, governance, and valuation of user metrics (e.g., user numbers, user engagement), rather than extending ownership and control rights over personal data per se. We conceptualize this strategy as a form of \u201ctechcraft\u201d to center attention on the means and mechanisms that Big Tech firms deploy to make users and user data measurable and legible as future revenue streams.",
+      "url": "https://doi.org/10.1177/20539517211017308",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211022370",
+      "title": "Visual media analysis for Instagram and other online platforms",
+      "authors": [
+        "Richard Rogers"
+      ],
+      "date": "2021-01-01T00:00:00+00:00",
+      "abstract": "Instagram is currently the social media platform most associated with online images (and their analysis), but images from other platforms also can be collected and grouped, arrayed by similarity, stacked, matched, stained, labelled, depicted as network, placed side by side and otherwise analytically displayed. In the following, the initial focus is on Instagram, together with certain schools of thought such as Instagramism and Instagrammatics for its aesthetic and visual cultural study. Building on those two approaches, it subsequently focuses on other web and social media platforms, such as Google Image Search, Twitter, Facebook and 4chan. It provides demonstrations of how querying techniques create online image collections, and how these sets are analytically grouped through arrangements collectively referred to as metapictures.",
+      "url": "https://doi.org/10.1177/20539517211022370",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/20539517211025561",
+      "title": "Dashboard stories: How narratives told by predictive analytics reconfigure roles, risk and sociality in education",
+      "authors": [
+        "Juliane Jarke",
+        "Felicitas Macgilchrist"
+      ],
+      "date": "2021-01-01T00:00:00+00:00",
+      "abstract": "In this paper, we explore how the development and affordances of predictive analytics may impact how teachers and other educational actors think about and teach students and, more broadly, how society understands education. Our particular focus is on the data dashboards of learning support systems which are based on Machine Learning (ML). While previous research has focused on how these systems produce credible knowledge, we explore here how they also produce compelling, persuasive and convincing narratives. Our main argument is that particular kinds of stories are written by predictive analytics and written into their data dashboards. Based on a case study of a leading predictive analytics system, we explore how data dashboards imply causality between the \u2018facts\u2019 they are visualising. To do so, we analyse the stories they tell according to their spatial and temporal dimensions, characters and events, sequentiality as well as tellability. In the stories we identify, teachers are managers, students are at greater or lesser risk, and students\u2019 sociality is reduced to machine-readable interactions. Overall, only data marked as individual behaviours becomes relevant to the system, rendering structural inequalities invisible. Reflecting on the implications of these systems, we suggest ways in which the uptake of these systems can interrupt such stories and reshape them in other directions.",
+      "url": "https://doi.org/10.1177/20539517211025561",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720944603",
+      "title": "Intentionality and design in the data sonification of social issues",
+      "authors": [
+        "Sara Lenzi",
+        "Paolo Ciuccarelli"
+      ],
+      "date": "2020-07-01T00:00:00+00:00",
+      "abstract": "Data sonification is a practice for conducting scientific analysis through the use of sound to represent data. It is now transitioning to a practice for communicating and reaching wider publics by expanding the range of languages and senses for understanding complexity in data-intensive societies. Communicating to wider publics, though, requires that authors intentionally shape sonification in ways that consider the goals and contexts in which publics relate. It requires a specific set of knowledge and skills that design as a discipline could provide. In this article, we interpret five recent sonification projects and locate them on a scale of intentionality in how authors communicate socially relevant issues to publics.",
+      "url": "https://doi.org/10.1177/2053951720944603",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720935141",
+      "title": "Black boxes, not green: Mythologizing artificial intelligence and omitting the environment",
+      "authors": [
+        "Benedetta Brevini"
+      ],
+      "date": "2020-07-01T00:00:00+00:00",
+      "abstract": "We are repeatedly told that AI will help us to solve some of the world's biggest challenges, from treating chronic diseases and reducing fatality rates in traffic accidents to fighting climate change and anticipating cybersecurity threats. However, the article contends that public discourse on AI systematically avoids considering AI\u2019s environmental costs.  Artificial Intelligence- Brevini argues- runs on technology, machines, and infrastructures that deplete scarce resources in their production, consumption, and disposal, thus increasing the amounts of energy in their use, and exacerbate problems of waste and pollution. It also relies on data centers, that demands impressive amounts of energy to compute, analyse, categorize. If we want to stand a chance at tackling the Climate Emergency, then we have to stop avoiding addressing the environmental problems generated by AI.",
+      "url": "https://doi.org/10.1177/2053951720935141",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720943234",
+      "title": "Content moderation, AI, and the question of scale",
+      "authors": [
+        "Tarleton Gillespie"
+      ],
+      "date": "2020-07-01T00:00:00+00:00",
+      "abstract": "AI seems like the perfect response to the growing challenges of content moderation on social media platforms: the immense scale of the data, the relentlessness of the violations, and the need for human judgments without wanting humans to have to make them. The push toward automated content moderation is often justified as a necessary response to the scale: the enormity of social media platforms like Facebook and YouTube stands as the reason why AI approaches are desirable, even inevitable. But even if we could effectively automate content moderation, it is not clear that we should.",
+      "url": "https://doi.org/10.1177/2053951720943234",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720938091",
+      "title": "Cambridge Analytica\u2019s black box",
+      "authors": [
+        "Margaret Hu"
+      ],
+      "date": "2020-07-01T00:00:00+00:00",
+      "abstract": "The Cambridge Analytica\u2013Facebook scandal led to widespread concern over the methods deployed by Cambridge Analytica to target voters through psychographic profiling algorithms, built upon Facebook user data. The scandal ultimately led to a record-breaking $5 billion penalty imposed upon Facebook by the Federal Trade Commission (FTC) in July 2019. The FTC action, however, has been criticized as failing to adequately address the privacy and other harms emanating from Facebook\u2019s release of approximately 87 million Facebook users\u2019 data, which was exploited without user authorization. This Essay summarizes the FTC\u2019s response to the Cambridge Analytica\u2013Facebook scandal. It concludes that the scandal focuses attention on the need to explore the potential for embedding due process-type inquiries and protections within the enforcement actions by regulatory agencies such as the FTC. These protections are increasingly important in addressing the problem of \u201cblack boxing the voter\u201d that is now presented by data- and algorithmic-driven companies such as Cambridge Analytica and Facebook.",
+      "url": "https://doi.org/10.1177/2053951720938091",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720965616",
+      "title": "Good organizational reasons for better medical records: The data work of clinical documentation integrity specialists",
+      "authors": [
+        "Kathleen H Pine",
+        "Claus Bossen"
+      ],
+      "date": "2020-07-01T00:00:00+00:00",
+      "abstract": "Healthcare organizations and workers are under pressure to produce increasingly complete and accurate data for multiple data-intensive endeavors. However, little research has examined the emerging occupations arising to carry out the data work necessary to produce \u201cimproved\u201d data sets, or the specific work activities of these emerging data occupations. We describe the work of Clinical Documentation Integrity Specialists (CDIS), an emerging occupation that focuses on improving clinical documentation to produce more detailed and accurate administrative datasets crucial for evolving data-intensive forms of healthcare accountability, management, and research. Using ethnographic methods, we describe the core of CDIS\u2019 work as a translation practice in which the language, interests, and concerns of clinicians and clinical documentation are translated via real-time \u201cnudging\u201d and ongoing education of clinicians into the language, interests, and concerns of medical coders, structured administrative datasets, and the various stakeholders of these datasets. Further, we show how the institutional context of CDIS\u2019 work shapes the occupational virtues that guide CDIS\u2019 translation practice, including financial reimbursement, quality measures, clinical accuracy, and protecting clinician\u2019s time. Despite the existence of these multiple virtues, financial reimbursement is the most prominent virtue guiding CDIS\u2019 limited attention. Thus, overall clinical documentation is \u201cimproved\u201d in specific, partial ways. This research provides one of the first studies of the emergent data work occupations arising in the wake of digitization and big data opportunities, and shows how local data settings shape large scale data in specific ways and thus may influence outcomes of analyses based on such data.",
+      "url": "https://doi.org/10.1177/2053951720965616",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720949566",
+      "title": "Designing for human rights in AI",
+      "authors": [
+        "Evgeni Aizenberg",
+        "Jeroen van den Hoven"
+      ],
+      "date": "2020-07-01T00:00:00+00:00",
+      "abstract": "In the age of Big Data, companies and governments are increasingly using algorithms to inform hiring decisions, employee management, policing, credit scoring, insurance pricing, and many more aspects of our lives. Artificial intelligence (AI) systems can help us make evidence-driven, efficient decisions, but can also confront us with unjustified, discriminatory decisions wrongly assumed to be accurate because they are made automatically and quantitatively. It is becoming evident that these technological developments are consequential to people\u2019s fundamental human rights. Despite increasing attention to these urgent challenges in recent years, technical solutions to these complex socio-ethical problems are often developed without empirical study of societal context and the critical input of societal stakeholders who are impacted by the technology. On the other hand, calls for more ethically and socially aware AI often fail to provide answers for how to proceed beyond stressing the importance of transparency, explainability, and fairness. Bridging these socio-technical gaps and the deep divide between abstract value language and design requirements is essential to facilitate nuanced, context-dependent design choices that will support moral and social values. In this paper, we bridge this divide through the framework of Design for Values, drawing on methodologies of Value Sensitive Design and Participatory Design to present a roadmap for proactively engaging societal stakeholders to translate fundamental human rights into context-dependent design requirements through a structured, inclusive, and transparent process.",
+      "url": "https://doi.org/10.1177/2053951720949566",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720904112",
+      "title": "Manipulate to empower: Hyper-relevance and the contradictions of marketing in the age of surveillance capitalism",
+      "authors": [
+        "Aron Darmody",
+        "Detlev Zwick"
+      ],
+      "date": "2020-01-01T00:00:00+00:00",
+      "abstract": "In this article, we explore how digital marketers think about marketing in the age of Big Data surveillance, automatic computational analyses, and algorithmic shaping of choice contexts. Our starting point is a contradiction at the heart of digital marketing namely that digital marketing brings about unprecedented levels of consumer empowerment and autonomy and total control over and manipulation of consumer decision-making. We argue that this contradiction of digital marketing is resolved via the notion of relevance, which represents what Fredric Jameson calls a symbolic act. The notion of the symbolic act lets us see the centering of relevance as a creative act of digital marketers who undertake to symbolically resolve a contradiction that cannot otherwise be resolved. Specifically, we suggest that relevance allows marketers to believe that in the age of surveillance capitalism, the manipulation of choice contexts and decision-making is the same as consumer empowerment. Put differently, relevance is the moment when marketing manipulation disappears and all that is left is the empowered consumer. To create relevant manipulations that are experienced as empowering by the consumer requires always-on surveillance, massive analyses of consumer data and hyper-targeted responses, in short, a persistent marketing presence. The vision of digital marketing is therefore a fascinating one: marketing disappears at precisely the moment when it extends throughout the life without limit.",
+      "url": "https://doi.org/10.1177/2053951720904112",
+      "source": "crossref+semanticscholar"
+    },
+    {
+      "doi": "10.1177/2053951719897945",
+      "title": "Algorithmic content moderation: Technical and political challenges in the automation of platform governance",
+      "authors": [
+        "Robert Gorwa",
+        "Reuben Binns",
+        "Christian Katzenbach"
+      ],
+      "date": "2020-01-01T00:00:00+00:00",
+      "abstract": "As government pressure on major technology companies builds, both firms and legislators are searching for technical solutions to difficult platform governance puzzles such as hate speech and misinformation. Automated hash-matching and predictive machine learning tools \u2013 what we define here as algorithmic moderation systems \u2013 are increasingly being deployed to conduct content moderation at scale by major platforms for user-generated content such as Facebook, YouTube and Twitter. This article provides an accessible technical primer on how algorithmic moderation works; examines some of the existing automated tools used by major platforms to handle copyright infringement, terrorism and toxic speech; and identifies key political and ethical issues for these systems as the reliance on them grows. Recent events suggest that algorithmic moderation has become necessary to manage growing public expectations for increased platform responsibility, safety and security on the global stage; however, as we demonstrate, these systems remain opaque, unaccountable and poorly understood. Despite the potential promise of algorithms or \u2018AI\u2019, we show that even \u2018well optimized\u2019 moderation systems could exacerbate, rather than relieve, many existing problems with content policy as enacted by platforms for three main reasons: automated moderation threatens to (a) further increase opacity, making a famously non-transparent set of practices even more difficult to understand or audit, (b) further complicate outstanding issues of fairness and justice in large-scale sociotechnical systems and (c) re-obscure the fundamentally political nature of speech decisions being executed at scale.",
+      "url": "https://doi.org/10.1177/2053951719897945",
+      "source": "crossref+semanticscholar"
+    },
+    {
+      "doi": "10.1177/2053951720919776",
+      "title": "The trainer, the verifier, the imitator: Three ways in which human platform workers support artificial intelligence",
+      "authors": [
+        "Paola Tubaro",
+        "Antonio A Casilli",
+        "Marion Coville"
+      ],
+      "date": "2020-01-01T00:00:00+00:00",
+      "abstract": "This paper sheds light on the role of digital platform labour in the development of today\u2019s artificial intelligence, predicated on data-intensive machine learning algorithms. Focus is on the specific ways in which outsourcing of data tasks to myriad \u2018micro-workers\u2019, recruited and managed through specialized platforms, powers virtual assistants, self-driving vehicles and connected objects. Using qualitative data from multiple sources, we show that micro-work performs a variety of functions, between three poles that we label, respectively, \u2018artificial intelligence preparation\u2019, \u2018artificial intelligence verification\u2019 and \u2018artificial intelligence impersonation\u2019. Because of the wide scope of application of micro-work, it is a structural component of contemporary artificial intelligence production processes \u2013 not an ephemeral form of support that may vanish once the technology reaches maturity stage. Through the lens of micro-work, we prefigure the policy implications of a future in which data technologies do not replace human workforce but imply its marginalization and precariousness.",
+      "url": "https://doi.org/10.1177/2053951720919776",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720904386",
+      "title": "Emotional AI, soft biometrics and the surveillance of emotional life: An unusual consensus on privacy",
+      "authors": [
+        "Andrew McStay"
+      ],
+      "date": "2020-01-01T00:00:00+00:00",
+      "abstract": "By the early 2020s, emotional artificial intelligence (emotional AI) will become increasingly present in everyday objects and practices such as assistants, cars, games, mobile phones, wearables, toys, marketing, insurance, policing, education and border controls. There is also keen interest in using these technologies to regulate and optimize the emotional experiences of spaces, such as workplaces, hospitals, prisons, classrooms, travel infrastructures, restaurants, retail and chain stores. Developers frequently claim that their applications do not identify people. Taking the claim at face value, this paper asks, what are the privacy implications of emotional AI practices that do not identify individuals? To investigate privacy perspectives on soft non-identifying emotional AI, the paper draws upon the following: over 100 interviews with the emotion detection industry, legal community, policy-makers, regulators and NGOs interested in privacy; a workshop with stakeholders to design ethical codes for using data about emotions; a UK survey of 2068 citizens on feelings about emotion capture technologies. It finds a weak consensus among social stakeholders on the need for privacy, this driven by different interests and motivations. Given this weak consensus, it concludes that there exists a limited window of opportunity to societally agree principles of practice regarding privacy and the use of data about emotions.",
+      "url": "https://doi.org/10.1177/2053951720904386",
+      "source": "crossref+semanticscholar"
+    },
+    {
+      "doi": "10.1177/2053951720915939",
+      "title": "Expectations of artificial intelligence and the performativity of ethics: Implications for communication governance",
+      "authors": [
+        "Aphra Kerr",
+        "Marguerite Barry",
+        "John D Kelleher"
+      ],
+      "date": "2020-01-01T00:00:00+00:00",
+      "abstract": "This article draws on the sociology of expectations to examine the construction of expectations of \u2018ethical AI\u2019 and considers the implications of these expectations for communication governance. We first analyse a range of public documents to identify the key actors, mechanisms and issues which structure societal expectations around artificial intelligence (AI) and an emerging discourse on ethics. We then explore expectations of AI and ethics through a survey of members of the public. Finally, we discuss the implications of our findings for the role of AI in communication governance. We find that, despite societal expectations that we can design ethical AI, and public expectations that developers and governments should share responsibility for the outcomes of AI use, there is a significant divergence between these expectations and the ways in which AI technologies are currently used and governed in large scale communication systems. We conclude that discourses of \u2018ethical AI\u2019 are generically performative, but to become more effective we need to acknowledge the limitations of contemporary AI and the requirement for extensive human labour to meet the challenges of communication governance. An effective ethics of AI requires domain appropriate AI tools, updated professional practices, dignified places of work and robust regulatory and accountability frameworks.",
+      "url": "https://doi.org/10.1177/2053951720915939",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951720904871",
+      "title": "Smart forests and data practices: From the Internet of Trees to planetary governance",
+      "authors": [
+        "Jennifer Gabrys"
+      ],
+      "date": "2020-01-01T00:00:00+00:00",
+      "abstract": "Environments are increasingly becoming technologized sites of data production. From smart cities to smart forests, digital networks are analyzing and joining up environmental processes. This commentary focuses on one such understudied smart environment, smart forests, as emerging digital infrastructures that are materializing to manage and mitigate environmental change. How does the digitalization of forests not only change understandings of these environments but also generate different practices and ontologies for addressing environmental change? I first analyze smart forests within the expanding area of smart environments, and then discuss five digital practices that characterize smart forests. Based on this analysis, I suggest that forests are not only becoming highly digital environments but also that forests are transforming into technologies for managing environmental change. Smart forest interventions therefore expand the scope of what could count as a technology, especially in the context of data-oriented planetary governance.",
+      "url": "https://doi.org/10.1177/2053951720904871",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951719826856",
+      "title": "Beyond mystery: Putting algorithmic accountability in context",
+      "authors": [
+        "Elizabeth Reddy",
+        "Baki Cakici",
+        "Andrea Ballestero"
+      ],
+      "date": "2019-01-01T00:00:00+00:00",
+      "abstract": "Critical algorithm scholarship has demonstrated the difficulties of attributing accountability for the actions and effects of algorithmic systems. In this commentary, we argue that we cannot stop at denouncing the lack of accountability for algorithms and their effects but must engage the broader systems and distributed agencies that algorithmic systems exist within; including standards, regulations, technologies, and social relations. To this end, we explore accountability in \u201cthe Generated Detective,\u201d an algorithmically generated comic. Taking up the mantle of detectives ourselves, we investigate accountability in relation to this piece of experimental fiction. We problematize efforts to effect accountability through transparency by undertaking a simple operation: asking for permission to re-publish a set of the algorithmically selected and modified words and images which make the frames of the comic. Recounting this process, we demonstrate slippage between the \u201ccomplication\u201d of the algorithm and the obscurity of the legal and institutional structures in which it exists.",
+      "url": "https://doi.org/10.1177/2053951719826856",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951718821146",
+      "title": "The social imaginaries of data activism",
+      "authors": [
+        "Tuukka Lehtiniemi",
+        "Minna Ruckenstein"
+      ],
+      "date": "2019-01-01T00:00:00+00:00",
+      "abstract": "Data activism, promoting new forms of civic and political engagement, has emerged as a response to problematic aspects of datafication that include tensions between data openness and data ownership, and asymmetries in terms of data usage and distribution. In this article, we discuss MyData, a data activism initiative originating in Finland, which aims to shape a more sustainable citizen-centric data economy by means of increasing individuals' control of their personal data. Using data gathered during long-term participant-observation in collaborative projects with data activists, we explore the internal tensions of data activism by first outlining two different social imaginaries \u2013 technological and socio-critical \u2013 within MyData, and then merging them to open practical and analytical space for engaging with the socio-technical futures currently in the making. While the technological imaginary favours data infrastructures as corrective measures, the socio-critical imaginary questions the effectiveness of technological correction. Unpacking them clarifies the kinds of political and social alternatives that different social imaginaries ascribe to the notions underlying data activism, and highlights the need to consider the social structures in play. The more far-reaching goal of our exercise is to provide practical and analytical resources for critical engagement in the context of data activism. By merging technological and socio-critical imaginaries in the work of reimagining governing structures and knowledge practices alongside infrastructural arrangements, scholars can depart from the most obvious forms of critique, influence data activism practice, and formulate data ethics and data futures.",
+      "url": "https://doi.org/10.1177/2053951718821146",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951719861703",
+      "title": "To predict and to manage. Predictive policing in the United States",
+      "authors": [
+        "Bilel Benbouzid"
+      ],
+      "date": "2019-01-01T00:00:00+00:00",
+      "abstract": "This article offers a detailed examination of the content of predictive policing applications. Crime prediction machines are used by governments to shape the moral behavior of police. They serve not only to predict when and where crime is likely to occur, but also to regulate police work. They calculate equivalence ratios, distributing security across the territory based on multiple cost and social justice criteria. Tracing the origins of predictive policing in the Compstat system, this article studies the shift from machines to explore intuitions (where police officers still have control over the machine) to applications removing the reflexive dimension of proactivity, thus turning prediction into the medium for \u201cdosage\u201d metrics of police work quantities. Finally, the article discusses how, driven by a critical movement denouncing the discriminatory biases of predictive machines, developers seek to develop techniques to audit training dataset and ways to calculate the reasonable amount of stop and frisk over the population.",
+      "url": "https://doi.org/10.1177/2053951719861703",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951718786314",
+      "title": "How do data come to matter? Living and becoming with personal data",
+      "authors": [
+        "Deborah Lupton"
+      ],
+      "date": "2018-07-01T00:00:00+00:00",
+      "abstract": "Humans have become increasingly datafied with the use of digital technologies that generate information with and about their bodies and everyday lives. The onto-epistemological dimensions of human\u2013data assemblages and their relationship to bodies and selves have yet to be thoroughly theorised. In this essay, I draw on key perspectives espoused in feminist materialism, vital materialism and the anthropology of material culture to examine the ways in which these assemblages operate as part of knowing, perceiving and sensing human bodies. I draw particularly on scholarship that employs organic metaphors and concepts of vitality, growth, making, articulation, composition and decomposition. I show how these metaphors and concepts relate to and build on each other, and how they can be applied to think through humans\u2019 encounters with their digital data. I argue that these theoretical perspectives work to highlight the material and embodied dimensions of human\u2013data assemblages as they grow and are enacted, articulated and incorporated into everyday lives.",
+      "url": "https://doi.org/10.1177/2053951718786314",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951718809145",
+      "title": "Democratic governance in an age of datafication: Lessons from mapping government discourses and practices",
+      "authors": [
+        "Joanna Redden"
+      ],
+      "date": "2018-07-01T00:00:00+00:00",
+      "abstract": "There is an abundance of enthusiasm and optimism about how governments at all levels can make use of big data, algorithms and artificial intelligence. There is also growing concern about the risks that come with these new systems. This article makes the case for greater government transparency and accountability about uses of big data through a Government of Canada qualitative research case study. Adapting a method from critical cartographers, I employ counter-mapping to map government big data practices and internal discussions of risk and challenge. I do so by drawing on interviews and freedom of information requests. The analysis reveals that there are more concerns and risks than often publicly discussed and that there are significant areas of silence that need greater attention. The article underlines the need for our democratic systems to respond to our new datafied contexts by ensuring that our institutions make changes to better protect citizen rights, uphold democratic principles and ensure means for citizen intervention.",
+      "url": "https://doi.org/10.1177/2053951718809145",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951718756684",
+      "title": "Understanding perception of algorithmic decisions: Fairness, trust, and emotion in response to algorithmic management",
+      "authors": [
+        "Min Kyung Lee"
+      ],
+      "date": "2018-01-01T00:00:00+00:00",
+      "abstract": "Algorithms increasingly make managerial decisions that people used to make. Perceptions of algorithms, regardless of the algorithms' actual performance, can significantly influence their adoption, yet we do not fully understand how people perceive decisions made by algorithms as compared with decisions made by humans. To explore perceptions of algorithmic management, we conducted an online experiment using four managerial decisions that required either mechanical or human skills. We manipulated the decision-maker (algorithmic or human), and measured perceived fairness, trust, and emotional response. With the mechanical tasks, algorithmic and human-made decisions were perceived as equally fair and trustworthy and evoked similar emotions; however, human managers' fairness and trustworthiness were attributed to the manager's authority, whereas algorithms' fairness and trustworthiness were attributed to their perceived efficiency and objectivity. Human decisions evoked some positive emotion due to the possibility of social recognition, whereas algorithmic decisions generated a more mixed response \u2013 algorithms were seen as helpful tools but also possible tracking mechanisms. With the human tasks, algorithmic decisions were perceived as less fair and trustworthy and evoked more negative emotion than human decisions. Algorithms' perceived lack of intuition and subjective judgment capabilities contributed to the lower fairness and trustworthiness judgments. Positive emotion from human decisions was attributed to social recognition, while negative emotion from algorithmic decisions was attributed to the dehumanizing experience of being evaluated by machines. This work reveals people's lay concepts of algorithmic versus human decisions in a management context and suggests that task characteristics matter in understanding people's experiences with algorithmic technologies.",
+      "url": "https://doi.org/10.1177/2053951718756684",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951718771399",
+      "title": "Algorithmic affordances for productive resistance",
+      "authors": [
+        "Nancy Ettlinger"
+      ],
+      "date": "2018-01-01T00:00:00+00:00",
+      "abstract": "Although overarching if not foundational conceptualizations of digital governance in the field of critical data studies aptly account for and explain subjection, calculated resistance is left conceptually unattended despite case studies that document instances of resistance. I ask at the outset why conceptualizations of digital governance are so bleak, and I argue that all are underscored implicitly by a Deleuzian theory of desire that overlooks agency, defined here in Foucauldian terms. I subsequently conceptualize digital governance as encompassing subjection as well as resistance, and I cast the two in relational perspective by making use of the concepts \u201caffordance\u201d and \u201cassemblage\u201d in conjunction with multiple subjectivities and Foucault's view of power as productive as well as his view of resistance as an \u201cantagonism of strategies\u201d in his late scholarship on resistance, ethics, and subjectivity. I offer examples of salient modes of what I call \u201cproductive\u201d resistance (as opposed to resistance by way of avoidance, disruption or obfuscation), and from a Foucauldian perspective I explain how each mode targets and subverts technologies of repressive power to produce new elements of the digital environment and construct new truths. I conclude by recognizing the agency embodied in resistance as an end in itself, but I also consider that modes of productive resistance can have extrinsic value as they affect the fluid interaction among elements of the digital environment, potentially disrupting the presumed structure of dominance and dependence, and opening our conceptualization of algorithmic life to hopeful possibilities for change.",
+      "url": "https://doi.org/10.1177/2053951718771399",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951717738104",
+      "title": "Algorithms as culture: Some tactics for the ethnography of algorithmic systems",
+      "authors": [
+        "Nick Seaver"
+      ],
+      "date": "2017-12-01T00:00:00+00:00",
+      "abstract": "This article responds to recent debates in critical algorithm studies about the significance of the term \u201calgorithm.\u201d Where some have suggested that critical scholars should align their use of the term with its common definition in professional computer science, I argue that we should instead approach algorithms as \u201cmultiples\u201d\u2014unstable objects that are enacted through the varied practices that people use to engage with them, including the practices of \u201coutsider\u201d researchers. This approach builds on the work of Laura Devendorf, Elizabeth Goodman, and Annemarie Mol. Different ways of enacting algorithms foreground certain issues while occluding others: computer scientists enact algorithms as conceptual objects indifferent to implementation details, while calls for accountability enact algorithms as closed boxes to be opened. I propose that critical researchers might seek to enact algorithms ethnographically, seeing them as heterogeneous and diffuse sociotechnical systems, rather than rigidly constrained and procedural formulas. To do so, I suggest thinking of algorithms not \u201cin\u201d culture, as the event occasioning this essay was titled, but \u201cas\u201d culture: part of broad patterns of meaning and practice that can be engaged with empirically. I offer a set of practical tactics for the ethnographic enactment of algorithmic systems, which do not depend on pinning down a singular \u201calgorithm\u201d or achieving \u201caccess,\u201d but which rather work from the partial and mobile position of an outsider.",
+      "url": "https://doi.org/10.1177/2053951717738104",
+      "source": "crossref+semanticscholar"
+    },
+    {
+      "doi": "10.1177/2053951717743530",
+      "title": "Fairer machine learning in the real world: Mitigating discrimination without collecting sensitive data",
+      "authors": [
+        "Michael Veale",
+        "Reuben Binns"
+      ],
+      "date": "2017-12-01T00:00:00+00:00",
+      "abstract": "Decisions based on algorithmic, machine learning models can be unfair, reproducing biases in historical data used to train them. While computational techniques are emerging to address aspects of these concerns through communities such as discrimination-aware data mining (DADM) and fairness, accountability and transparency machine learning (FATML), their practical implementation faces real-world challenges. For legal, institutional or commercial reasons, organisations might not hold the data on sensitive attributes such as gender, ethnicity, sexuality or disability needed to diagnose and mitigate emergent indirect discrimination-by-proxy, such as redlining. Such organisations might also lack the knowledge and capacity to identify and manage fairness issues that are emergent properties of complex sociotechnical systems. This paper presents and discusses three potential approaches to deal with such knowledge and information deficits in the context of fairer machine learning. Trusted third parties could selectively store data necessary for performing discrimination discovery and incorporating fairness constraints into model-building in a privacy-preserving manner. Collaborative online platforms would allow diverse organisations to record, share and access contextual and experiential knowledge to promote fairness in machine learning systems. Finally, unsupervised learning and pedagogically interpretable algorithms might allow fairness hypotheses to be built for further selective testing and exploration. Real-world fairness challenges in machine learning are not abstract, constrained optimisation problems, but are institutionally and contextually grounded. Computational fairness tools are useful, but must be researched and developed in and with the messy contexts that will shape their deployment, rather than just for imagined situations. Not doing so risks real, near-term algorithmic harm.",
+      "url": "https://doi.org/10.1177/2053951717743530",
+      "source": "crossref+semanticscholar"
+    },
+    {
+      "doi": "10.1177/2053951717724477",
+      "title": "Virtual, visible, and actionable: Data assemblages and the sightlines of justice",
+      "authors": [
+        "Sheila Jasanoff"
+      ],
+      "date": "2017-12-01T00:00:00+00:00",
+      "abstract": "This paper explores the politics of representing events in the world in the form of data points, data sets, or data associations. Data collection involves an act of seeing and recording something that was previously hidden and possibly unnamed. The incidences included in a data set are not random or unrelated but stand for coherent, classifiable phenomena in the world. Moreover, for data to have an impact on law and policy, such information must be seen as actionable, that is, the aggregated data must show people both something they can perceive and something that demands interrogation, explanation, or resolution. Actionable data problematize the taken-for-granted order of society by pointing to questions or imbalances that can be corrected or rectified, or simply better understood, through systematic compilations of occurrences, frequencies, distributions, or correlations. The paper describes and analyzes three different modes of authorized seeing that render data on global environmental phenomena such as climate change both visible and actionable. It argues that the political force of environmental data compilations derives from the divergent epistemological standpoints and expert practices associated with producing views from nowhere, everywhere, and somewhere.",
+      "url": "https://doi.org/10.1177/2053951717724477",
+      "source": "crossref+semanticscholar"
+    },
+    {
+      "doi": "10.1177/2053951717736335",
+      "title": "What is data justice? The case for connecting digital rights and freedoms globally",
+      "authors": [
+        "Linnet Taylor"
+      ],
+      "date": "2017-12-01T00:00:00+00:00",
+      "abstract": "The increasing availability of digital data reflecting economic and human development, and in particular the availability of data emitted as a by-product of people\u2019s use of technological devices and services, has both political and practical implications for the way people are seen and treated by the state and by the private sector. Yet the data revolution is so far primarily a technical one: the power of data to sort, categorise and intervene has not yet been explicitly connected to a social justice agenda by the agencies and authorities involved. Meanwhile, although data-driven discrimination is advancing at a similar pace to data processing technologies, awareness and mechanisms for combating it are not. This paper posits that just as an idea of justice is needed in order to establish the rule of law, an idea of data justice \u2013 fairness in the way people are made visible, represented and treated as a result of their production of digital data \u2013 is necessary to determine ethical paths through a datafying world. Bringing together the emerging scholarly perspectives on this topic, I propose three pillars as the basis of a notion of international data justice: (in)visibility, (dis)engagement with technology and antidiscrimination. These pillars integrate positive with negative rights and freedoms, and by doing so challenge both the basis of current data protection regulations and the growing assumption that being visible through the data we emit is part of the contemporary social contract.",
+      "url": "https://doi.org/10.1177/2053951717736335",
+      "source": "crossref+semanticscholar"
+    },
+    {
+      "doi": "10.1177/2053951717718855",
+      "title": "Algorithms in practice: Comparing web journalism and criminal justice",
+      "authors": [
+        "Ang\u00e8le Christin"
+      ],
+      "date": "2017-12-01T00:00:00+00:00",
+      "abstract": "Big Data evangelists often argue that algorithms make decision-making more informed and objective\u2014a promise hotly contested by critics of these technologies. Yet, to date, most of the debate has focused on the instruments themselves, rather than on how they are used. This article addresses this lack by examining the actual practices surrounding algorithmic technologies. Specifically, drawing on multi-sited ethnographic data, I compare how algorithms are used and interpreted in two institutional contexts with markedly different characteristics: web journalism and criminal justice. I find that there are surprising similarities in how web journalists and legal professionals use algorithms in their work. In both cases, I document a gap between the intended and actual effects of algorithms\u2014a process I analyze as \u201cdecoupling.\u201d Second, I identify a gamut of buffering strategies used by both web journalists and legal professionals to minimize the impact of algorithms in their daily work. Those include foot-dragging, gaming, and open critique. Of course, these similarities do not exhaust the differences between the two cases, which are explored in the discussion section. I conclude with a call for further ethnographic work on algorithms in practice as an important empirical check against the dominant rhetoric of algorithmic power.",
+      "url": "https://doi.org/10.1177/2053951717718855",
+      "source": "crossref+semanticscholar"
+    },
+    {
+      "doi": "10.1177/2053951716679679",
+      "title": "The ethics of algorithms: Mapping the debate",
+      "authors": [
+        "Brent Daniel Mittelstadt",
+        "Patrick Allo",
+        "Mariarosaria Taddeo",
+        "Sandra Wachter",
+        "Luciano Floridi"
+      ],
+      "date": "2016-12-01T00:00:00+00:00",
+      "abstract": "In information societies, operations, decisions and choices previously left to humans are increasingly delegated to algorithms, which may advise, if not decide, about how data should be interpreted and what actions should be taken as a result. More and more often, algorithms mediate social processes, business transactions, governmental decisions, and how we perceive, understand, and interact among ourselves and with the environment. Gaps between the design and operation of algorithms and our understanding of their ethical implications can have severe consequences affecting individuals as well as groups and whole societies. This paper makes three contributions to clarify the ethical importance of algorithmic mediation. It provides a prescriptive map to organise the debate. It reviews the current discussion of ethical aspects of algorithms. And it assesses the available literature in order to identify areas requiring further work to develop the ethics of algorithms.",
+      "url": "https://doi.org/10.1177/2053951716679679",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951716640566",
+      "title": "Affect and value in critical examinations of the production and \u2018prosumption\u2019 of Big Data",
+      "authors": [
+        "Daniel G Cockayne"
+      ],
+      "date": "2016-12-01T00:00:00+00:00",
+      "abstract": "In this paper I explore the relationship between the production and the value of Big Data. In particular I examine the concept of social media \u2018prosumption\u2019\u2014which has predominantly been theorized from a Marxist, political economic perspective\u2014to consider what other forms of value Big Data have, imbricated with their often speculative economic value. I take the example of social media firms in their early stages of operation to suggest that, since these firms do not necessarily generate revenue, data collected through user contributions do not always realize economic value, at least in a Marxist sense, and that, in addition to their speculative value, these data have value beyond an economic valence. Instead I argue that in addition to their function as systems for accumulation, social media and their associated data have an affective value, related closely to their economic value, and demonstrate the efficacy of social media as systems designed for the appropriation and circulation of user attention.",
+      "url": "https://doi.org/10.1177/2053951716640566",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951716665128",
+      "title": "Algorithms and their others: Algorithmic culture in context",
+      "authors": [
+        "Paul Dourish"
+      ],
+      "date": "2016-12-01T00:00:00+00:00",
+      "abstract": "Algorithms, once obscure objects of technical art, have lately been subject to considerable popular and scholarly scrutiny. What does it mean to adopt the algorithm as an object of analytic attention? What is in view, and out of view, when we focus on the algorithm? Using Niklaus Wirth's 1975 formulation that \u201calgorithms\u2009+\u2009data structures\u2009=\u2009programs\u201d as a launching-off point, this paper examines how an algorithmic lens shapes the way in which we might inquire into contemporary digital culture.",
+      "url": "https://doi.org/10.1177/2053951716665128",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951716674238",
+      "title": "Critical data studies: An introduction",
+      "authors": [
+        "Andrew Iliadis",
+        "Federica Russo"
+      ],
+      "date": "2016-12-01T00:00:00+00:00",
+      "abstract": "Critical Data Studies (CDS) explore the unique cultural, ethical, and critical challenges posed by Big Data. Rather than treat Big Data as only scientifically empirical and therefore largely neutral phenomena, CDS advocates the view that Big Data should be seen as always-already constituted within wider data assemblages. Assemblages is a concept that helps capture the multitude of ways that already-composed data structures inflect and interact with society, its organization and functioning, and the resulting impact on individuals\u2019 daily lives. CDS questions the many assumptions about Big Data that permeate contemporary literature on information and society by locating instances where Big Data may be naively taken to denote objective and transparent informational entities. In this introduction to the Big Data &amp; Society CDS special theme, we briefly describe CDS work, its orientations, and principles.",
+      "url": "https://doi.org/10.1177/2053951716674238",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951715622512",
+      "title": "How the machine \u2018thinks\u2019: Understanding opacity in machine learning algorithms",
+      "authors": [
+        "Jenna Burrell"
+      ],
+      "date": "2016-06-01T00:00:00+00:00",
+      "abstract": "This article considers the issue of opacity as a problem for socially consequential mechanisms of classification and ranking, such as spam filters, credit card fraud detection, search engines, news trends, market segmentation and advertising, insurance or loan qualification, and credit scoring. These mechanisms of classification all frequently rely on computational algorithms, and in many cases on machine learning algorithms to do this work. In this article, I draw a distinction between three forms of opacity: (1) opacity as intentional corporate or state secrecy, (2) opacity as technical illiteracy, and (3) an opacity that arises from the characteristics of machine learning algorithms and the scale required to apply them usefully. The analysis in this article gets inside the algorithms themselves. I cite existing literatures in computer science, known industry practices (as they are publicly presented), and do some testing and manipulation of code as a form of lightweight code audit. I argue that recognizing the distinct forms of opacity that may be coming into play in a given application is a key to determining which of a variety of technical and non-technical solutions could help to prevent harm.",
+      "url": "https://doi.org/10.1177/2053951715622512",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951715611145",
+      "title": "Known or knowing publics? Social media data mining and the question of public agency",
+      "authors": [
+        "Helen Kennedy",
+        "Giles Moss"
+      ],
+      "date": "2015-12-01T00:00:00+00:00",
+      "abstract": "New methods to analyse social media data provide a powerful way to know publics and capture what they say and do. At the same time, access to these methods is uneven, with corporations and governments tending to have best access to relevant data and analytics tools. Critics raise a number of concerns about the implications dominant uses of data mining and analytics may have for the public: they result in less privacy, more surveillance and social discrimination, and they provide new ways of controlling how publics come to be represented and so understood. In this paper, we consider if a different relationship between the public and data mining might be established, one in which publics might be said to have greater agency and reflexivity vis-\u00e0-vis data power. Drawing on growing calls for alternative data regimes and practices, we argue that to enable this different relationship, data mining and analytics need to be democratised in three ways: they should be subject to greater public supervision and regulation, available and accessible to all, and used to create not simply known but reflexive, active and knowing publics. We therefore imagine conditions in which data mining is not just used as a way to know publics, but can become a means for publics to know themselves.",
+      "url": "https://doi.org/10.1177/2053951715611145",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951715608406",
+      "title": "Heuristics of the algorithm: Big Data, user interpretation and institutional translation",
+      "authors": [
+        "G\u00f6ran Bolin",
+        "Jonas Andersson Schwarz"
+      ],
+      "date": "2015-12-01T00:00:00+00:00",
+      "abstract": "Intelligence on mass media audiences was founded on representative statistical samples, analysed by statisticians at the market departments of media corporations. The techniques for aggregating user data in the age of pervasive and ubiquitous personal media (e.g. laptops, smartphones, credit cards/swipe cards and radio-frequency identification) build on large aggregates of information (Big Data) analysed by algorithms that transform data into commodities. While the former technologies were built on socio-economic variables such as age, gender, ethnicity, education, media preferences (i.e. categories recognisable to media users and industry representatives alike), Big Data technologies register consumer choice, geographical position, web movement, and behavioural information in technologically complex ways that for most lay people are too abstract to appreciate the full consequences of. The data mined for pattern recognition privileges relational rather than demographic qualities. We argue that the agency of interpretation at the bottom of market decisions within media companies nevertheless introduces a \u2018heuristics of the algorithm\u2019, where the data inevitably becomes translated into social categories. In the paper we argue that although the promise of algorithmically generated data is often implemented in automated systems where human agency gets increasingly distanced from the data collected (it is our technological gadgets that are being surveyed, rather than us as social beings), one can observe a felt need among media users and among industry actors to \u2018translate back\u2019 the algorithmically produced relational statistics into \u2018traditional\u2019 social parameters. The tenacious social structures within the advertising industries work against the techno-economically driven tendencies within the Big Data economy.",
+      "url": "https://doi.org/10.1177/2053951715608406",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951714564227",
+      "title": "The emerging role of Big Data in key development issues: Opportunities, challenges, and concerns",
+      "authors": [
+        "Nir Kshetri"
+      ],
+      "date": "2014-07-01T00:00:00+00:00",
+      "abstract": "This paper presents a review of academic literature, policy documents from government organizations and international agencies, and reports from industries and popular media on the trends in Big Data utilization in key development issues and its worthwhileness, usefulness, and relevance. By looking at Big Data deployment in a number of key economic sectors, it seeks to provide a better understanding of the opportunities and challenges of using it for addressing key issues facing the developing world. It reviews the uses of Big Data in agriculture and farming activities in developing countries to assess the capabilities required at various levels to benefit from Big Data. It also provides insights into how the current digital divide is associated with and facilitated by the pattern of Big Data diffusion and its effective use in key development areas. It also discusses the lessons that developing countries can learn from the utilization of Big Data in big corporations as well as in other activities in industrialized countries.",
+      "url": "https://doi.org/10.1177/2053951714564227",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951714528481",
+      "title": "Big Data, new epistemologies and paradigm shifts",
+      "authors": [
+        "Rob Kitchin"
+      ],
+      "date": "2014-04-01T00:00:00+00:00",
+      "abstract": "This article examines how the availability of Big Data, coupled with new data analytics, challenges established epistemologies across the sciences, social sciences and humanities, and assesses the extent to which they are engendering paradigm shifts across multiple disciplines. In particular, it critically explores new forms of empiricism that declare \u2018the end of theory\u2019, the creation of data-driven rather than knowledge-driven science, and the development of digital humanities and computational social sciences that propose radically different ways to make sense of culture, history, economy and society. It is argued that: (1) Big Data and new data analytics are disruptive innovations which are reconfiguring in many instances how research is conducted; and (2) there is an urgent need for wider critical reflection within the academy on the epistemological implications of the unfolding data revolution, a task that has barely begun to be tackled despite the rapid changes in research practices presently taking place. After critically reviewing emerging epistemological positions, it is contended that a potentially fruitful approach would be the development of a situated, reflexive and contextually nuanced epistemology.",
+      "url": "https://doi.org/10.1177/2053951714528481",
+      "source": "crossref"
+    },
+    {
+      "doi": "10.1177/2053951714538417",
+      "title": "Official statistics and Big Data",
+      "authors": [
+        "Peter Struijs",
+        "Barteld Braaksma",
+        "Piet JH Daas"
+      ],
+      "date": "2014-04-01T00:00:00+00:00",
+      "abstract": "The rise of Big Data changes the context in which organisations producing official statistics operate. Big Data provides opportunities, but in order to make optimal use of Big Data, a number of challenges have to be addressed. This stimulates increased collaboration between National Statistical Institutes, Big Data holders, businesses and universities. In time, this may lead to a shift in the role of statistical institutes in the provision of high-quality and impartial statistical information to society. In this paper, the changes in context, the opportunities, the challenges and the way to collaborate are addressed. The collaboration between the various stakeholders will involve each partner building on and contributing different strengths. For national statistical offices, traditional strengths include, on the one hand, the ability to collect data and combine data sources with statistical products and, on the other hand, their focus on quality, transparency and sound methodology. In the Big Data era of competing and multiplying data sources, they continue to have a unique knowledge of official statistical production methods. And their impartiality and respect for privacy as enshrined in law uniquely position them as a trusted third party. Based on this, they may advise on the quality and validity of information of various sources. By thus positioning themselves, they will be able to play their role as key information providers in a changing society.",
+      "url": "https://doi.org/10.1177/2053951714538417",
+      "source": "crossref"
+    }
+  ]
+}
