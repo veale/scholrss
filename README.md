@@ -51,6 +51,7 @@ A self-hosted scholarly RSS feed generator that pulls article metadata from **Cr
 | `INTERNAL_URL` | _(empty)_ | Optional internal URL (e.g. `http://scholrss:8844`) shown alongside `BASE_URL` for container-to-container readers that bypass reverse-proxy auth |
 | `UPDATE_INTERVAL_HOURS` | `24` | Hours between automatic feed refreshes |
 | `LOOKBACK_DAYS` | `365` | Default lookback window (overridden by UI setting) |
+| `MAX_ARTICLES` | `100` | Max articles fetched/cached per journal (1–1000; overridden by UI setting) |
 | `DATA_DIR` | `/data` | Where journals config and cache are stored |
 
 ## Data Storage

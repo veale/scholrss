@@ -23,6 +23,20 @@ DATA_DIR = Path(os.environ.get("SCHOLRSS_DATA_DIR",
 CACHE_DIR = DATA_DIR / "cache"
 JOURNALS_FILE = DATA_DIR / "journals.json"
 
+# Defensive abstract cleaner — same rules as app.py.clean_abstract. Kept local
+# so the MCP server has no runtime dep on the Flask module.
+_JATS_TAG_RE = re.compile(r"<[^>]+>")
+_ABSTRACT_PREFIX_RE = re.compile(
+    r"^\s*(?i:abstract)(?=[\s:.\-—]|[A-Z])[\s:.\-—]*"
+)
+
+def _clean_abstract(text):
+    if not text:
+        return text
+    text = _JATS_TAG_RE.sub("", text)
+    text = _ABSTRACT_PREFIX_RE.sub("", text)
+    return text.strip()
+
 mcp = FastMCP("scholrss", instructions=(
     "ScholRSS provides access to cached scholarly articles from tracked academic journals. "
     "Use `list_journals` to see what's tracked, `latest_articles` for recent papers, "
@@ -59,14 +73,14 @@ def _format_article(w):
     if len(w.get("authors", [])) > 5:
         authors += f" et al. ({len(w['authors'])} authors)"
     date = w.get("date", "")[:10]
-    abstract = w.get("abstract", "").strip()
+    abstract = _clean_abstract(w.get("abstract", "") or "")
     if len(abstract) > 1000:
         abstract = abstract[:997] + "..."
     lines = [
         f"**{w.get('title', 'Untitled')}**",
         f"  {authors}" if authors else None,
         f"  {w.get('_journal', '')} | {date}",
-        f"  DOI: {w['doi']} — https://doi.org/{w['doi']}" if w.get("doi") else None,
+        f"  https://doi.org/{w['doi']}" if w.get("doi") else None,
         f"  {abstract}" if abstract else "  [No abstract available]",
     ]
     return "\n".join(l for l in lines if l is not None)

@@ -24,7 +24,27 @@ BASE_URL = os.environ.get("BASE_URL", "http://localhost:8844")
 INTERNAL_URL = os.environ.get("INTERNAL_URL", "")
 UPDATE_INTERVAL = int(os.environ.get("UPDATE_INTERVAL_HOURS", 24))
 LOOKBACK_DAYS_DEFAULT = int(os.environ.get("LOOKBACK_DAYS", 365))
+MAX_ARTICLES_DEFAULT = int(os.environ.get("MAX_ARTICLES", 100))
 SETTINGS_FILE = DATA_DIR / "settings.json"
+
+# ── Abstract cleaning ──────────────────────────────────────────────────────
+# Strip JATS/HTML tags and a leading "Abstract" heading that publishers sometimes
+# jam onto the start of the abstract body. The (?i:...) inline flag makes only
+# the word case-insensitive — the [A-Z] lookahead below stays case-sensitive so
+# we only strip "Abstract" when followed by a separator or a capital letter
+# (handles "AbstractThis paper…" without mangling legitimate words like
+# "Abstractly speaking…").
+_JATS_TAG_RE = re.compile(r"<[^>]+>")
+_ABSTRACT_PREFIX_RE = re.compile(
+    r"^\s*(?i:abstract)(?=[\s:.\-—]|[A-Z])[\s:.\-—]*"
+)
+
+def clean_abstract(text):
+    if not text:
+        return text
+    text = _JATS_TAG_RE.sub("", text)
+    text = _ABSTRACT_PREFIX_RE.sub("", text)
+    return text.strip()
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("scholrss")
@@ -58,6 +78,15 @@ def save_settings(settings):
 
 def get_lookback_days():
     return load_settings().get("lookback_days", LOOKBACK_DAYS_DEFAULT)
+
+def get_max_articles():
+    try:
+        val = int(load_settings().get("max_articles", MAX_ARTICLES_DEFAULT))
+    except (TypeError, ValueError):
+        val = MAX_ARTICLES_DEFAULT
+    # CrossRef accepts up to 1000 rows per request; pagination would be needed
+    # beyond that, so cap there.
+    return max(1, min(1000, val))
 
 def journal_cache_path(issn):
     return CACHE_DIR / f"{issn.replace('-', '')}.json"
@@ -107,14 +136,48 @@ def crossref_journal_from_doi(doi):
         log.error(f"CrossRef DOI lookup failed: {e}")
         return None
 
-def crossref_latest_works(issn, from_date):
+def _parse_crossref_date(item):
+    """Extract the best available publication date from a CrossRef work record.
+
+    CrossRef exposes several date fields with different semantics. We prefer the
+    canonical publication dates (print/online), fall back to ``issued`` /
+    ``published`` which are the generic publication date fields, and only use
+    ``created`` (CrossRef record creation) as a last resort. Each date is a
+    nested ``{"date-parts": [[year, month?, day?]]}`` with optional month/day.
+
+    Returns a tz-aware UTC ``datetime``; when the source only has a year we
+    anchor to Jan 1, month → day 1, so ordering is still sensible.
+    """
+    # Ordered from most-to-least authoritative for "when was this published?"
+    for field in ("published-print", "published-online", "issued",
+                  "published", "created"):
+        dp_list = item.get(field, {}).get("date-parts") or []
+        if not dp_list:
+            continue
+        dp = dp_list[0] or []
+        if not dp or dp[0] is None:
+            continue
+        try:
+            y = int(dp[0])
+            m = int(dp[1]) if len(dp) > 1 and dp[1] is not None else 1
+            d = int(dp[2]) if len(dp) > 2 and dp[2] is not None else 1
+            # Guard against garbage years (CrossRef occasionally has "0" or far-future)
+            if y < 1800 or y > 2200:
+                continue
+            return datetime(y, m, d, tzinfo=timezone.utc)
+        except (ValueError, TypeError):
+            continue
+    return None
+
+
+def crossref_latest_works(issn, from_date, rows=100):
     """Fetch recent works from CrossRef for a given ISSN."""
     url = "https://api.crossref.org/works"
     params = {
         "filter": f"issn:{issn},from-index-date:{from_date},type:journal-article",
         "sort": "indexed",
         "order": "desc",
-        "rows": 100,
+        "rows": max(1, min(1000, rows)),
         "mailto": MAILTO,
     }
     try:
@@ -126,21 +189,8 @@ def crossref_latest_works(issn, from_date):
             doi = item.get("DOI", "")
             title_parts = item.get("title", [])
             title = title_parts[0] if title_parts else "Untitled"
-            # Extract date
-            pub_date = None
-            for date_field in ["published-print", "published-online", "created"]:
-                dp = item.get(date_field, {}).get("date-parts", [[]])[0]
-                if dp and len(dp) >= 1:
-                    y = dp[0]
-                    m = dp[1] if len(dp) > 1 else 1
-                    d = dp[2] if len(dp) > 2 else 1
-                    try:
-                        pub_date = datetime(y, m, d, tzinfo=timezone.utc)
-                    except (ValueError, TypeError):
-                        pass
-                    break
-            if not pub_date:
-                pub_date = datetime.now(timezone.utc)
+
+            pub_date = _parse_crossref_date(item) or datetime.now(timezone.utc)
 
             # Authors
             authors = []
@@ -149,7 +199,7 @@ def crossref_latest_works(issn, from_date):
                 if name:
                     authors.append(name)
 
-            abstract = item.get("abstract", "")
+            abstract = clean_abstract(item.get("abstract", ""))
 
             works.append({
                 "doi": doi,
@@ -246,9 +296,10 @@ def openalex_enrich_abstract(doi):
 def update_journal_feed(issn, journal_info):
     """Fetch and cache latest works for a journal."""
     from_date = (datetime.now(timezone.utc) - timedelta(days=get_lookback_days())).strftime("%Y-%m-%d")
-    log.info(f"Updating feed for {journal_info['title']} ({issn}) from {from_date}")
+    max_articles = get_max_articles()
+    log.info(f"Updating feed for {journal_info['title']} ({issn}) from {from_date} (max {max_articles})")
 
-    crossref_works = crossref_latest_works(issn, from_date)
+    crossref_works = crossref_latest_works(issn, from_date, rows=max_articles)
     log.info(f"  CrossRef: {len(crossref_works)} works")
 
     # Enrich missing abstracts: Semantic Scholar batch first, then OpenAlex fallback
@@ -263,7 +314,7 @@ def update_journal_feed(issn, journal_info):
         for w in missing:
             abstract = ss_abstracts.get(w["doi"].lower())
             if abstract:
-                w["abstract"] = abstract
+                w["abstract"] = clean_abstract(abstract)
                 w["source"] = w["source"] + "+semanticscholar"
                 ss_count += 1
         log.info(f"  Semantic Scholar batch: {ss_count}/{len(missing)} abstracts")
@@ -274,17 +325,18 @@ def update_journal_feed(issn, journal_info):
     for w in still_missing:
         abstract = openalex_enrich_abstract(w["doi"])
         if abstract:
-            w["abstract"] = abstract
+            w["abstract"] = clean_abstract(abstract)
             w["source"] = w["source"] + "+openalex"
             oa_count += 1
         time.sleep(0.15)  # rate limit
     if still_missing:
         log.info(f"  OpenAlex fallback: {oa_count}/{len(still_missing)} abstracts")
 
-    # Clean abstracts (strip JATS XML tags)
+    # Final pass — any abstract not already cleaned above (e.g. from CrossRef
+    # pre-clean_abstract was added) gets normalised now. Idempotent.
     for w in crossref_works:
         if w["abstract"]:
-            w["abstract"] = re.sub(r"<[^>]+>", "", w["abstract"]).strip()
+            w["abstract"] = clean_abstract(w["abstract"])
 
     # Sort by date descending
     crossref_works.sort(key=lambda x: x["date"], reverse=True)
@@ -342,11 +394,12 @@ def generate_feed(issn):
     fg.language("en")
     fg.updated(datetime.fromisoformat(cache["updated"]))
 
-    for work in works[:50]:  # Cap at 50 items
+    for work in works[:get_max_articles()]:
         fe = fg.add_entry()
         fe.id(work["url"] or work["doi"] or work["title"])
         fe.title(work["title"])
-        fe.link(href=work["url"])
+        if work["url"]:
+            fe.link(href=work["url"])
 
         try:
             fe.published(datetime.fromisoformat(work["date"]))
@@ -358,6 +411,9 @@ def generate_feed(issn):
             for author_name in work["authors"][:5]:
                 fe.author({"name": author_name})
 
+        # Keep the summary compact — the entry <link> already points at the
+        # DOI URL, so we don't repeat "DOI: 10.xxxx/..." in the body (wastes
+        # tokens when an MCP client ingests the feed).
         summary_parts = []
         if work["authors"]:
             summary_parts.append(", ".join(work["authors"][:5]))
@@ -366,9 +422,6 @@ def generate_feed(issn):
         if work["abstract"]:
             summary_parts.append("")
             summary_parts.append(work["abstract"])
-        if work["doi"]:
-            summary_parts.append("")
-            summary_parts.append(f"DOI: {work['doi']}")
 
         fe.summary("\n".join(summary_parts) if summary_parts else "No abstract available.")
 
@@ -394,7 +447,8 @@ def index():
             stats[issn] = {"count": 0, "with_abstract": 0, "updated": "never"}
     return render_template("index.html", journals=journals, stats=stats,
                            base_url=BASE_URL, internal_url=INTERNAL_URL,
-                           lookback_days=get_lookback_days())
+                           lookback_days=get_lookback_days(),
+                           max_articles=get_max_articles())
 
 @app.route("/feed/<issn>")
 def feed_atom(issn):
@@ -667,6 +721,7 @@ def api_get_settings():
     settings = load_settings()
     return jsonify({
         "lookback_days": settings.get("lookback_days", LOOKBACK_DAYS_DEFAULT),
+        "max_articles": get_max_articles(),
     })
 
 @app.route("/api/settings", methods=["PUT"])
@@ -678,6 +733,11 @@ def api_put_settings():
         if val < 1 or val > 3650:
             return jsonify({"error": "lookback_days must be between 1 and 3650"}), 400
         settings["lookback_days"] = val
+    if "max_articles" in data:
+        val = int(data["max_articles"])
+        if val < 1 or val > 1000:
+            return jsonify({"error": "max_articles must be between 1 and 1000"}), 400
+        settings["max_articles"] = val
     save_settings(settings)
     return jsonify({"ok": True})
 
@@ -686,6 +746,40 @@ def api_put_settings():
 # ── Startup ─────────────────────────────────────────────────────────────────
 
 ensure_dirs()
+
+
+def _migrate_clean_existing_abstracts():
+    """One-shot pass over cached articles to normalise abstracts.
+
+    Strips JATS/HTML tags and any leading "Abstract" heading. Idempotent —
+    running it repeatedly is a no-op once abstracts are already clean.
+    """
+    if not CACHE_DIR.exists():
+        return
+    total_changed = 0
+    for cache_file in CACHE_DIR.glob("*.json"):
+        try:
+            cache = json.loads(cache_file.read_text())
+        except Exception as e:
+            log.warning(f"Skipping unreadable cache {cache_file.name}: {e}")
+            continue
+        changed = False
+        for w in cache.get("works", []):
+            orig = w.get("abstract") or ""
+            if not orig:
+                continue
+            cleaned = clean_abstract(orig)
+            if cleaned != orig:
+                w["abstract"] = cleaned
+                changed = True
+        if changed:
+            cache_file.write_text(json.dumps(cache, indent=2))
+            total_changed += 1
+    if total_changed:
+        log.info(f"Abstract migration: cleaned {total_changed} cache file(s)")
+
+
+_migrate_clean_existing_abstracts()
 
 # Start background scheduler only once (gunicorn may fork multiple workers)
 # We use an env flag to ensure only one scheduler runs
