@@ -812,6 +812,7 @@
       <button class="search-tab" data-mode="doi" onclick="setSearchMode('doi')">From a DOI</button>
       <button class="search-tab" data-mode="bulk" onclick="setSearchMode('bulk')">Bulk import</button>
       <button class="search-tab" data-mode="filtered" onclick="setSearchMode('filtered')">Filtered feed</button>
+      <button class="search-tab" data-mode="ssrn" onclick="setSearchMode('ssrn')">SSRN search</button>
     </div>
     <div class="search-row" id="searchRow">
       <div class="ac-wrap" id="acWrap">
@@ -844,11 +845,23 @@
              style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);margin-bottom:0.5rem;">
       <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">Authors (comma-separated)</label>
       <input type="text" id="ffAuthors" placeholder="e.g. Lilian Edwards, Michael Veale"
+             style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);margin-bottom:0.5rem;">
+      <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">OpenAlex source ID (optional — use instead of ISSN for sources like SSRN that map poorly)</label>
+      <input type="text" id="ffSourceId" placeholder="e.g. S4210172589 (SSRN) — find at openalex.org/sources"
              style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);margin-bottom:0.6rem;">
-      <div style="display:flex;gap:1rem;align-items:center;font-size:0.8rem;color:var(--text-dim);margin-bottom:0.6rem;">
+      <div style="display:flex;gap:1rem;align-items:center;font-size:0.8rem;color:var(--text-dim);margin-bottom:0.6rem;flex-wrap:wrap;">
         <label><input type="radio" name="ffMatch" value="any" checked> match any keyword (OR)</label>
         <label><input type="radio" name="ffMatch" value="all"> match all keywords (AND)</label>
+        <label><input type="checkbox" id="ffUseS2"> also search Semantic Scholar</label>
       </div>
+      <div id="ffS2VenueRow" style="display:none;margin-bottom:0.6rem;">
+        <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">S2 venue filter (optional — e.g. "SSRN" to restrict S2 results to that venue)</label>
+        <input type="text" id="ffS2Venue" placeholder="e.g. SSRN"
+               style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);">
+      </div>
+      <script>document.getElementById('ffUseS2').addEventListener('change', function() {
+        document.getElementById('ffS2VenueRow').style.display = this.checked ? 'block' : 'none';
+      });</script>
       <button class="btn btn-accent" onclick="addFilteredFeed()" id="ffBtn">Create filtered feed</button>
     </div>
     <div class="search-results" id="searchResults"></div>
@@ -919,6 +932,9 @@
         <label for="fa-{{ issn }}">Authors (comma-separated — matched against author display names)</label>
         <input type="text" id="fa-{{ issn }}" placeholder="e.g. Lilian Edwards, Michael Veale"
                value="{{ (info.filter.authors or []) | join(', ') if info.filter else '' }}">
+        <label for="fs-{{ issn }}">OpenAlex source ID (optional — overrides ISSN for source matching)</label>
+        <input type="text" id="fs-{{ issn }}" placeholder="e.g. S4210172589 (SSRN)"
+               value="{{ info.filter.openalex_source_id if info.filter and info.filter.openalex_source_id else '' }}">
         <div class="fr-row">
           <label style="display:inline;margin:0">
             <input type="radio" name="fm-{{ issn }}" value="any"
@@ -930,14 +946,25 @@
               {% if info.filter and info.filter.match == 'all' %}checked{% endif %}>
             all keywords (AND)
           </label>
+          <label style="display:inline;margin:0">
+            <input type="checkbox" id="fss-{{ issn }}"
+              {% if info.filter and info.filter.use_semantic_scholar %}checked{% endif %}>
+            also search S2
+          </label>
           <div class="fr-actions">
             <button class="btn btn-sm btn-danger" onclick="clearFilter('{{ issn }}')">Clear</button>
             <button class="btn btn-sm btn-accent" onclick="saveFilter('{{ issn }}')">Save &amp; refetch</button>
           </div>
         </div>
+        <div style="margin-top:0.3rem;">
+          <label for="fv-{{ issn }}" style="font-size:0.72rem;">S2 venue filter (optional)</label>
+          <input type="text" id="fv-{{ issn }}" placeholder="e.g. SSRN"
+                 value="{{ info.filter.s2_venue if info.filter and info.filter.s2_venue else '' }}">
+        </div>
         <div style="margin-top:0.5rem;color:var(--text-dim);font-size:0.72rem;line-height:1.45;font-style:italic;">
           Filtered feeds use OpenAlex server-side filtering — only matching works transit the wire.
-          Essential for mega-journals like SSRN or arXiv. Leaving all fields empty reverts to the CrossRef pipeline.
+          Enable "also search S2" to additionally query Semantic Scholar (useful for SSRN papers that lack DOIs).
+          Leaving all fields empty reverts to the CrossRef pipeline.
         </div>
       </div>
     </div>
@@ -974,10 +1001,22 @@ function setSearchMode(mode) {
     searchRow.style.display = 'none';
     bulkRow.style.display = 'block';
     filteredRow.style.display = 'none';
-  } else if (mode === 'filtered') {
+  } else if (mode === 'filtered' || mode === 'ssrn') {
     searchRow.style.display = 'none';
     bulkRow.style.display = 'none';
     filteredRow.style.display = 'block';
+    if (mode === 'ssrn') {
+      // Pre-fill SSRN defaults (all editable)
+      document.getElementById('ffIssn').value = '1556-5068';
+      document.getElementById('ffSourceId').value = 'S4210172589';
+      document.getElementById('ffUseS2').checked = true;
+      document.getElementById('ffS2Venue').value = 'SSRN';
+      document.getElementById('ffS2VenueRow').style.display = 'block';
+      document.getElementById('ffLabel').value = '';
+      document.getElementById('ffKeywords').value = '';
+      document.getElementById('ffAuthors').value = '';
+      document.getElementById('ffKeywords').focus();
+    }
   } else {
     searchRow.style.display = 'flex';
     bulkRow.style.display = 'none';
@@ -1201,6 +1240,9 @@ async function addFilteredFeed() {
     .split(',').map(s => s.trim()).filter(s => s);
   const authors = document.getElementById('ffAuthors').value
     .split(',').map(s => s.trim()).filter(s => s);
+  const openalex_source_id = document.getElementById('ffSourceId').value.trim();
+  const use_semantic_scholar = document.getElementById('ffUseS2').checked;
+  const s2_venue = document.getElementById('ffS2Venue').value.trim();
   const matchEl = document.querySelector('input[name="ffMatch"]:checked');
   const match = matchEl ? matchEl.value : 'any';
   if (!issn) { toast('ISSN is required', true); return; }
@@ -1226,7 +1268,7 @@ async function addFilteredFeed() {
     const r = await fetch('/api/journal/filtered', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ issn, title, publisher, label, keywords, authors, match }),
+      body: JSON.stringify({ issn, title, publisher, label, keywords, authors, match, openalex_source_id, use_semantic_scholar, s2_venue }),
     });
     const data = await r.json();
     if (data.ok) {
@@ -1235,6 +1277,7 @@ async function addFilteredFeed() {
       document.getElementById('ffLabel').value = '';
       document.getElementById('ffKeywords').value = '';
       document.getElementById('ffAuthors').value = '';
+      document.getElementById('ffSourceId').value = '';
       setTimeout(() => location.reload(), 3000);
     } else {
       toast(data.error || 'Failed to create filtered feed', true);
@@ -1336,13 +1379,16 @@ async function saveFilter(issn) {
     .split(',').map(s => s.trim()).filter(s => s);
   const authors = document.getElementById(`fa-${issn}`).value
     .split(',').map(s => s.trim()).filter(s => s);
+  const openalex_source_id = (document.getElementById(`fs-${issn}`) || {}).value || '';
+  const use_semantic_scholar = (document.getElementById(`fss-${issn}`) || {}).checked || false;
+  const s2_venue = (document.getElementById(`fv-${issn}`) || {}).value || '';
   const matchEl = document.querySelector(`input[name="fm-${issn}"]:checked`);
   const match = matchEl ? matchEl.value : 'any';
   try {
     const r = await fetch(`/api/journal/${issn}/filter`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ keywords, authors, match }),
+      body: JSON.stringify({ keywords, authors, match, openalex_source_id: openalex_source_id.trim(), use_semantic_scholar, s2_venue: s2_venue.trim() }),
     });
     const data = await r.json();
     if (data.ok) {

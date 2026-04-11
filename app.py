@@ -293,6 +293,79 @@ def semantic_scholar_batch_abstracts(dois):
         log.error(f"Semantic Scholar batch lookup failed: {e}")
     return results
 
+def semantic_scholar_search(query, from_date, venue=None, limit=100):
+    """Search Semantic Scholar for papers matching a keyword query.
+
+    Returns a list of work dicts in the same shape as crossref_latest_works.
+    Useful for sources like SSRN where S2 crawls directly and catches papers
+    that never get DOIs/CrossRef registration.
+    """
+    url = "https://api.semanticscholar.org/graph/v1/paper/search"
+    # Parse from_date (YYYY-MM-DD) into year range for the year= filter
+    try:
+        from_year = int(from_date[:4])
+    except (ValueError, TypeError):
+        from_year = datetime.now(timezone.utc).year
+    current_year = datetime.now(timezone.utc).year
+
+    params = {
+        "query": query,
+        "fields": "title,abstract,url,venue,year,externalIds,publicationDate,authors",
+        "limit": min(limit, 100),
+        "year": f"{from_year}-{current_year}",
+    }
+    if venue:
+        params["venue"] = venue
+
+    works = []
+    try:
+        r = requests.get(url, params=params,
+                         headers=semantic_scholar_headers(), timeout=30)
+        if r.status_code != 200:
+            log.warning(f"Semantic Scholar search returned {r.status_code}: {r.text[:200]}")
+            return works
+        data = r.json()
+        for item in data.get("data", []):
+            ext = item.get("externalIds") or {}
+            doi = ext.get("DOI") or ""
+            arxiv_id = ext.get("ArXiv") or ""
+            ssrn_id = ext.get("SSRN") or ""
+            # Build URL: prefer DOI, then arXiv, then SSRN, then S2 URL
+            if doi:
+                item_url = f"https://doi.org/{doi}"
+            elif arxiv_id:
+                item_url = f"https://arxiv.org/abs/{arxiv_id}"
+                doi = f"10.48550/arXiv.{arxiv_id}"
+            elif ssrn_id:
+                item_url = f"https://papers.ssrn.com/sol3/papers.cfm?abstract_id={ssrn_id}"
+            else:
+                item_url = item.get("url") or ""
+
+            pub_date_str = item.get("publicationDate") or ""
+            try:
+                y, m, d = pub_date_str.split("-")[:3]
+                pub_date = datetime(int(y), int(m), int(d), tzinfo=timezone.utc)
+            except (ValueError, TypeError):
+                pub_date = datetime(item.get("year") or current_year, 1, 1,
+                                   tzinfo=timezone.utc)
+
+            authors = [a.get("name", "") for a in (item.get("authors") or []) if a.get("name")]
+            abstract = clean_abstract(item.get("abstract") or "")
+
+            works.append({
+                "doi": doi,
+                "title": item.get("title") or "Untitled",
+                "authors": authors,
+                "date": pub_date.isoformat(),
+                "abstract": abstract,
+                "url": item_url,
+                "source": "semantic_scholar",
+            })
+    except Exception as e:
+        log.error(f"Semantic Scholar search failed: {e}")
+    return works
+
+
 def openalex_enrich_abstract(doi):
     """Try to get an abstract from OpenAlex for a specific DOI."""
     url = f"https://api.openalex.org/works/doi:{doi}"
@@ -356,18 +429,32 @@ def _openalex_work_to_record(w):
     }
 
 def openalex_filtered_works(issn, from_date, filter_config, limit=100):
-    """Fetch recent works from a journal (by ISSN) that match a keyword/author
-    filter, using OpenAlex's /works endpoint with server-side filtering.
+    """Fetch recent works from a journal (by ISSN or OpenAlex source ID) that
+    match a keyword/author filter, using OpenAlex's /works endpoint with
+    server-side filtering.
 
     ``filter_config`` is a dict with:
       - ``keywords``: list of search terms (matched against title + abstract)
       - ``authors``:  list of author name fragments
       - ``match``:    "any" (OR across keywords) or "all" (AND across keywords)
+      - ``openalex_source_id``: optional OpenAlex source ID (e.g. "S4210172589")
+        — when set, used instead of the ISSN for source matching (more reliable
+        for sources like SSRN that map poorly via ISSN).
 
     Returns a list of work dicts in the same shape as ``crossref_latest_works``.
     """
+    oa_src = (filter_config.get("openalex_source_id") or "").strip()
+    if oa_src:
+        # Normalise: accept full URL, bare ID, or Sxxxxx
+        oa_src = oa_src.rstrip("/").split("/")[-1]
+        if not oa_src.upper().startswith("S"):
+            oa_src = f"S{oa_src}"
+        source_filter = f"primary_location.source.id:https://openalex.org/sources/{oa_src.lower()}"
+    else:
+        source_filter = f"primary_location.source.issn:{issn}"
+
     filters = [
-        f"primary_location.source.issn:{issn}",
+        source_filter,
         f"from_publication_date:{from_date}",
         "type:article",
     ]
@@ -474,6 +561,31 @@ def update_journal_feed(feed_id, journal_info):
         )
         works = openalex_filtered_works(real_issn, from_date, filter_config, limit=max_articles)
         log.info(f"  OpenAlex filtered: {len(works)} matching works")
+
+        # Also search Semantic Scholar if enabled — catches SSRN papers that
+        # lack DOIs and never appear in CrossRef/OpenAlex.
+        if filter_config.get("use_semantic_scholar"):
+            keywords = filter_config.get("keywords") or []
+            if keywords:
+                query = " ".join(keywords)
+                s2_venue = (filter_config.get("s2_venue") or "").strip() or None
+                s2_works = semantic_scholar_search(query, from_date,
+                                                  venue=s2_venue, limit=max_articles)
+                log.info(f"  Semantic Scholar search: {len(s2_works)} results")
+                # Merge, deduplicating by DOI (prefer existing OpenAlex record)
+                seen_dois = {w["doi"].lower() for w in works if w["doi"]}
+                seen_titles = {w["title"].lower().strip() for w in works}
+                for sw in s2_works:
+                    if sw["doi"] and sw["doi"].lower() in seen_dois:
+                        continue
+                    if sw["title"].lower().strip() in seen_titles:
+                        continue
+                    works.append(sw)
+                    if sw["doi"]:
+                        seen_dois.add(sw["doi"].lower())
+                    seen_titles.add(sw["title"].lower().strip())
+                log.info(f"  After S2 merge: {len(works)} total works")
+
         # OpenAlex usually returns abstracts inline, but coverage varies
         # (especially for SSRN). Run the enrichment cascade on anything still
         # missing — safe to do since "missing" will typically be a small set.
@@ -781,6 +893,9 @@ def api_add_filtered_feed():
     keywords = [str(k).strip() for k in (data.get("keywords") or []) if str(k).strip()]
     authors = [str(a).strip() for a in (data.get("authors") or []) if str(a).strip()]
     match = data.get("match", "any")
+    openalex_source_id = (data.get("openalex_source_id") or "").strip()
+    use_semantic_scholar = bool(data.get("use_semantic_scholar"))
+    s2_venue = (data.get("s2_venue") or "").strip()
     if match not in ("any", "all"):
         match = "any"
 
@@ -816,6 +931,9 @@ def api_add_filtered_feed():
             "keywords": keywords,
             "authors": authors,
             "match": match,
+            "openalex_source_id": openalex_source_id,
+            "use_semantic_scholar": use_semantic_scholar,
+            "s2_venue": s2_venue,
         },
     }
     save_journals(journals)
@@ -838,6 +956,9 @@ def api_set_journal_filter(issn):
     keywords = [str(k).strip() for k in (data.get("keywords") or []) if str(k).strip()]
     authors = [str(a).strip() for a in (data.get("authors") or []) if str(a).strip()]
     match = data.get("match", "any")
+    openalex_source_id = (data.get("openalex_source_id") or "").strip()
+    use_semantic_scholar = bool(data.get("use_semantic_scholar"))
+    s2_venue = (data.get("s2_venue") or "").strip()
     if match not in ("any", "all"):
         match = "any"
 
@@ -846,6 +967,9 @@ def api_set_journal_filter(issn):
             "keywords": keywords,
             "authors": authors,
             "match": match,
+            "openalex_source_id": openalex_source_id,
+            "use_semantic_scholar": use_semantic_scholar,
+            "s2_venue": s2_venue,
         }
     else:
         # Empty → clear filter

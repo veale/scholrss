@@ -131,6 +131,21 @@ filter=primary_location.source.issn:1556-5068,
 
 Only matching works transit the wire — one request per refresh, no client-side culling. OpenAlex usually returns abstracts inline; anything still missing goes through the normal Semantic Scholar → OpenAlex enrichment fallback. Clearing all fields reverts the journal to the standard CrossRef pipeline.
 
+Two additional options improve coverage for tricky sources:
+
+- **OpenAlex source ID** — some sources (notably SSRN) don't map cleanly from ISSN to the correct OpenAlex source record. If results seem too few, supply the OpenAlex source ID directly (e.g. `S4210172589` for SSRN Electronic Journal — find it at `openalex.org/sources`). When set, the query uses `primary_location.source.id:` instead of `primary_location.source.issn:`.
+- **Also search Semantic Scholar** — enables a parallel keyword search via the Semantic Scholar API, which crawls SSRN directly and catches papers that never get DOIs or CrossRef registration. Results are merged and deduplicated by DOI and title. Use the **S2 venue** field (e.g. `SSRN`) to restrict S2 results to a specific venue.
+
+#### Recommended setup for SSRN
+
+SSRN's ISSN (`1556-5068`) resolves to the wrong OpenAlex source by default. For reliable results:
+
+1. Set **OpenAlex source ID** to `S4210172589`
+2. Enable **Also search Semantic Scholar**
+3. Set **S2 venue** to `SSRN`
+
+This queries both OpenAlex (with the correct source ID) and Semantic Scholar (restricted to SSRN papers), giving the best coverage of SSRN's mix of DOI'd and non-DOI'd uploads.
+
 ### Multiple filtered feeds on one ISSN
 
 To track several independent slices of the same mega-journal (e.g. one SSRN feed for "privacy" and another for "AI safety"), open the Add Journal panel and switch to the **Filtered feed** tab. Give each variant a label and its own keywords/authors — every submission creates a separate entry keyed by `<issn>__<slug>` with its own cache, feed URL (`/feed/1556-5068__privacy`, `/feed/1556-5068__ai_safety`, …), and OPML line. The original unfiltered entry keeps working unchanged.
