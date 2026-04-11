@@ -1,6 +1,7 @@
 services:
   scholrss:
-    build: .
+    image: ghcr.io/veale/scholrss:latest
+    # Or to build locally instead: build: .
     container_name: scholrss
     restart: unless-stopped
     ports:
