@@ -531,6 +531,67 @@
     padding: 0.5rem 0;
   }
 
+  /* ── Filter badges / editor ───────────── */
+  .jc-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin-top: 0.35rem;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+  .jc-filter-label { font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; }
+  .filter-chip {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    background: rgba(155, 105, 255, 0.12);
+    border: 1px solid rgba(155, 105, 255, 0.4);
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--accent);
+  }
+  .filter-chip.author {
+    background: rgba(255, 155, 50, 0.12);
+    border-color: rgba(255, 155, 50, 0.4);
+    color: #ff9b32;
+  }
+  .jc-filter-form {
+    display: none;
+    margin-top: 0.6rem;
+    padding: 0.65rem 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.75rem;
+  }
+  .journal-card.filter-editing .jc-filter-form { display: block; }
+  .jc-filter-form label {
+    display: block;
+    margin: 0.3rem 0 0.15rem;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+  }
+  .jc-filter-form input[type="text"] {
+    width: 100%;
+    padding: 0.3rem 0.5rem;
+    background: var(--bg-dim, var(--bg));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+  }
+  .jc-filter-form .fr-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .jc-filter-form .fr-actions { margin-left: auto; display: flex; gap: 0.4rem; }
+
   /* ── Responsive ───────────────────────── */
   @media (max-width: 600px) {
     .container { padding: 1rem; }
@@ -580,6 +641,7 @@
       <button class="search-tab" data-mode="issn" onclick="setSearchMode('issn')">By ISSN</button>
       <button class="search-tab" data-mode="doi" onclick="setSearchMode('doi')">From a DOI</button>
       <button class="search-tab" data-mode="bulk" onclick="setSearchMode('bulk')">Bulk import</button>
+      <button class="search-tab" data-mode="filtered" onclick="setSearchMode('filtered')">Filtered feed</button>
     </div>
     <div class="search-row" id="searchRow">
       <div class="ac-wrap" id="acWrap">
@@ -595,6 +657,30 @@
                 placeholder="Enter ISSNs, one per line (e.g. 0028-0836)"
                 style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.5rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);resize:vertical;margin-bottom:0.5rem;"></textarea>
       <button class="btn btn-accent" onclick="doBulkImport()" id="bulkBtn">Import all</button>
+    </div>
+    <div id="filteredRow" style="display:none">
+      <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:0.6rem;line-height:1.5;">
+        Create a new filtered feed variant. Ideal for mega-journals where a plain feed would be unusable —
+        stack as many as you like on the same ISSN (e.g. one SSRN feed for "privacy" and another for "AI safety").
+        Uses OpenAlex server-side filtering: only matching works are fetched.
+      </div>
+      <label style="display:block;font-size:0.7rem;color:var(--text-dim);margin-bottom:0.2rem;">ISSN of source journal</label>
+      <input type="text" id="ffIssn" placeholder="e.g. 1556-5068 (SSRN) or 2331-8422 (arXiv)"
+             style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.4rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);margin-bottom:0.5rem;">
+      <label style="display:block;font-size:0.7rem;color:var(--text-dim);margin-bottom:0.2rem;">Label (shown alongside the journal title)</label>
+      <input type="text" id="ffLabel" placeholder="e.g. Privacy &amp; regulation"
+             style="width:100%;font-size:0.85rem;padding:0.4rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);margin-bottom:0.5rem;">
+      <label style="display:block;font-size:0.7rem;color:var(--text-dim);margin-bottom:0.2rem;">Keywords (comma-separated, matched against title + abstract)</label>
+      <input type="text" id="ffKeywords" placeholder="e.g. privacy, regulation, GDPR"
+             style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.4rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);margin-bottom:0.5rem;">
+      <label style="display:block;font-size:0.7rem;color:var(--text-dim);margin-bottom:0.2rem;">Authors (comma-separated)</label>
+      <input type="text" id="ffAuthors" placeholder="e.g. Lilian Edwards, Michael Veale"
+             style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.4rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);margin-bottom:0.6rem;">
+      <div style="display:flex;gap:1rem;align-items:center;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.6rem;">
+        <label><input type="radio" name="ffMatch" value="any" checked> match any keyword (OR)</label>
+        <label><input type="radio" name="ffMatch" value="all"> match all keywords (AND)</label>
+      </div>
+      <button class="btn btn-accent" onclick="addFilteredFeed()" id="ffBtn">Create filtered feed</button>
     </div>
     <div class="search-results" id="searchResults"></div>
   </div>
@@ -618,12 +704,13 @@
         <div class="jc-top">
           <div class="jc-title"><span class="jc-expand-indicator">▶</span>{{ info.title }}</div>
           <div class="jc-actions" onclick="event.stopPropagation()">
+            <button class="btn btn-sm" onclick="toggleFilterForm('{{ issn }}')" title="Keyword / author filter">⌕ Filter</button>
             <button class="btn btn-sm" onclick="refreshJournal('{{ issn }}', this)">↻ Refresh</button>
             <button class="btn btn-sm btn-danger" onclick="deleteJournal('{{ issn }}')">Remove</button>
           </div>
         </div>
         <div class="jc-stats">
-          <div class="jc-stat">ISSN: <strong>{{ issn }}</strong></div>
+          <div class="jc-stat">ISSN: <strong>{{ info.issn or issn }}</strong></div>
           {% if info.publisher %}<div class="jc-stat">{{ info.publisher }}</div>{% endif %}
           <div class="jc-stat">
             Articles: <strong>{{ stats[issn].count }}</strong>
@@ -649,6 +736,40 @@
         · <a href="{{ internal_url }}/feed/{{ issn }}/json">JSON</a>
       </div>
       {% endif %}
+      {% if info.filter and (info.filter.keywords or info.filter.authors) %}
+      <div class="jc-filter">
+        <span class="jc-filter-label">Filter ({{ info.filter.match or 'any' }}):</span>
+        {% for k in info.filter.keywords or [] %}<span class="filter-chip">{{ k }}</span>{% endfor %}
+        {% for a in info.filter.authors or [] %}<span class="filter-chip author">@ {{ a }}</span>{% endfor %}
+      </div>
+      {% endif %}
+      <div class="jc-filter-form" id="filter-form-{{ issn }}" onclick="event.stopPropagation()">
+        <label for="fk-{{ issn }}">Keywords (comma-separated — matched against title + abstract)</label>
+        <input type="text" id="fk-{{ issn }}" placeholder="e.g. privacy, regulation, GDPR"
+               value="{{ (info.filter.keywords or []) | join(', ') if info.filter else '' }}">
+        <label for="fa-{{ issn }}">Authors (comma-separated — matched against author display names)</label>
+        <input type="text" id="fa-{{ issn }}" placeholder="e.g. Lilian Edwards, Michael Veale"
+               value="{{ (info.filter.authors or []) | join(', ') if info.filter else '' }}">
+        <div class="fr-row">
+          <label style="display:inline;margin:0">
+            <input type="radio" name="fm-{{ issn }}" value="any"
+              {% if not info.filter or (info.filter.match or 'any') == 'any' %}checked{% endif %}>
+            any keyword (OR)
+          </label>
+          <label style="display:inline;margin:0">
+            <input type="radio" name="fm-{{ issn }}" value="all"
+              {% if info.filter and info.filter.match == 'all' %}checked{% endif %}>
+            all keywords (AND)
+          </label>
+          <div class="fr-actions">
+            <button class="btn btn-sm btn-danger" onclick="clearFilter('{{ issn }}')">Clear</button>
+            <button class="btn btn-sm btn-accent" onclick="saveFilter('{{ issn }}')">Save &amp; refetch</button>
+          </div>
+        </div>
+        <div style="margin-top:0.4rem;color:var(--text-dim);font-size:0.65rem;line-height:1.4;">
+          Filtered feeds use OpenAlex's <code>/works</code> endpoint with server-side filtering — only matching works are fetched, which is essential for mega-journals like SSRN (<code>1556-5068</code>) or arXiv (<code>2331-8422</code>). Leaving fields empty falls back to the standard CrossRef pipeline.
+        </div>
+      </div>
     </div>
     {% endfor %}
   </div>
@@ -675,15 +796,22 @@ function setSearchMode(mode) {
   const input = document.getElementById('searchInput');
   const searchRow = document.getElementById('searchRow');
   const bulkRow = document.getElementById('bulkRow');
+  const filteredRow = document.getElementById('filteredRow');
   const searchBtn = document.getElementById('searchBtn');
   const acDropdown = document.getElementById('acDropdown');
   acDropdown.classList.remove('open');
   if (mode === 'bulk') {
     searchRow.style.display = 'none';
     bulkRow.style.display = 'block';
+    filteredRow.style.display = 'none';
+  } else if (mode === 'filtered') {
+    searchRow.style.display = 'none';
+    bulkRow.style.display = 'none';
+    filteredRow.style.display = 'block';
   } else {
     searchRow.style.display = 'flex';
     bulkRow.style.display = 'none';
+    filteredRow.style.display = 'none';
     if (mode === 'name') {
       searchBtn.style.display = 'none';
       input.placeholder = 'Start typing a journal name...';
@@ -896,6 +1024,57 @@ async function doBulkImport() {
   btn.textContent = 'Import all';
 }
 
+async function addFilteredFeed() {
+  const issn = document.getElementById('ffIssn').value.trim();
+  const label = document.getElementById('ffLabel').value.trim();
+  const keywords = document.getElementById('ffKeywords').value
+    .split(',').map(s => s.trim()).filter(s => s);
+  const authors = document.getElementById('ffAuthors').value
+    .split(',').map(s => s.trim()).filter(s => s);
+  const matchEl = document.querySelector('input[name="ffMatch"]:checked');
+  const match = matchEl ? matchEl.value : 'any';
+  if (!issn) { toast('ISSN is required', true); return; }
+  if (!keywords.length && !authors.length) {
+    toast('Add at least one keyword or author', true);
+    return;
+  }
+  const btn = document.getElementById('ffBtn');
+  const orig = btn.textContent;
+  btn.innerHTML = '<span class="spinner"></span> Creating…';
+
+  // Best-effort title/publisher lookup so the card displays nicely. Falls
+  // back to the raw ISSN if nothing found.
+  let title = issn, publisher = '';
+  try {
+    const r = await fetch(`/api/autocomplete?q=${encodeURIComponent(issn)}`);
+    const data = await r.json();
+    const match = (data || []).find(j => (j.issn || []).some(i => i === issn));
+    if (match) { title = match.title; publisher = match.publisher || ''; }
+  } catch (e) { /* non-fatal */ }
+
+  try {
+    const r = await fetch('/api/journal/filtered', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ issn, title, publisher, label, keywords, authors, match }),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      toast(`Created filtered feed ${data.feed_id}. Fetching via OpenAlex…`);
+      document.getElementById('ffIssn').value = '';
+      document.getElementById('ffLabel').value = '';
+      document.getElementById('ffKeywords').value = '';
+      document.getElementById('ffAuthors').value = '';
+      setTimeout(() => location.reload(), 3000);
+    } else {
+      toast(data.error || 'Failed to create filtered feed', true);
+    }
+  } catch (e) {
+    toast(`Error: ${e.message}`, true);
+  }
+  btn.textContent = orig;
+}
+
 async function addJournal(issn, title, publisher) {
   try {
     const r = await fetch('/api/journal', {
@@ -974,6 +1153,47 @@ async function toggleJournalExpand(event, issn) {
   } catch (e) {
     box.innerHTML = `<div class="jc-articles-loading" style="color:var(--red)">Error: ${e.message}</div>`;
   }
+}
+
+function toggleFilterForm(issn) {
+  const card = document.getElementById(`card-${issn}`);
+  if (!card) return;
+  card.classList.toggle('filter-editing');
+}
+
+async function saveFilter(issn) {
+  const keywords = document.getElementById(`fk-${issn}`).value
+    .split(',').map(s => s.trim()).filter(s => s);
+  const authors = document.getElementById(`fa-${issn}`).value
+    .split(',').map(s => s.trim()).filter(s => s);
+  const matchEl = document.querySelector(`input[name="fm-${issn}"]:checked`);
+  const match = matchEl ? matchEl.value : 'any';
+  try {
+    const r = await fetch(`/api/journal/${issn}/filter`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ keywords, authors, match }),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      if (!keywords.length && !authors.length) {
+        toast('Filter cleared. Re-fetching with CrossRef pipeline…');
+      } else {
+        toast(`Filter saved (${keywords.length} keywords, ${authors.length} authors). Re-fetching via OpenAlex…`);
+      }
+      setTimeout(() => location.reload(), 3000);
+    } else {
+      toast(data.error || 'Failed to save filter', true);
+    }
+  } catch (e) {
+    toast(`Error: ${e.message}`, true);
+  }
+}
+
+async function clearFilter(issn) {
+  document.getElementById(`fk-${issn}`).value = '';
+  document.getElementById(`fa-${issn}`).value = '';
+  await saveFilter(issn);
 }
 
 async function saveMaxArticles(val) {

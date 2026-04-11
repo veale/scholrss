@@ -106,10 +106,34 @@ ScholRSS includes an MCP (Model Context Protocol) server so LLMs can query your 
 | `/api/journal` | POST | Add a journal `{issn, title, publisher}` |
 | `/api/journal/bulk` | POST | Bulk import `{issns: ["1234-5678", ...]}` |
 | `/api/journal/{issn}` | DELETE | Remove a journal |
+| `/api/journal/{issn}/filter` | PUT | Set/clear keyword+author filter `{keywords: [...], authors: [...], match: "any"\|"all"}` |
+| `/api/journal/filtered` | POST | Create a new filtered feed variant `{issn, title, publisher, label, keywords, authors, match}` — lets you stack multiple filters on the same ISSN |
 | `/api/refresh/{issn}` | POST | Refresh one journal |
 | `/api/refresh-all` | POST | Refresh all journals |
 | `/api/settings` | GET/PUT | Read/update settings (e.g. `{lookback_days: 365}`) |
 | `/api/update-journal-db` | POST | Rebuild journal autocomplete database |
+
+## Filtered feeds (for mega-journals / preprint servers)
+
+Mega-journals and preprint servers like **SSRN Electronic Journal** (`1556-5068`) or **arXiv** (`2331-8422`) publish thousands of papers per week. Fetching them unfiltered would flood your reader and waste API calls. Instead, click the **⌕ Filter** button on the journal card and set:
+
+- **Keywords** — comma-separated terms matched against title + abstract (OR by default, switch to AND if you need all)
+- **Authors** — comma-separated name fragments matched against author display names (OR)
+
+When a filter is set, ScholRSS switches that journal's fetch path from CrossRef to OpenAlex's `/works` endpoint with server-side filtering:
+
+```
+filter=primary_location.source.issn:1556-5068,
+       from_publication_date:2025-04-01,
+       title_and_abstract.search:privacy|regulation,
+       authorships.author.display_name.search:lilian+edwards
+```
+
+Only matching works transit the wire — one request per refresh, no client-side culling. OpenAlex usually returns abstracts inline; anything still missing goes through the normal Semantic Scholar → OpenAlex enrichment fallback. Clearing all fields reverts the journal to the standard CrossRef pipeline.
+
+### Multiple filtered feeds on one ISSN
+
+To track several independent slices of the same mega-journal (e.g. one SSRN feed for "privacy" and another for "AI safety"), open the Add Journal panel and switch to the **Filtered feed** tab. Give each variant a label and its own keywords/authors — every submission creates a separate entry keyed by `<issn>__<slug>` with its own cache, feed URL (`/feed/1556-5068__privacy`, `/feed/1556-5068__ai_safety`, …), and OPML line. The original unfiltered entry keeps working unchanged.
 
 ## Abstract Enrichment Pipeline
 

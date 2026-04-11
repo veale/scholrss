@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
-from flask import Flask, render_template, request, jsonify, Response, redirect, url_for
+from flask import Flask, render_template, request, jsonify, Response, redirect, url_for, send_from_directory
 from feedgen.feed import FeedGenerator
 
 # ── Config ──────────────────────────────────────────────────────────────────
@@ -88,8 +88,25 @@ def get_max_articles():
     # beyond that, so cap there.
     return max(1, min(1000, val))
 
-def journal_cache_path(issn):
-    return CACHE_DIR / f"{issn.replace('-', '')}.json"
+def journal_cache_path(feed_id):
+    """Resolve the on-disk cache path for a given feed id.
+
+    A ``feed_id`` is either a plain ISSN (``2044-3994`` — unfiltered journals,
+    legacy format) or ``<issn>__<slug>`` for filtered feed variants. We keep
+    the ``__slug`` portion verbatim so two filtered variants on the same ISSN
+    don't collide on disk; only the ISSN hyphens get stripped (preserving the
+    legacy filename scheme for unfiltered entries).
+    """
+    if "__" in feed_id:
+        issn_part, slug = feed_id.split("__", 1)
+        return CACHE_DIR / f"{issn_part.replace('-', '')}__{slug}.json"
+    return CACHE_DIR / f"{feed_id.replace('-', '')}.json"
+
+
+def _slugify(text, max_len=40):
+    """Produce a URL/filename-safe slug from arbitrary text."""
+    slug = re.sub(r"[^a-z0-9]+", "_", (text or "").lower()).strip("_")
+    return slug[:max_len] or "filtered"
 
 def crossref_headers():
     return {"User-Agent": f"ScholRSS/1.0 (mailto:{MAILTO})"}
@@ -291,36 +308,120 @@ def openalex_enrich_abstract(doi):
     except Exception:
         return ""
 
+def _openalex_work_to_record(w):
+    """Normalise an OpenAlex /works result into our internal work dict."""
+    doi_url = w.get("doi") or ""
+    doi = doi_url.replace("https://doi.org/", "") if doi_url else ""
+    title = w.get("title") or w.get("display_name") or "Untitled"
+
+    # Date — OpenAlex gives "publication_date" as YYYY-MM-DD
+    pub_date_str = w.get("publication_date") or ""
+    try:
+        y, m, d = pub_date_str.split("-")[:3]
+        pub_date = datetime(int(y), int(m), int(d), tzinfo=timezone.utc)
+    except (ValueError, TypeError):
+        pub_date = datetime.now(timezone.utc)
+
+    # Authors (authorships is an ordered list)
+    authors = []
+    for auth in w.get("authorships", []) or []:
+        name = (auth.get("author") or {}).get("display_name", "")
+        if name:
+            authors.append(name)
+
+    abstract = clean_abstract(reconstruct_abstract(w.get("abstract_inverted_index")))
+    oa_id = (w.get("id") or "").rstrip("/").split("/")[-1]
+    url = doi_url or (f"https://openalex.org/{oa_id}" if oa_id else "")
+
+    return {
+        "doi": doi,
+        "title": title,
+        "authors": authors,
+        "date": pub_date.isoformat(),
+        "abstract": abstract,
+        "url": url,
+        "source": "openalex",
+    }
+
+def openalex_filtered_works(issn, from_date, filter_config, limit=100):
+    """Fetch recent works from a journal (by ISSN) that match a keyword/author
+    filter, using OpenAlex's /works endpoint with server-side filtering.
+
+    ``filter_config`` is a dict with:
+      - ``keywords``: list of search terms (matched against title + abstract)
+      - ``authors``:  list of author name fragments
+      - ``match``:    "any" (OR across keywords) or "all" (AND across keywords)
+
+    Returns a list of work dicts in the same shape as ``crossref_latest_works``.
+    """
+    filters = [
+        f"primary_location.source.issn:{issn}",
+        f"from_publication_date:{from_date}",
+        "type:article",
+    ]
+
+    keywords = [k.strip() for k in (filter_config.get("keywords") or []) if k and k.strip()]
+    authors = [a.strip() for a in (filter_config.get("authors") or []) if a and a.strip()]
+    match = (filter_config.get("match") or "any").lower()
+
+    if keywords:
+        if match == "all":
+            # AND across keywords — each term becomes its own filter clause.
+            for kw in keywords:
+                filters.append(f"title_and_abstract.search:{kw}")
+        else:
+            # OR — pipe-separated values inside one filter clause.
+            filters.append("title_and_abstract.search:" + "|".join(keywords))
+
+    if authors:
+        # OR across author fragments
+        filters.append(
+            "authorships.author.display_name.search:" + "|".join(authors)
+        )
+
+    params = {
+        "filter": ",".join(filters),
+        "per-page": max(1, min(200, limit)),
+        "sort": "publication_date:desc",
+    }
+    params.update(openalex_params())
+
+    url = "https://api.openalex.org/works"
+    try:
+        r = requests.get(url, params=params, headers=openalex_headers(), timeout=30)
+        if r.status_code != 200:
+            log.warning(f"OpenAlex filtered fetch returned {r.status_code}: {r.text[:200]}")
+            return []
+        data = r.json()
+        results = [_openalex_work_to_record(w) for w in data.get("results", [])]
+        return results[:limit]
+    except Exception as e:
+        log.error(f"OpenAlex filtered fetch failed for {issn}: {e}")
+        return []
+
 # ── Feed Update ─────────────────────────────────────────────────────────────
 
-def update_journal_feed(issn, journal_info):
-    """Fetch and cache latest works for a journal."""
-    from_date = (datetime.now(timezone.utc) - timedelta(days=get_lookback_days())).strftime("%Y-%m-%d")
-    max_articles = get_max_articles()
-    log.info(f"Updating feed for {journal_info['title']} ({issn}) from {from_date} (max {max_articles})")
-
-    crossref_works = crossref_latest_works(issn, from_date, rows=max_articles)
-    log.info(f"  CrossRef: {len(crossref_works)} works")
-
-    # Enrich missing abstracts: Semantic Scholar batch first, then OpenAlex fallback
-    missing = [w for w in crossref_works if not w["abstract"] and w["doi"]]
+def _enrich_missing_abstracts(works):
+    """Run the Semantic Scholar → OpenAlex fallback pipeline on works missing
+    abstracts. Mutates ``works`` in place. Shared between the filtered and
+    unfiltered update paths so we don't duplicate enrichment logic."""
+    missing = [w for w in works if not w["abstract"] and w["doi"]]
+    if not missing:
+        return
     log.info(f"  {len(missing)} works missing abstracts")
 
-    # Step 1: Semantic Scholar batch (up to 500 DOIs per request, very efficient)
-    if missing:
-        dois = [w["doi"] for w in missing]
-        ss_abstracts = semantic_scholar_batch_abstracts(dois)
-        ss_count = 0
-        for w in missing:
-            abstract = ss_abstracts.get(w["doi"].lower())
-            if abstract:
-                w["abstract"] = clean_abstract(abstract)
-                w["source"] = w["source"] + "+semanticscholar"
-                ss_count += 1
-        log.info(f"  Semantic Scholar batch: {ss_count}/{len(missing)} abstracts")
+    dois = [w["doi"] for w in missing]
+    ss_abstracts = semantic_scholar_batch_abstracts(dois)
+    ss_count = 0
+    for w in missing:
+        abstract = ss_abstracts.get(w["doi"].lower())
+        if abstract:
+            w["abstract"] = clean_abstract(abstract)
+            w["source"] = w["source"] + "+semanticscholar"
+            ss_count += 1
+    log.info(f"  Semantic Scholar batch: {ss_count}/{len(missing)} abstracts")
 
-    # Step 2: OpenAlex individual lookups for remaining missing abstracts
-    still_missing = [w for w in crossref_works if not w["abstract"] and w["doi"]]
+    still_missing = [w for w in works if not w["abstract"] and w["doi"]]
     oa_count = 0
     for w in still_missing:
         abstract = openalex_enrich_abstract(w["doi"])
@@ -332,24 +433,63 @@ def update_journal_feed(issn, journal_info):
     if still_missing:
         log.info(f"  OpenAlex fallback: {oa_count}/{len(still_missing)} abstracts")
 
-    # Final pass — any abstract not already cleaned above (e.g. from CrossRef
-    # pre-clean_abstract was added) gets normalised now. Idempotent.
-    for w in crossref_works:
+
+def update_journal_feed(feed_id, journal_info):
+    """Fetch and cache latest works for a feed.
+
+    ``feed_id`` is the journals.json key — either a plain ISSN (unfiltered) or
+    ``<issn>__<slug>`` (filtered variant). The real ISSN used for upstream API
+    calls is taken from ``journal_info['issn']`` (falls back to ``feed_id``
+    itself for legacy entries).
+
+    When ``journal_info['filter']`` has keywords/authors, we fetch via
+    OpenAlex's filtered /works endpoint so only matching works transit the
+    wire — essential for mega-journals/servers like SSRN (1556-5068) or arXiv
+    (2331-8422). Otherwise we use the existing CrossRef-primary pipeline.
+    """
+    real_issn = journal_info.get("issn") or feed_id.split("__", 1)[0]
+    from_date = (datetime.now(timezone.utc) - timedelta(days=get_lookback_days())).strftime("%Y-%m-%d")
+    max_articles = get_max_articles()
+    filter_config = journal_info.get("filter") or {}
+    has_filter = bool(
+        (filter_config.get("keywords") or []) or (filter_config.get("authors") or [])
+    )
+
+    if has_filter:
+        log.info(
+            f"Updating FILTERED feed '{feed_id}' ({journal_info['title']}, ISSN {real_issn}) "
+            f"from {from_date} (max {max_articles}); filter={filter_config}"
+        )
+        works = openalex_filtered_works(real_issn, from_date, filter_config, limit=max_articles)
+        log.info(f"  OpenAlex filtered: {len(works)} matching works")
+        # OpenAlex usually returns abstracts inline, but coverage varies
+        # (especially for SSRN). Run the enrichment cascade on anything still
+        # missing — safe to do since "missing" will typically be a small set.
+        _enrich_missing_abstracts(works)
+    else:
+        log.info(f"Updating feed '{feed_id}' ({journal_info['title']}, ISSN {real_issn}) from {from_date} (max {max_articles})")
+        works = crossref_latest_works(real_issn, from_date, rows=max_articles)
+        log.info(f"  CrossRef: {len(works)} works")
+        _enrich_missing_abstracts(works)
+
+    # Final abstract cleanup (idempotent — safe if already cleaned upstream).
+    for w in works:
         if w["abstract"]:
             w["abstract"] = clean_abstract(w["abstract"])
 
     # Sort by date descending
-    crossref_works.sort(key=lambda x: x["date"], reverse=True)
-    merged = crossref_works
+    works.sort(key=lambda x: x["date"], reverse=True)
+    merged = works
     log.info(f"  Final: {len(merged)} works, {sum(1 for w in merged if w['abstract'])} with abstracts")
 
     cache = {
-        "issn": issn,
+        "issn": real_issn,
+        "feed_id": feed_id,
         "journal": journal_info,
         "updated": datetime.now(timezone.utc).isoformat(),
         "works": merged,
     }
-    journal_cache_path(issn).write_text(json.dumps(cache, indent=2))
+    journal_cache_path(feed_id).write_text(json.dumps(cache, indent=2))
     return cache
 
 def update_all_feeds():
@@ -428,6 +568,16 @@ def generate_feed(issn):
     return fg
 
 # ── Routes ──────────────────────────────────────────────────────────────────
+
+@app.route("/et-book/<path:filename>")
+def serve_et_book(filename):
+    """Serve the et-book font family from the repo root (used by the UI CSS).
+
+    The fonts are outside Flask's default ``static/`` folder so we expose them
+    explicitly. They're copied into the Docker image verbatim.
+    """
+    return send_from_directory(Path(__file__).parent / "et-book", filename)
+
 
 @app.route("/")
 def index():
@@ -587,6 +737,7 @@ def api_add_journal():
 
     journals = load_journals()
     journals[issn] = {
+        "issn": issn,
         "title": title,
         "publisher": publisher,
         "added": datetime.now(timezone.utc).isoformat(),
@@ -597,6 +748,102 @@ def api_add_journal():
     threading.Thread(target=update_journal_feed, args=(issn, journals[issn]), daemon=True).start()
 
     return jsonify({"ok": True, "issn": issn})
+
+
+@app.route("/api/journal/filtered", methods=["POST"])
+def api_add_filtered_feed():
+    """Create a new filtered feed variant on a (possibly already-tracked) ISSN.
+
+    Body: {issn, title, publisher, label, keywords, authors, match}
+    Returns: {ok, feed_id}
+
+    Each call creates a fresh entry with a unique feed_id, so you can stack
+    multiple filtered feeds on the same ISSN (e.g. one SSRN "privacy" feed and
+    one SSRN "ai safety" feed).
+    """
+    data = request.get_json() or {}
+    issn = (data.get("issn") or "").strip()
+    title = data.get("title", "").strip() or "Unknown Journal"
+    publisher = data.get("publisher", "")
+    label = (data.get("label") or "").strip()
+    keywords = [str(k).strip() for k in (data.get("keywords") or []) if str(k).strip()]
+    authors = [str(a).strip() for a in (data.get("authors") or []) if str(a).strip()]
+    match = data.get("match", "any")
+    if match not in ("any", "all"):
+        match = "any"
+
+    if not issn:
+        return jsonify({"error": "ISSN required"}), 400
+    if not (keywords or authors):
+        return jsonify({"error": "At least one keyword or author is required for a filtered feed"}), 400
+
+    # Derive a slug from the user label, falling back to the first keywords /
+    # authors so every filtered feed has a human-recognisable id.
+    if label:
+        slug = _slugify(label)
+    elif keywords:
+        slug = _slugify("_".join(keywords[:3]))
+    else:
+        slug = _slugify("_".join(authors[:2]))
+
+    journals = load_journals()
+    feed_id = f"{issn}__{slug}"
+    n = 2
+    while feed_id in journals:
+        feed_id = f"{issn}__{slug}_{n}"
+        n += 1
+
+    display_title = f"{title} — {label}" if label else f"{title} [{', '.join((keywords or authors)[:2])}]"
+    journals[feed_id] = {
+        "issn": issn,
+        "title": display_title,
+        "publisher": publisher,
+        "label": label,
+        "added": datetime.now(timezone.utc).isoformat(),
+        "filter": {
+            "keywords": keywords,
+            "authors": authors,
+            "match": match,
+        },
+    }
+    save_journals(journals)
+
+    threading.Thread(target=update_journal_feed, args=(feed_id, journals[feed_id]), daemon=True).start()
+    return jsonify({"ok": True, "feed_id": feed_id})
+
+@app.route("/api/journal/<issn>/filter", methods=["PUT"])
+def api_set_journal_filter(issn):
+    """Set or clear the keyword/author filter on a journal.
+
+    Body: {"keywords": [...], "authors": [...], "match": "any"|"all"}
+          — or {} / {"keywords": [], "authors": []} to clear the filter.
+    """
+    data = request.get_json() or {}
+    journals = load_journals()
+    if issn not in journals:
+        return jsonify({"error": "not found"}), 404
+
+    keywords = [str(k).strip() for k in (data.get("keywords") or []) if str(k).strip()]
+    authors = [str(a).strip() for a in (data.get("authors") or []) if str(a).strip()]
+    match = data.get("match", "any")
+    if match not in ("any", "all"):
+        match = "any"
+
+    if keywords or authors:
+        journals[issn]["filter"] = {
+            "keywords": keywords,
+            "authors": authors,
+            "match": match,
+        }
+    else:
+        # Empty → clear filter
+        journals[issn].pop("filter", None)
+    save_journals(journals)
+
+    # Re-fetch with the new filter so the cache reflects it immediately.
+    threading.Thread(target=update_journal_feed, args=(issn, journals[issn]), daemon=True).start()
+    return jsonify({"ok": True, "filter": journals[issn].get("filter")})
+
 
 @app.route("/api/journal/<issn>", methods=["DELETE"])
 def api_delete_journal(issn):
@@ -646,6 +893,7 @@ def api_bulk_import():
                     publisher = ""
 
                 journals[issn] = {
+                    "issn": issn,
                     "title": title,
                     "publisher": publisher,
                     "added": datetime.now(timezone.utc).isoformat(),
@@ -780,6 +1028,30 @@ def _migrate_clean_existing_abstracts():
 
 
 _migrate_clean_existing_abstracts()
+
+
+def _migrate_journals_backfill_issn():
+    """Ensure every journal entry has an explicit ``issn`` field.
+
+    Legacy entries pre-dated filtered variants and relied on the dict key
+    being the ISSN. New code paths read ``info['issn']`` directly (the feed
+    key may now be ``<issn>__<slug>`` for filtered variants), so we backfill
+    the field here. Idempotent.
+    """
+    journals = load_journals()
+    changed = False
+    for key, info in list(journals.items()):
+        if not isinstance(info, dict):
+            continue
+        if "issn" not in info:
+            info["issn"] = key  # legacy entries were always keyed by plain ISSN
+            changed = True
+    if changed:
+        save_journals(journals)
+        log.info("Backfilled 'issn' field on existing journal entries")
+
+
+_migrate_journals_backfill_issn()
 
 # Start background scheduler only once (gunicorn may fork multiple workers)
 # We use an env flag to ensure only one scheduler runs
