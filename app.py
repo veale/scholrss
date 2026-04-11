@@ -311,6 +311,18 @@ def openalex_enrich_abstract(doi):
 def _openalex_work_to_record(w):
     """Normalise an OpenAlex /works result into our internal work dict."""
     doi_url = w.get("doi") or ""
+    # Fallback: check ids dict, then synthesise from arXiv ID
+    if not doi_url:
+        doi_url = (w.get("ids") or {}).get("doi") or ""
+    if not doi_url:
+        arxiv_id = (w.get("ids") or {}).get("openalex", "")
+        # Some arXiv records carry the ID in primary_location or ids
+        for loc_key in ("primary_location", "best_oa_location"):
+            landing = ((w.get(loc_key) or {}).get("landing_page_url") or "")
+            if "arxiv.org/abs/" in landing:
+                arxiv_id = landing.split("arxiv.org/abs/")[-1].split("v")[0]
+                doi_url = f"https://doi.org/10.48550/arXiv.{arxiv_id}"
+                break
     doi = doi_url.replace("https://doi.org/", "") if doi_url else ""
     title = w.get("title") or w.get("display_name") or "Untitled"
 
@@ -1052,6 +1064,29 @@ def _migrate_journals_backfill_issn():
 
 
 _migrate_journals_backfill_issn()
+
+
+def _migrate_fix_openalex_urls():
+    """Replace openalex.org URLs with DOI URLs where a DOI exists."""
+    if not CACHE_DIR.exists():
+        return
+    for cache_file in CACHE_DIR.glob("*.json"):
+        try:
+            cache = json.loads(cache_file.read_text())
+        except Exception:
+            continue
+        changed = False
+        for w in cache.get("works", []):
+            url = w.get("url") or ""
+            if "openalex.org" in url and w.get("doi"):
+                w["url"] = f"https://doi.org/{w['doi']}"
+                changed = True
+        if changed:
+            cache_file.write_text(json.dumps(cache, indent=2))
+    log.info("Migrated cached URLs: replaced openalex.org links with DOI URLs")
+
+
+_migrate_fix_openalex_urls()
 
 # Start background scheduler only once (gunicorn may fork multiple workers)
 # We use an env flag to ensure only one scheduler runs
