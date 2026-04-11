@@ -48,6 +48,7 @@ A self-hosted scholarly RSS feed generator that pulls article metadata from **Cr
 | `OPENALEX_API_KEY` | _(empty)_ | Free API key from OpenAlex (required) |
 | `SEMANTIC_SCHOLAR_API_KEY` | _(empty)_ | Optional API key for faster Semantic Scholar access |
 | `BASE_URL` | `http://localhost:8844` | External URL for feed self-links |
+| `INTERNAL_URL` | _(empty)_ | Optional internal URL (e.g. `http://scholrss:8844`) shown alongside `BASE_URL` for container-to-container readers that bypass reverse-proxy auth |
 | `UPDATE_INTERVAL_HOURS` | `24` | Hours between automatic feed refreshes |
 | `LOOKBACK_DAYS` | `365` | Default lookback window (overridden by UI setting) |
 | `DATA_DIR` | `/data` | Where journals config and cache are stored |

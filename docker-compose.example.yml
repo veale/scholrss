@@ -16,6 +16,11 @@ services:
       - OPENALEX_API_KEY=
       # The external URL where ScholRSS is reachable (for feed self-links)
       - BASE_URL=http://localhost:8844
+      # Optional: internal URL for container-to-container access (e.g. another
+      # feed reader on the same Docker network bypassing reverse-proxy auth).
+      # When set, the UI shows it alongside BASE_URL on each journal card,
+      # and /opml?internal=1 emits an OPML using this URL.
+      # - INTERNAL_URL=http://scholrss:8844
       # How often to refresh feeds (hours)
       - UPDATE_INTERVAL_HOURS=24
       # Semantic Scholar API key (optional, speeds up abstract enrichment)

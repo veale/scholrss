@@ -57,7 +57,15 @@
       "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS ls-files)",
       "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS ls-files --others --exclude-standard)",
       "Bash(git rm:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS lfs ls-files)",
+      "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS status -s)",
+      "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS add .github/workflows/docker-publish.yml docker-compose.example.yml)",
+      "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS commit -m ':*)",
+      "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS push origin main)",
+      "Bash(gh run:*)"
     ]
   }
 }

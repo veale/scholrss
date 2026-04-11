@@ -21,6 +21,7 @@ JOURNALS_DB = Path(os.environ.get("JOURNALS_DB", Path(__file__).parent / "journa
 MAILTO = os.environ.get("MAILTO", "scholrss@example.com")
 OPENALEX_API_KEY = os.environ.get("OPENALEX_API_KEY", "")
 BASE_URL = os.environ.get("BASE_URL", "http://localhost:8844")
+INTERNAL_URL = os.environ.get("INTERNAL_URL", "")
 UPDATE_INTERVAL = int(os.environ.get("UPDATE_INTERVAL_HOURS", 24))
 LOOKBACK_DAYS_DEFAULT = int(os.environ.get("LOOKBACK_DAYS", 365))
 SETTINGS_FILE = DATA_DIR / "settings.json"
@@ -392,7 +393,8 @@ def index():
         else:
             stats[issn] = {"count": 0, "with_abstract": 0, "updated": "never"}
     return render_template("index.html", journals=journals, stats=stats,
-                           base_url=BASE_URL, lookback_days=get_lookback_days())
+                           base_url=BASE_URL, internal_url=INTERNAL_URL,
+                           lookback_days=get_lookback_days())
 
 @app.route("/feed/<issn>")
 def feed_atom(issn):
@@ -414,8 +416,14 @@ def feed_json(issn):
 
 @app.route("/opml")
 def opml():
-    """Generate OPML file of all feeds for easy import into feed readers."""
+    """Generate OPML file of all feeds for easy import into feed readers.
+
+    Pass ?internal=1 to use INTERNAL_URL (for container-to-container readers
+    that should bypass the reverse-proxy auth).
+    """
     journals = load_journals()
+    use_internal = request.args.get("internal") in ("1", "true", "yes")
+    root = INTERNAL_URL if (use_internal and INTERNAL_URL) else BASE_URL
     lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<opml version="2.0">',
@@ -423,7 +431,7 @@ def opml():
         '<body>',
     ]
     for issn, info in journals.items():
-        feed_url = f"{BASE_URL}/feed/{issn}"
+        feed_url = f"{root}/feed/{issn}"
         lines.append(f'  <outline type="rss" text="{info["title"]}" xmlUrl="{feed_url}" />')
     lines.append('</body>')
     lines.append('</opml>')

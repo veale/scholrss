@@ -572,6 +572,13 @@
         · <a href="{{ base_url }}/feed/{{ issn }}?format=rss">RSS</a>
         · <a href="{{ base_url }}/feed/{{ issn }}/json">JSON</a>
       </div>
+      {% if internal_url %}
+      <div class="jc-feed-url" style="opacity:0.75">
+        Internal: <a href="{{ internal_url }}/feed/{{ issn }}">{{ internal_url }}/feed/{{ issn }}</a>
+        · <a href="{{ internal_url }}/feed/{{ issn }}?format=rss">RSS</a>
+        · <a href="{{ internal_url }}/feed/{{ issn }}/json">JSON</a>
+      </div>
+      {% endif %}
     </div>
     {% endfor %}
   </div>
