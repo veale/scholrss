@@ -1,2 +1,6 @@
 docker-compose.yml
-data
+data/
+journal_data/
+__pycache__/
+*.pyc
+.pytest_cache/

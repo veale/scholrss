@@ -18,6 +18,7 @@ A self-hosted scholarly RSS feed generator that pulls article metadata from **Cr
 1. **Clone and configure:**
    ```bash
    cd ScholRSS
+   cp docker-compose.example.yml docker-compose.yml
    # Edit docker-compose.yml — set MAILTO, OPENALEX_API_KEY, BASE_URL
    ```
 

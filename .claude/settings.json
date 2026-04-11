@@ -50,7 +50,14 @@
       "Bash(timeout 3 python3 mcp_server.py)",
       "Bash(echo \"exit: $?\")",
       "Bash(python3)",
-      "Bash(sqlite3 /Users/michael/Documents/Repositories/ScholRSS/journals/journals.db \"SELECT issn_l, title, all_issns FROM journals WHERE issn_l IN \\('2632-8550','1396-0458'\\) OR all_issns LIKE '%2632-8615%';\")"
+      "Bash(sqlite3 /Users/michael/Documents/Repositories/ScholRSS/journals/journals.db \"SELECT issn_l, title, all_issns FROM journals WHERE issn_l IN \\('2632-8550','1396-0458'\\) OR all_issns LIKE '%2632-8615%';\")",
+      "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS log --oneline -3)",
+      "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS remote -v)",
+      "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS status)",
+      "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS ls-files)",
+      "Bash(git -C /Users/michael/Documents/Repositories/ScholRSS ls-files --others --exclude-standard)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)"
     ]
   }
 }

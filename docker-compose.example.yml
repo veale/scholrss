@@ -1,0 +1,33 @@
+services:
+  scholrss:
+    build: .
+    container_name: scholrss
+    restart: unless-stopped
+    ports:
+      - "8844:8844"
+    volumes:
+      # Bind mount for persistent data (journals.json, cache, etc.)
+      - ./data:/data
+    environment:
+      # Your email for polite API access (CrossRef & OpenAlex)
+      - MAILTO=you@example.com
+      # OpenAlex API key (free, get from https://openalex.org/settings/api)
+      - OPENALEX_API_KEY=
+      # The external URL where ScholRSS is reachable (for feed self-links)
+      - BASE_URL=http://localhost:8844
+      # How often to refresh feeds (hours)
+      - UPDATE_INTERVAL_HOURS=24
+      # Semantic Scholar API key (optional, speeds up abstract enrichment)
+      # Get one from https://www.semanticscholar.org/product/api#api-key
+      - SEMANTIC_SCHOLAR_API_KEY=
+      # How many days back to look for articles
+      - LOOKBACK_DAYS=365
+    labels:
+      # ── Cosmos proxy labels (adjust to your setup) ──
+      - "cosmos-force-network-secured=true"
+      - "cosmos-auto-update=true"
+      # - "cosmos-stack=freshrss"
+      # If using Cosmos Smart Shield:
+      # - "cosmos.hostname=scholrss.yourdomain.com"
+      # - "cosmos.port=8844"
+      # - "cosmos.icon=https://cdn-icons-png.flaticon.com/512/2232/2232688.png"
