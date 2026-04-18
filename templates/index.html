@@ -808,7 +808,7 @@
              placeholder="HH"
              onchange="saveRefreshTime()">
       <span>:</span>
-      <input type="number" id="refreshMinute" value="{{ refresh_minute_utc if refresh_hour_utc is not none else '' }}" min="0" max="59"
+      <input type="number" id="refreshMinute" value="{{ refresh_minute_utc if refresh_minute_utc is not none else '' }}" min="0" max="59"
              style="width:3.5rem;"
              placeholder="MM"
              onchange="saveRefreshTime()">
@@ -1532,9 +1532,12 @@ async function saveRefreshTime() {
   const hour = hourInput.value;
   const minute = minuteInput.value;
 
-  // If either is empty, clear the setting
-  if (hour === '' || minute === '') {
+  // If both are empty, clear the setting; if only one is filled, wait silently
+  if (hour === '' && minute === '') {
     await clearRefreshTime();
+    return;
+  }
+  if (hour === '' || minute === '') {
     return;
   }
 
