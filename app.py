@@ -46,8 +46,20 @@ def clean_abstract(text):
     text = _ABSTRACT_PREFIX_RE.sub("", text)
     return text.strip()
 
+# Create data directories early so the file handler can use them
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("scholrss")
+
+# Add rotating file handler for persistent logs
+from logging.handlers import RotatingFileHandler
+LOG_FILE = DATA_DIR / "scholrss.log"
+_file_handler = RotatingFileHandler(LOG_FILE, maxBytes=1_000_000, backupCount=3,
+                                    encoding="utf-8")
+_file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+logging.getLogger().addHandler(_file_handler)
 
 app = Flask(__name__)
 _journals_lock = threading.Lock()
@@ -55,6 +67,7 @@ _journals_lock = threading.Lock()
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
 def ensure_dirs():
+    # Already created above, but keep for compatibility
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -87,6 +100,23 @@ def get_max_articles():
     # CrossRef accepts up to 1000 rows per request; pagination would be needed
     # beyond that, so cap there.
     return max(1, min(1000, val))
+
+
+def _work_after_cutoff(work, cutoff):
+    """Check if a work's publication date is after the cutoff.
+
+    Returns True if the work should be kept (date is after cutoff or unparseable).
+    Returns False only if the date is successfully parsed and is before cutoff.
+    """
+    date_str = work.get("date")
+    if not date_str:
+        return True
+    try:
+        work_date = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+        return work_date >= cutoff
+    except (ValueError, TypeError):
+        # Can't parse date — keep the work to be safe
+        return True
 
 def journal_cache_path(feed_id):
     """Resolve the on-disk cache path for a given feed id.
@@ -191,8 +221,8 @@ def crossref_latest_works(issn, from_date, rows=100):
     """Fetch recent works from CrossRef for a given ISSN."""
     url = "https://api.crossref.org/works"
     params = {
-        "filter": f"issn:{issn},from-index-date:{from_date},type:journal-article",
-        "sort": "indexed",
+        "filter": f"issn:{issn},from-pub-date:{from_date},type:journal-article",
+        "sort": "published",
         "order": "desc",
         "rows": max(1, min(1000, rows)),
         "mailto": MAILTO,
@@ -596,6 +626,14 @@ def update_journal_feed(feed_id, journal_info):
         log.info(f"  CrossRef: {len(works)} works")
         _enrich_missing_abstracts(works)
 
+    # Defensive clip: drop works published before the lookback window.
+    # This covers OpenAlex and Semantic Scholar paths that may surface old works.
+    cutoff = datetime.now(timezone.utc) - timedelta(days=get_lookback_days())
+    before = len(works)
+    works = [w for w in works if _work_after_cutoff(w, cutoff)]
+    if len(works) != before:
+        log.info(f"  Clipped {before - len(works)} works published before {cutoff.date()}")
+
     # Final abstract cleanup (idempotent — safe if already cleaned upstream).
     for w in works:
         if w["abstract"]:
@@ -626,16 +664,36 @@ def update_all_feeds():
         except Exception as e:
             log.error(f"Failed to update {issn}: {e}")
 
+def _seconds_until_next_refresh_time(hour, minute):
+    """Calculate seconds until the next occurrence of the given UTC time."""
+    now = datetime.now(timezone.utc)
+    target = now.replace(hour=int(hour), minute=int(minute), second=0, microsecond=0)
+    if target <= now:
+        target += timedelta(days=1)
+    return (target - now).total_seconds()
+
+
 def scheduler_loop():
     """Background thread that updates feeds on schedule."""
     while True:
+        settings = load_settings()
+        hour = settings.get("refresh_hour_utc")
+        if hour is not None:
+            minute = settings.get("refresh_minute_utc", 0)
+            sleep_for = _seconds_until_next_refresh_time(hour, minute)
+            log.info(f"Next scheduled update at {hour:02d}:{minute:02d} UTC "
+                     f"(in {sleep_for/3600:.1f}h)")
+            time.sleep(sleep_for)
+        else:
+            # Fall back to interval mode
+            log.info(f"Feed update complete. Next update in {UPDATE_INTERVAL} hours.")
+            time.sleep(UPDATE_INTERVAL * 3600)
+
         log.info("Starting scheduled feed update...")
         try:
             update_all_feeds()
         except Exception as e:
             log.error(f"Scheduled update failed: {e}")
-        log.info(f"Feed update complete. Next update in {UPDATE_INTERVAL} hours.")
-        time.sleep(UPDATE_INTERVAL * 3600)
 
 # ── RSS Generation ──────────────────────────────────────────────────────────
 
@@ -719,10 +777,13 @@ def index():
             }
         else:
             stats[issn] = {"count": 0, "with_abstract": 0, "updated": "never"}
+    settings = load_settings()
     return render_template("index.html", journals=journals, stats=stats,
                            base_url=BASE_URL, internal_url=INTERNAL_URL,
                            lookback_days=get_lookback_days(),
-                           max_articles=get_max_articles())
+                           max_articles=get_max_articles(),
+                           refresh_hour_utc=settings.get("refresh_hour_utc"),
+                           refresh_minute_utc=settings.get("refresh_minute_utc", 0))
 
 @app.route("/feed/<issn>")
 def feed_atom(issn):
@@ -1121,6 +1182,8 @@ def api_get_settings():
     return jsonify({
         "lookback_days": settings.get("lookback_days", LOOKBACK_DAYS_DEFAULT),
         "max_articles": get_max_articles(),
+        "refresh_hour_utc": settings.get("refresh_hour_utc"),
+        "refresh_minute_utc": settings.get("refresh_minute_utc", 0),
     })
 
 @app.route("/api/settings", methods=["PUT"])
@@ -1137,8 +1200,69 @@ def api_put_settings():
         if val < 1 or val > 1000:
             return jsonify({"error": "max_articles must be between 1 and 1000"}), 400
         settings["max_articles"] = val
+    if "refresh_hour_utc" in data:
+        val = data["refresh_hour_utc"]
+        if val is None:
+            # Clear the setting
+            settings.pop("refresh_hour_utc", None)
+            settings.pop("refresh_minute_utc", None)
+        else:
+            try:
+                hour = int(val)
+                minute = int(data.get("refresh_minute_utc", 0))
+                if hour < 0 or hour > 23:
+                    return jsonify({"error": "refresh_hour_utc must be between 0 and 23"}), 400
+                if minute < 0 or minute > 59:
+                    return jsonify({"error": "refresh_minute_utc must be between 0 and 59"}), 400
+                settings["refresh_hour_utc"] = hour
+                settings["refresh_minute_utc"] = minute
+            except (TypeError, ValueError):
+                return jsonify({"error": "refresh_hour_utc must be an integer or null"}), 400
+    elif "refresh_minute_utc" in data:
+        # If hour is set but minute is being updated
+        if "refresh_hour_utc" in settings:
+            try:
+                minute = int(data["refresh_minute_utc"])
+                if minute < 0 or minute > 59:
+                    return jsonify({"error": "refresh_minute_utc must be between 0 and 59"}), 400
+                settings["refresh_minute_utc"] = minute
+            except (TypeError, ValueError):
+                return jsonify({"error": "refresh_minute_utc must be an integer"}), 400
     save_settings(settings)
     return jsonify({"ok": True})
+
+
+@app.route("/api/logs", methods=["GET"])
+def api_get_logs():
+    """Return the tail of the log file. ?lines=N (default 500, max 5000), ?level=ERROR filters."""
+    try:
+        n = min(int(request.args.get("lines", 500)), 5000)
+    except ValueError:
+        n = 500
+    level = (request.args.get("level") or "").upper().strip()
+    if not LOG_FILE.exists():
+        return jsonify({"lines": [], "size_bytes": 0})
+    # Read the tail efficiently: for a 1 MB file just reading the whole thing is fine
+    text = LOG_FILE.read_text(encoding="utf-8", errors="replace")
+    lines = text.splitlines()[-n:]
+    if level:
+        lines = [ln for ln in lines if f"[{level}]" in ln]
+    return jsonify({"lines": lines, "size_bytes": LOG_FILE.stat().st_size})
+
+
+@app.route("/api/logs", methods=["DELETE"])
+def api_clear_logs():
+    """Truncate the log file. Leaves the file in place so the handler keeps writing to it."""
+    if LOG_FILE.exists():
+        LOG_FILE.write_text("")
+    # Also clear any rotated backups
+    for i in range(1, 4):
+        p = LOG_FILE.with_suffix(f".log.{i}")
+        if p.exists():
+            p.unlink()
+    log.info("Log file purged via web UI")
+    return jsonify({"ok": True})
+
 
 # ── Main ────────────────────────────────────────────────────────────────────
 

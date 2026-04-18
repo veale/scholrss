@@ -7,9 +7,10 @@ Run unit tests only: pytest tests/ -v -m "not integration"
 """
 
 import json
+import logging
 import os
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
@@ -109,6 +110,231 @@ class TestHelpers:
     def test_reconstruct_abstract_empty(self):
         assert scholrss.reconstruct_abstract(None) == ""
         assert scholrss.reconstruct_abstract({}) == ""
+
+    def test_work_after_cutoff(self):
+        """Test that _work_after_cutoff correctly filters works by date."""
+        from datetime import datetime, timezone
+
+        # Current time as cutoff
+        now = datetime(2026, 4, 18, tzinfo=timezone.utc)
+        cutoff = now - timedelta(days=365)
+
+        # Work within cutoff should be kept
+        work_new = {"date": "2026-04-01T00:00:00+00:00"}
+        assert scholrss._work_after_cutoff(work_new, cutoff) is True
+
+        # Work outside cutoff should be dropped
+        work_old = {"date": "1972-01-01T00:00:00+00:00"}
+        assert scholrss._work_after_cutoff(work_old, cutoff) is False
+
+        # Work exactly at cutoff should be kept
+        work_at_cutoff = {"date": cutoff.isoformat()}
+        assert scholrss._work_after_cutoff(work_at_cutoff, cutoff) is True
+
+        # Work one day before cutoff should be dropped
+        work_one_day_before = {"date": (cutoff - timedelta(days=1)).isoformat()}
+        assert scholrss._work_after_cutoff(work_one_day_before, cutoff) is False
+
+    def test_work_after_cutoff_parse_failure(self):
+        """Test that parse failures keep the work (fail-open)."""
+        now = datetime(2026, 4, 18, tzinfo=timezone.utc)
+        cutoff = now - timedelta(days=365)
+
+        # Garbage date should be kept (fail-open)
+        work_garbage = {"date": "garbage"}
+        assert scholrss._work_after_cutoff(work_garbage, cutoff) is True
+
+        # Missing date should be kept
+        work_no_date = {"title": "Test"}
+        assert scholrss._work_after_cutoff(work_no_date, cutoff) is True
+
+
+class TestCrossRefQuery:
+    def test_crossref_uses_pub_date(self):
+        """Test that crossref_latest_works uses from-pub-date and sort=published."""
+        with patch("app.requests.get") as mock_get:
+            mock_response = MagicMock()
+            mock_response.json.return_value = {"message": {"items": []}}
+            mock_response.raise_for_status = MagicMock()
+            mock_get.return_value = mock_response
+
+            scholrss.crossref_latest_works("1234-5678", "2025-01-01", rows=50)
+
+            # Check the request was made with correct params
+            mock_get.assert_called_once()
+            call_args = mock_get.call_args
+            params = call_args.kwargs.get("params", {})
+
+            assert "from-pub-date:2025-01-01" in params["filter"]
+            assert params["sort"] == "published"
+            assert params["order"] == "desc"
+
+
+class TestUpdateJournalFeedClipping:
+    def test_update_journal_feed_clips_old_works(self, client):
+        """Test that update_journal_feed drops works older than lookback_days."""
+        # Set up a journal
+        journals = {
+            "1234-5678": {
+                "title": "Test Journal",
+                "publisher": "Test Publisher",
+                "issn": "1234-5678",
+            }
+        }
+        scholrss.save_journals(journals)
+
+        # Mock crossref_latest_works to return a mix of old and new works
+        old_date = "1972-01-01T00:00:00+00:00"
+        new_date = "2026-04-01T00:00:00+00:00"
+
+        mock_works = [
+            {"doi": "10.1234/old", "title": "Old Article", "authors": [],
+             "date": old_date, "abstract": "", "url": "", "source": "crossref"},
+            {"doi": "10.1234/new", "title": "New Article", "authors": [],
+             "date": new_date, "abstract": "", "url": "", "source": "crossref"},
+        ]
+
+        with patch("app.crossref_latest_works", return_value=mock_works):
+            with patch("app._enrich_missing_abstracts"):
+                cache = scholrss.update_journal_feed("1234-5678", journals["1234-5678"])
+
+        # Should only have the new work
+        assert len(cache["works"]) == 1
+        assert cache["works"][0]["doi"] == "10.1234/new"
+
+
+class TestRefreshTime:
+    def test_seconds_until_next_refresh_time(self):
+        """Test _seconds_until_next_refresh_time returns values in valid range."""
+        from datetime import datetime, timezone
+
+        # Test with various times
+        with patch("app.datetime") as mock_datetime:
+            # When it's 10:00 UTC and we want 09:00 UTC, should be ~23 hours
+            mock_datetime.now.return_value = datetime(2026, 4, 18, 10, 0, 0, tzinfo=timezone.utc)
+            mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+
+            # Request refresh at 09:00 -> should be ~23 hours
+            seconds = scholrss._seconds_until_next_refresh_time(9, 0)
+            assert 82800 <= seconds <= 86400  # 23 to 24 hours
+
+            # Request refresh at 11:00 -> should be ~1 hour
+            seconds = scholrss._seconds_until_next_refresh_time(11, 0)
+            assert 3600 <= seconds <= 7200  # 1 to 2 hours
+
+            # Request refresh at 10:00 -> should be ~24 hours (next day)
+            seconds = scholrss._seconds_until_next_refresh_time(10, 0)
+            assert 82800 <= seconds <= 86400  # 23 to 24 hours
+
+    def test_seconds_until_next_refresh_time_edge_cases(self):
+        """Test edge cases for refresh time calculation."""
+        from datetime import datetime, timezone
+
+        with patch("app.datetime") as mock_datetime:
+            # Test minute handling
+            mock_datetime.now.return_value = datetime(2026, 4, 18, 10, 0, 0, tzinfo=timezone.utc)
+            mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+
+            # Request at 10:30 when it's 10:00 -> should be 30 minutes
+            seconds = scholrss._seconds_until_next_refresh_time(10, 30)
+            assert 1500 <= seconds <= 3600  # 30 min to 1 hour
+
+
+class TestSettingsAPI:
+    def test_get_settings_includes_refresh_time(self, client):
+        """Test that GET /api/settings returns refresh time fields."""
+        rv = client.get("/api/settings")
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert "refresh_hour_utc" in data
+        assert "refresh_minute_utc" in data
+
+    def test_put_settings_refresh_hour_validation(self, client):
+        """Test validation of refresh_hour_utc."""
+        # Invalid hour
+        rv = client.put("/api/settings", json={"refresh_hour_utc": 25})
+        assert rv.status_code == 400
+
+        # Valid hour
+        rv = client.put("/api/settings", json={"refresh_hour_utc": 10, "refresh_minute_utc": 30})
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert data["ok"] is True
+
+        # Clear the setting
+        rv = client.put("/api/settings", json={"refresh_hour_utc": None})
+        assert rv.status_code == 200
+
+    def test_put_settings_refresh_minute_validation(self, client):
+        """Test validation of refresh_minute_utc."""
+        # Invalid minute
+        rv = client.put("/api/settings", json={"refresh_hour_utc": 10, "refresh_minute_utc": 60})
+        assert rv.status_code == 400
+
+        # Valid minute
+        rv = client.put("/api/settings", json={"refresh_hour_utc": 10, "refresh_minute_utc": 45})
+        assert rv.status_code == 200
+
+
+class TestLogsAPI:
+    def test_get_logs_no_file(self, client):
+        """Test GET /api/logs returns empty when no log file exists."""
+        # The test uses a temp directory, so no log file
+        rv = client.get("/api/logs")
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert data["lines"] == []
+        assert data["size_bytes"] == 0
+
+    def test_get_logs_with_content(self, client):
+        """Test GET /api/logs returns log content."""
+        # Write some log content
+        scholrss.LOG_FILE.write_text("2026-04-18 [INFO] Test log line 1\n2026-04-18 [ERROR] Test error\n")
+
+        rv = client.get("/api/logs")
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert len(data["lines"]) == 2
+        assert "Test log line 1" in data["lines"][0]
+
+    def test_get_logs_filter_by_level(self, client):
+        """Test GET /api/logs?level=ERROR filters to error lines."""
+        scholrss.LOG_FILE.write_text("2026-04-18 [INFO] Info message\n2026-04-18 [ERROR] Error message\n2026-04-18 [WARNING] Warning message\n")
+
+        rv = client.get("/api/logs?level=ERROR")
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert len(data["lines"]) == 1
+        assert "Error message" in data["lines"][0]
+
+    def test_get_logs_lines_limit(self, client):
+        """Test GET /api/logs?lines=N limits the number of lines."""
+        # Write 10 lines
+        lines = [f"2026-04-18 [INFO] Line {i}\n" for i in range(10)]
+        scholrss.LOG_FILE.write_text("".join(lines))
+
+        rv = client.get("/api/logs?lines=5")
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert len(data["lines"]) == 5
+
+    def test_delete_logs(self, client):
+        """Test DELETE /api/logs truncates the file."""
+        scholrss.LOG_FILE.write_text("test\n")
+
+        rv = client.delete("/api/logs")
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert data["ok"] is True
+
+        # File should be empty
+        assert scholrss.LOG_FILE.read_text() == ""
+
+    def test_rotating_handler_attached(self):
+        """Test that the rotating file handler is attached to the logger."""
+        handlers = logging.getLogger().handlers
+        # Should have at least the file handler (plus basicConfig's stream handler)
+        assert any(isinstance(h, logging.handlers.RotatingFileHandler) for h in handlers)
 
 
 class TestRoutes:

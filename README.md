@@ -49,7 +49,7 @@ A self-hosted scholarly RSS feed generator that pulls article metadata from **Cr
 | `SEMANTIC_SCHOLAR_API_KEY` | _(empty)_ | Optional API key for faster Semantic Scholar access |
 | `BASE_URL` | `http://localhost:8844` | External URL for feed self-links |
 | `INTERNAL_URL` | _(empty)_ | Optional internal URL (e.g. `http://scholrss:8844`) shown alongside `BASE_URL` for container-to-container readers that bypass reverse-proxy auth |
-| `UPDATE_INTERVAL_HOURS` | `24` | Hours between automatic feed refreshes |
+| `UPDATE_INTERVAL_HOURS` | `24` | Hours between automatic feed refreshes (used when no daily refresh time is set) |
 | `LOOKBACK_DAYS` | `365` | Default lookback window (overridden by UI setting) |
 | `MAX_ARTICLES` | `100` | Max articles fetched/cached per journal (1–1000; overridden by UI setting) |
 | `DATA_DIR` | `/data` | Where journals config and cache are stored |
@@ -110,7 +110,9 @@ ScholRSS includes an MCP (Model Context Protocol) server so LLMs can query your 
 | `/api/journal/filtered` | POST | Create a new filtered feed variant `{issn, title, publisher, label, keywords, authors, match}` — lets you stack multiple filters on the same ISSN |
 | `/api/refresh/{issn}` | POST | Refresh one journal |
 | `/api/refresh-all` | POST | Refresh all journals |
-| `/api/settings` | GET/PUT | Read/update settings (e.g. `{lookback_days: 365}`) |
+| `/api/settings` | GET/PUT | Read/update settings (e.g. `{lookback_days: 365, refresh_hour_utc: 10, refresh_minute_utc: 30}`) |
+| `/api/logs` | GET | Get log file tail (`?lines=N`, `?level=ERROR`) |
+| `/api/logs` | DELETE | Clear log file |
 | `/api/update-journal-db` | POST | Rebuild journal autocomplete database |
 
 ## Filtered feeds (for mega-journals / preprint servers)
@@ -166,6 +168,15 @@ ScholRSS is polite to upstream APIs:
 - CrossRef: 500ms delay after fetching works
 - 1s delay between journals during bulk refresh
 - All requests include `mailto` / API keys for polite pool access
+
+## Lookback and Publication Date Filtering
+
+The **Lookback** setting (default 365 days) controls which articles are fetched and displayed. ScholRSS uses publication date rather than CrossRef's index date to determine relevance:
+
+- CrossRef queries use `from-pub-date` (publication date) instead of `from-index-date` (when the record was added/modified in CrossRef)
+- At ingestion time, works published before the lookback window are dropped regardless of source (CrossRef, OpenAlex, or Semantic Scholar)
+
+This prevents decades-old papers that were recently back-indexed or assigned DOIs from flooding your feed.
 
 ## Testing
 

@@ -801,6 +801,20 @@
              onchange="saveMaxArticles(this.value)">
       <span style="font-style:italic;">(1–1000; refresh to apply)</span>
     </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <label for="refreshHour">Daily refresh:</label>
+      <input type="number" id="refreshHour" value="{{ refresh_hour_utc if refresh_hour_utc is not none else '' }}" min="0" max="23"
+             style="width:3.5rem;"
+             placeholder="HH"
+             onchange="saveRefreshTime()">
+      <span>:</span>
+      <input type="number" id="refreshMinute" value="{{ refresh_minute_utc if refresh_hour_utc is not none else '' }}" min="0" max="59"
+             style="width:3.5rem;"
+             placeholder="MM"
+             onchange="saveRefreshTime()">
+      <span>UTC</span>
+      <button class="btn btn-sm" onclick="clearRefreshTime()" title="Clear to use interval mode">clear</button>
+    </div>
   </div>
 
   <!-- Add Journal Panel -->
@@ -971,6 +985,46 @@
     </div>
     {% endfor %}
   </div>
+
+  <!-- Logs Panel -->
+  <details class="logs-panel" style="margin-top:2rem;border-top:1px solid var(--border);padding-top:1rem;">
+    <summary style="cursor:pointer;font-size:0.85rem;color:var(--text-dim);">Logs</summary>
+    <div class="logs-controls" style="display:flex;gap:0.5rem;align-items:center;margin:0.75rem 0;flex-wrap:wrap;">
+      <select id="logLevel" onchange="loadLogs()" style="font-size:0.8rem;padding:0.2rem;">
+        <option value="">All</option>
+        <option value="ERROR">Errors only</option>
+        <option value="WARNING">Warnings+</option>
+        <option value="INFO">Info+</option>
+      </select>
+      <input type="number" id="logLines" value="500" min="50" max="5000" onchange="loadLogs()"
+             style="width:5rem;font-size:0.8rem;padding:0.2rem;">
+      <button class="btn btn-sm" onclick="loadLogs()">Refresh</button>
+      <button class="btn btn-sm" onclick="clearLogs()">Clear</button>
+      <span id="logSize" class="text-dim" style="font-size:0.75rem;"></span>
+    </div>
+    <pre id="logOutput" class="logs-output" style="background:var(--bg-secondary);padding:0.75rem;overflow:auto;max-height:400px;font-size:0.75rem;line-height:1.4;font-family:monospace;white-space:pre-wrap;word-break:break-all;border-radius:4px;"></pre>
+  </details>
+  <script>
+  async function loadLogs() {
+    const level = document.getElementById('logLevel').value;
+    const lines = document.getElementById('logLines').value;
+    const r = await fetch(`/api/logs?lines=${lines}&level=${level}`);
+    const data = await r.json();
+    document.getElementById('logOutput').textContent = data.lines.join('\n');
+    document.getElementById('logSize').textContent =
+        `${(data.size_bytes / 1024).toFixed(1)} KB`;
+  }
+  async function clearLogs() {
+    if (!confirm('Purge the log file?')) return;
+    await fetch('/api/logs', { method: 'DELETE' });
+    toast('Logs cleared.');
+    loadLogs();
+  }
+  // Load on first expand
+  document.querySelector('.logs-panel').addEventListener('toggle', e => {
+    if (e.target.open) loadLogs();
+  });
+  </script>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1467,6 +1521,60 @@ async function saveLookback(val) {
     const data = await r.json();
     if (data.ok) toast(`Lookback set to ${val} days. Refresh feeds to apply.`);
     else toast(data.error || 'Failed to save', true);
+  } catch (e) {
+    toast(`Error: ${e.message}`, true);
+  }
+}
+
+async function saveRefreshTime() {
+  const hourInput = document.getElementById('refreshHour');
+  const minuteInput = document.getElementById('refreshMinute');
+  const hour = hourInput.value;
+  const minute = minuteInput.value;
+
+  // If either is empty, clear the setting
+  if (hour === '' || minute === '') {
+    await clearRefreshTime();
+    return;
+  }
+
+  const h = parseInt(hour);
+  const m = parseInt(minute);
+
+  if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) {
+    toast('Invalid time. Use HH:MM in UTC (0-23:0-59).', true);
+    return;
+  }
+
+  try {
+    const r = await fetch('/api/settings', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ refresh_hour_utc: h, refresh_minute_utc: m }),
+    });
+    const data = await r.json();
+    if (data.ok) toast(`Refresh time set to ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')} UTC`);
+    else toast(data.error || 'Failed to save', true);
+  } catch (e) {
+    toast(`Error: ${e.message}`, true);
+  }
+}
+
+async function clearRefreshTime() {
+  try {
+    const r = await fetch('/api/settings', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ refresh_hour_utc: null }),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      document.getElementById('refreshHour').value = '';
+      document.getElementById('refreshMinute').value = '';
+      toast('Refresh time cleared. Using interval mode.');
+    } else {
+      toast(data.error || 'Failed to clear', true);
+    }
   } catch (e) {
     toast(`Error: ${e.message}`, true);
   }
