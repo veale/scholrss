@@ -18,6 +18,7 @@ DATA_DIR = Path(os.environ.get("DATA_DIR", "/data"))
 JOURNALS_FILE = DATA_DIR / "journals.json"
 CACHE_DIR = DATA_DIR / "cache"
 JOURNALS_DB = Path(os.environ.get("JOURNALS_DB", Path(__file__).parent / "journals" / "journals.db"))
+BOOK_PUBLISHERS_DB = Path(os.environ.get("BOOK_PUBLISHERS_DB", Path(__file__).parent / "journals" / "bookpublishers.db"))
 MAILTO = os.environ.get("MAILTO", "scholrss@example.com")
 OPENALEX_API_KEY = os.environ.get("OPENALEX_API_KEY", "")
 BASE_URL = os.environ.get("BASE_URL", "http://localhost:8844")
@@ -26,6 +27,7 @@ UPDATE_INTERVAL = int(os.environ.get("UPDATE_INTERVAL_HOURS", 24))
 LOOKBACK_DAYS_DEFAULT = int(os.environ.get("LOOKBACK_DAYS", 365))
 MAX_ARTICLES_DEFAULT = int(os.environ.get("MAX_ARTICLES", 100))
 SETTINGS_FILE = DATA_DIR / "settings.json"
+BOOK_FEEDS_FILE = DATA_DIR / "book_feeds.json"
 
 # ── Abstract cleaning ──────────────────────────────────────────────────────
 # Strip JATS/HTML tags and a leading "Abstract" heading that publishers sometimes
@@ -35,6 +37,7 @@ SETTINGS_FILE = DATA_DIR / "settings.json"
 # (handles "AbstractThis paper…" without mangling legitimate words like
 # "Abstractly speaking…").
 _JATS_TAG_RE = re.compile(r"<[^>]+>")
+_BOOK_FEED_ID_RE = re.compile(r"^[a-z0-9_]+$")
 _ABSTRACT_PREFIX_RE = re.compile(
     r"^\s*(?i:abstract)(?=[\s:.\-—]|[A-Z])[\s:.\-—]*"
 )
@@ -63,6 +66,7 @@ logging.getLogger().addHandler(_file_handler)
 
 app = Flask(__name__)
 _journals_lock = threading.Lock()
+_book_feeds_lock = threading.Lock()
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -88,6 +92,25 @@ def load_settings():
 
 def save_settings(settings):
     SETTINGS_FILE.write_text(json.dumps(settings, indent=2))
+
+def load_book_feeds():
+    with _book_feeds_lock:
+        if BOOK_FEEDS_FILE.exists():
+            return json.loads(BOOK_FEEDS_FILE.read_text())
+        return {}
+
+def save_book_feeds(feeds):
+    with _book_feeds_lock:
+        BOOK_FEEDS_FILE.write_text(json.dumps(feeds, indent=2))
+
+def _valid_feed_id(feed_id):
+    return bool(_BOOK_FEED_ID_RE.match(feed_id))
+
+def book_feed_cache_path(feed_id):
+    if not _valid_feed_id(feed_id):
+        raise ValueError(f"invalid feed_id: {feed_id!r}")
+    return CACHE_DIR / f"book__{feed_id}.json"
+
 
 def get_lookback_days():
     return load_settings().get("lookback_days", LOOKBACK_DAYS_DEFAULT)
@@ -220,17 +243,14 @@ def _parse_crossref_date(item):
 def crossref_latest_works(issn, from_date, rows=100):
     """Fetch recent works from CrossRef for a given ISSN.
 
-    We intentionally don't pass ``from-pub-date`` to CrossRef: that filter
-    checks the ``issued`` field, which for some journals (e.g. Utrecht Law
-    Review, 1871-515X) only carries year resolution — so a mid-year cutoff
-    like 2025-04-21 drops everything from 2025 even though ``published-print``
-    shows Sept/Oct 2025. Instead we sort by ``published`` desc, over-fetch,
-    and rely on the client-side clip (using _parse_crossref_date, which
-    prefers published-print/online) to apply the lookback window.
+    We filter on ``from-pub-date`` so CrossRef only returns works whose
+    publication date is within the lookback window, then sort by ``published``
+    descending. The client-side clip remains as a safety net in case upstream
+    data still contains older items.
     """
     url = "https://api.crossref.org/works"
     params = {
-        "filter": f"issn:{issn},type:journal-article",
+        "filter": f"issn:{issn},type:journal-article,from-pub-date:{from_date}",
         "sort": "published",
         "order": "desc",
         "rows": max(1, min(1000, rows)),
@@ -467,6 +487,136 @@ def _openalex_work_to_record(w):
         "source": "openalex",
     }
 
+
+def _drop_excluded(works, exclude_terms):
+    if not exclude_terms:
+        return works
+    exclude_lc = [t.lower() for t in exclude_terms if t and t.strip()]
+    if not exclude_lc:
+        return works
+    out = []
+    for w in works:
+        hay = (w.get("title", "") + " " + (w.get("abstract") or "")).lower()
+        if not any(term in hay for term in exclude_lc):
+            out.append(w)
+    return out
+
+
+def openalex_book_works(filter_config, limit=100):
+    publisher_ids = [pid.strip().upper() for pid in (filter_config.get("publisher_ids") or []) if pid and pid.strip()]
+    types = [t.strip().lower() for t in (filter_config.get("types") or []) if t and t.strip()]
+    if not types:
+        types = ["book"]
+    type_clause = "|".join(types)
+
+    filters = [f"type:{type_clause}"]
+    if publisher_ids:
+        lineage_clause = "|".join(publisher_ids)
+        filters.append(f"primary_location.source.publisher_lineage:{lineage_clause}")
+
+    from_date = filter_config.get("from_date")
+    if from_date:
+        filters.append(f"from_publication_date:{from_date}")
+
+    keywords = [k.strip() for k in (filter_config.get("keywords") or []) if k and k.strip()]
+    match = (filter_config.get("keywords_match") or "any").lower()
+    if keywords:
+        if match == "all":
+            filters.extend(f"title_and_abstract.search:{kw}" for kw in keywords)
+        else:
+            filters.append("title_and_abstract.search:" + "|".join(keywords))
+
+    if not publisher_ids and not keywords:
+        log.warning("Book query skipped: no publishers or keywords specified")
+        return []
+
+    exclude_terms = [t.strip() for t in (filter_config.get("exclude_keywords") or []) if t and t.strip()]
+    params = {
+        "filter": ",".join(filters),
+        "per-page": min(200, limit + 50),
+        "sort": filter_config.get("sort", "publication_date:desc"),
+    }
+    params.update(openalex_params())
+
+    url = "https://api.openalex.org/works"
+    headers = openalex_headers()
+    for attempt in range(2):
+        try:
+            r = requests.get(url, params=params, headers=headers, timeout=30)
+            if r.status_code == 429 and attempt == 0:
+                log.warning("OpenAlex rate limit (429) encountered; retrying once")
+                time.sleep(1)
+                continue
+            if r.status_code != 200:
+                log.warning(f"OpenAlex book query returned {r.status_code}: {r.text[:200]}")
+                return []
+            data = r.json()
+            works = [_openalex_work_to_record(w) for w in data.get("results", [])]
+            works = _drop_excluded(works, exclude_terms)
+            return works[:limit]
+        except Exception as e:
+            log.error(f"OpenAlex book query failed: {e}")
+            return []
+    return []
+
+
+
+def _normalize_list(value):
+    if not value:
+        return []
+    if isinstance(value, str):
+        return [item.strip() for item in value.split(",") if item.strip()]
+    try:
+        return [str(item).strip() for item in value if str(item).strip()]
+    except TypeError:
+        return []
+
+def _normalize_publishers(value):
+    normalized = []
+    for item in value or []:
+        if isinstance(item, dict):
+            pid = (item.get("id") or item.get("publisher_id") or item.get("publisher") or "").strip()
+            name = (item.get("name") or item.get("display_name") or pid).strip()
+        else:
+            text = str(item or "").strip()
+            pid = text
+            name = text
+        if not pid and name:
+            pid = name
+        if pid:
+            normalized.append({"id": pid.upper(), "name": name or pid})
+    return normalized
+
+def _book_feed_slug(label, publishers, keywords):
+    keyword_hint = "_".join(keywords[:2]) if keywords else ""
+    candidates = [label, keyword_hint] + [p.get("name") for p in publishers if p.get("name")] + [p.get("id") for p in publishers if p.get("id")]
+    for candidate in candidates:
+        if candidate:
+            return _slugify(candidate)
+    return _slugify("books")
+
+def _normalize_book_feed_payload(payload):
+    publishers = _normalize_publishers(payload.get("publishers"))
+    keywords = _normalize_list(payload.get("keywords"))
+    exclude_keywords = _normalize_list(payload.get("exclude_keywords"))
+    types = _normalize_list(payload.get("types"))
+    if not types:
+        types = ["book"]
+    match = (payload.get("keywords_match") or payload.get("match") or "any").lower()
+    if match not in ("any", "all"):
+        match = "any"
+    slug = _book_feed_slug(payload.get("label"), publishers, keywords)
+    label = payload.get("label") or slug
+    return {
+        "publishers": publishers,
+        "publisher_ids": [p["id"] for p in publishers],
+        "keywords": keywords,
+        "exclude_keywords": exclude_keywords,
+        "types": types,
+        "keywords_match": match,
+        "label": (payload.get("label") or "").strip(),
+    }
+
 def openalex_filtered_works(issn, from_date, filter_config, limit=100):
     """Fetch recent works from a journal (by ISSN or OpenAlex source ID) that
     match a keyword/author filter, using OpenAlex's /works endpoint with
@@ -663,15 +813,57 @@ def update_journal_feed(feed_id, journal_info):
     journal_cache_path(feed_id).write_text(json.dumps(cache, indent=2))
     return cache
 
+def update_book_feed(feed_id, feed_info):
+    """Fetch and cache the latest works for a book feed definition."""
+    lookback_days = get_lookback_days()
+    from_date = (datetime.now(timezone.utc) - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
+    max_articles = get_max_articles()
+    label = feed_info.get("label") or feed_id
+    log.info(f"Updating book feed '{feed_id}' ({label}) from {from_date} (max {max_articles})")
+    match = feed_info.get("keywords_match") or feed_info.get("match") or "any"
+    filter_config = {**feed_info, "from_date": from_date, "keywords_match": match}
+    works = openalex_book_works(filter_config, limit=max_articles)
+    log.info(f"  OpenAlex books: {len(works)} works")
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=lookback_days)
+    before = len(works)
+    works = [w for w in works if _work_after_cutoff(w, cutoff)]
+    if len(works) != before:
+        log.info(f"  Clipped {before - len(works)} works published before {cutoff.date()}")
+
+    works.sort(key=lambda x: x.get("date"), reverse=True)
+    cache = {
+        "feed_id": feed_id,
+        "label": label,
+        "config": feed_info,
+        "publisher_ids": feed_info.get("publisher_ids") or [],
+        "publishers": feed_info.get("publishers") or [],
+        "keywords": feed_info.get("keywords") or [],
+        "exclude_keywords": feed_info.get("exclude_keywords") or [],
+        "types": feed_info.get("types") or [],
+        "keywords_match": feed_info.get("keywords_match") or feed_info.get("match") or "any",
+        "updated": datetime.now(timezone.utc).isoformat(),
+        "works": works,
+    }
+    book_feed_cache_path(feed_id).write_text(json.dumps(cache, indent=2))
+    return cache
+
 def update_all_feeds():
-    """Update all journal feeds."""
+    """Update all journal and book feeds."""
     journals = load_journals()
     for issn, info in journals.items():
         try:
             update_journal_feed(issn, info)
-            time.sleep(1)  # be polite between journals
+            time.sleep(1)
         except Exception as e:
             log.error(f"Failed to update {issn}: {e}")
+    book_feeds = load_book_feeds()
+    for feed_id, info in book_feeds.items():
+        try:
+            update_book_feed(feed_id, info)
+            time.sleep(1)
+        except Exception as e:
+            log.error(f"Failed to update book feed {feed_id}: {e}")
 
 def _seconds_until_next_refresh_time(hour, minute):
     """Calculate seconds until the next occurrence of the given UTC time."""
@@ -706,6 +898,37 @@ def scheduler_loop():
 
 # ── RSS Generation ──────────────────────────────────────────────────────────
 
+def _populate_feed_entries(fg, works):
+    max_entries = min(get_max_articles(), 50)
+    for work in works[:max_entries]:
+        fe = fg.add_entry()
+        fe.id(work["url"] or work["doi"] or work["title"])
+        fe.title(work["title"])
+        if work["url"]:
+            fe.link(href=work["url"])
+
+        try:
+            fe.published(datetime.fromisoformat(work["date"]))
+            fe.updated(datetime.fromisoformat(work["date"]))
+        except (ValueError, TypeError):
+            pass
+
+        if work["authors"]:
+            for author_name in work["authors"][:5]:
+                fe.author({"name": author_name})
+
+        summary_parts = []
+        if work["authors"]:
+            summary_parts.append(", ".join(work["authors"][:5]))
+            if len(work["authors"]) > 5:
+                summary_parts[-1] += f" et al. ({len(work['authors'])} authors)"
+        if work["abstract"]:
+            summary_parts.append("")
+            summary_parts.append(work["abstract"])
+
+        fe.summary("\n".join(summary_parts) if summary_parts else "No abstract available.")
+
+
 def generate_feed(issn):
     """Generate an Atom/RSS feed for a journal from cached data."""
     cache_path = journal_cache_path(issn)
@@ -725,37 +948,38 @@ def generate_feed(issn):
     fg.language("en")
     fg.updated(datetime.fromisoformat(cache["updated"]))
 
-    for work in works[:get_max_articles()]:
-        fe = fg.add_entry()
-        fe.id(work["url"] or work["doi"] or work["title"])
-        fe.title(work["title"])
-        if work["url"]:
-            fe.link(href=work["url"])
+    _populate_feed_entries(fg, works)
+    return fg
 
-        try:
-            fe.published(datetime.fromisoformat(work["date"]))
-            fe.updated(datetime.fromisoformat(work["date"]))
-        except (ValueError, TypeError):
-            pass
 
-        if work["authors"]:
-            for author_name in work["authors"][:5]:
-                fe.author({"name": author_name})
+def generate_book_feed(feed_id):
+    """Generate an Atom/RSS feed for a book feed definition."""
+    cache_path = book_feed_cache_path(feed_id)
+    if not cache_path.exists():
+        return None
 
-        # Keep the summary compact — the entry <link> already points at the
-        # DOI URL, so we don't repeat "DOI: 10.xxxx/..." in the body (wastes
-        # tokens when an MCP client ingests the feed).
-        summary_parts = []
-        if work["authors"]:
-            summary_parts.append(", ".join(work["authors"][:5]))
-            if len(work["authors"]) > 5:
-                summary_parts[-1] += f" et al. ({len(work['authors'])} authors)"
-        if work["abstract"]:
-            summary_parts.append("")
-            summary_parts.append(work["abstract"])
+    cache = json.loads(cache_path.read_text())
+    works = cache.get("works", [])
+    label = cache.get("label") or feed_id
 
-        fe.summary("\n".join(summary_parts) if summary_parts else "No abstract available.")
+    fg = FeedGenerator()
+    fg.id(f"{BASE_URL}/feed/book/{feed_id}")
+    fg.title(f"{label} — ScholRSS")
+    subtitle_parts = []
+    publishers = cache.get("publishers") or []
+    publisher_names = [p.get("name") or p.get("id") for p in publishers]
+    if publisher_names:
+        subtitle_parts.append("Publishers: " + ", ".join(publisher_names))
+    keywords = cache.get("keywords") or []
+    if keywords:
+        subtitle_parts.append("Keywords: " + ", ".join(keywords))
+    fg.subtitle(" | ".join(subtitle_parts) or "Books tracked via OpenAlex")
+    fg.link(href=f"{BASE_URL}/feed/book/{feed_id}", rel="self")
+    fg.link(href=f"{BASE_URL}", rel="alternate")
+    fg.language("en")
+    fg.updated(datetime.fromisoformat(cache.get("updated") or datetime.now(timezone.utc).isoformat()))
 
+    _populate_feed_entries(fg, works)
     return fg
 
 # ── Routes ──────────────────────────────────────────────────────────────────
@@ -786,13 +1010,27 @@ def index():
             }
         else:
             stats[issn] = {"count": 0, "with_abstract": 0, "updated": "never"}
+    book_feeds = load_book_feeds()
+    book_stats = {}
+    for feed_id in book_feeds:
+        cp = book_feed_cache_path(feed_id)
+        if cp.exists():
+            cache = json.loads(cp.read_text())
+            book_stats[feed_id] = {
+                "count": len(cache.get("works", [])),
+                "with_abstract": sum(1 for w in cache.get("works", []) if w.get("abstract")),
+                "updated": cache.get("updated", "never"),
+            }
+        else:
+            book_stats[feed_id] = {"count": 0, "with_abstract": 0, "updated": "never"}
     settings = load_settings()
     return render_template("index.html", journals=journals, stats=stats,
                            base_url=BASE_URL, internal_url=INTERNAL_URL,
                            lookback_days=get_lookback_days(),
                            max_articles=get_max_articles(),
                            refresh_hour_utc=settings.get("refresh_hour_utc"),
-                           refresh_minute_utc=settings.get("refresh_minute_utc", 0))
+                           refresh_minute_utc=settings.get("refresh_minute_utc", 0),
+                           book_feeds=book_feeds, book_stats=book_stats)
 
 @app.route("/feed/<issn>")
 def feed_atom(issn):
@@ -807,6 +1045,28 @@ def feed_atom(issn):
 @app.route("/feed/<issn>/json")
 def feed_json(issn):
     cache_path = journal_cache_path(issn)
+    if not cache_path.exists():
+        return jsonify({"error": "not found"}), 404
+    cache = json.loads(cache_path.read_text())
+    return jsonify(cache)
+
+@app.route("/feed/book/<feed_id>")
+def book_feed_atom(feed_id):
+    if not _valid_feed_id(feed_id):
+        return "Invalid feed id.", 400
+    fmt = request.args.get("format", "atom")
+    fg = generate_book_feed(feed_id)
+    if not fg:
+        return "Feed not found. Try refreshing first.", 404
+    if fmt == "rss":
+        return Response(fg.rss_str(pretty=True), mimetype="application/rss+xml")
+    return Response(fg.atom_str(pretty=True), mimetype="application/atom+xml")
+
+@app.route("/feed/book/<feed_id>/json")
+def book_feed_json(feed_id):
+    if not _valid_feed_id(feed_id):
+        return jsonify({"error": "invalid feed id"}), 400
+    cache_path = book_feed_cache_path(feed_id)
     if not cache_path.exists():
         return jsonify({"error": "not found"}), 404
     cache = json.loads(cache_path.read_text())
@@ -829,8 +1089,13 @@ def opml():
         '<body>',
     ]
     for issn, info in journals.items():
-        feed_url = f"{root}/feed/{issn}"
+        feed_url = f"{root}/feed/{issn}?format=rss"
         lines.append(f'  <outline type="rss" text="{info["title"]}" xmlUrl="{feed_url}" />')
+    book_feeds = load_book_feeds()
+    for feed_id, info in book_feeds.items():
+        label = info.get("label") or feed_id
+        feed_url = f"{root}/feed/book/{feed_id}?format=rss"
+        lines.append(f'  <outline type="rss" text="{label}" xmlUrl="{feed_url}" />')
     lines.append('</body>')
     lines.append('</opml>')
     return Response("\n".join(lines), mimetype="application/xml",
@@ -896,6 +1161,78 @@ def api_autocomplete():
     except Exception as e:
         log.error(f"Autocomplete query failed: {e}")
         return jsonify([])
+
+
+@app.route("/api/books/autocomplete", methods=["GET"])
+def api_books_autocomplete():
+    q = request.args.get("q", "").strip()
+    if not q or len(q) < 2:
+        return jsonify([])
+    if not BOOK_PUBLISHERS_DB.exists():
+        return jsonify([])
+    try:
+        conn = sqlite3.connect(f"file:{BOOK_PUBLISHERS_DB}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        terms = q.split()
+        fts_query = " ".join(t + "*" if i == len(terms) - 1 else t
+                             for i, t in enumerate(terms))
+        rows = conn.execute("""
+            SELECT p.publisher_id, p.display_name, p.alt_names, p.hierarchy_level,
+                   p.works_count, p.country_codes
+            FROM publishers_fts fts
+            JOIN publishers p ON p.rowid = fts.rowid
+            WHERE publishers_fts MATCH ?
+            ORDER BY p.works_count DESC
+            LIMIT 15
+        """, (fts_query,)).fetchall()
+        conn.close()
+        results = []
+        for r in rows:
+            alt_names = [n for n in (r["alt_names"] or "").split() if n.strip()]
+            results.append({
+                "id": r["publisher_id"],
+                "name": r["display_name"],
+                "alt_names": alt_names,
+                "hierarchy_level": r["hierarchy_level"],
+                "works_count": r["works_count"] or 0,
+                "country_codes": r["country_codes"] or "",
+            })
+        return jsonify(results)
+    except Exception as e:
+        log.error(f"Publisher autocomplete failed: {e}")
+        return jsonify([])
+
+
+@app.route("/api/books/preview", methods=["POST"])
+def api_books_preview():
+    payload = request.get_json() or {}
+    config = _normalize_book_feed_payload(payload)
+    if not config["publishers"] and not config["keywords"]:
+        return jsonify({"error": "At least one publisher or keyword is required."}), 400
+    from_date = (datetime.now(timezone.utc) - timedelta(days=get_lookback_days())).strftime("%Y-%m-%d")
+    config["from_date"] = from_date
+    works = openalex_book_works(config, limit=25)
+    return jsonify({"works": works, "from_date": from_date})
+
+
+@app.route("/api/books/feed", methods=["POST"])
+def api_books_feed():
+    payload = request.get_json() or {}
+    config = _normalize_book_feed_payload(payload)
+    if not config["publishers"]:
+        return jsonify({"error": "At least one publisher is required."}), 400
+    feeds = load_book_feeds()
+    slug_base = _book_feed_slug(config["label"], config["publishers"], config["keywords"])
+    feed_id = slug_base
+    suffix = 2
+    while feed_id in feeds:
+        feed_id = f"{slug_base}_{suffix}"
+        suffix += 1
+    config["id"] = feed_id
+    feeds[feed_id] = config
+    save_book_feeds(feeds)
+    threading.Thread(target=update_book_feed, args=(feed_id, config), daemon=True).start()
+    return jsonify({"ok": True, "feed_id": feed_id})
 
 @app.route("/api/search/journal", methods=["GET"])
 def api_search_journal():
@@ -1010,6 +1347,31 @@ def api_add_filtered_feed():
 
     threading.Thread(target=update_journal_feed, args=(feed_id, journals[feed_id]), daemon=True).start()
     return jsonify({"ok": True, "feed_id": feed_id})
+
+
+@app.route("/api/refresh/book/<feed_id>", methods=["POST"])
+def api_refresh_book_feed(feed_id):
+    if not _valid_feed_id(feed_id):
+        return jsonify({"error": "invalid feed id"}), 400
+    book_feeds = load_book_feeds()
+    if feed_id not in book_feeds:
+        return jsonify({"error": "not found"}), 404
+    threading.Thread(target=update_book_feed, args=(feed_id, book_feeds[feed_id]), daemon=True).start()
+    return jsonify({"ok": True, "feed_id": feed_id})
+
+
+@app.route("/api/books/feed/<feed_id>", methods=["DELETE"])
+def api_delete_book_feed(feed_id):
+    if not _valid_feed_id(feed_id):
+        return jsonify({"error": "invalid feed id"}), 400
+    book_feeds = load_book_feeds()
+    if feed_id in book_feeds:
+        del book_feeds[feed_id]
+        save_book_feeds(book_feeds)
+    cache_path = book_feed_cache_path(feed_id)
+    if cache_path.exists():
+        cache_path.unlink()
+    return jsonify({"ok": True})
 
 @app.route("/api/journal/<issn>/filter", methods=["PUT"])
 def api_set_journal_filter(issn):
@@ -1184,6 +1546,40 @@ def api_update_journal_db():
 
     threading.Thread(target=do_update, daemon=True).start()
     return jsonify({"ok": True, "message": "Journal database update started in background"})
+
+
+@app.route("/api/update-publisher-db", methods=["POST"])
+def api_update_publisher_db():
+    """Re-run publisher_merge.py to rebuild the book publisher autocomplete DB."""
+    import subprocess, shutil
+    merge_script = Path(__file__).parent / "publisher_merge.py"
+    if not merge_script.exists():
+        return jsonify({"error": "publisher_merge.py not found"}), 404
+
+    def do_update():
+        try:
+            db_dir = BOOK_PUBLISHERS_DB.parent
+            db_dir.mkdir(parents=True, exist_ok=True)
+            env = os.environ.copy()
+            env["JOURNAL_DATA_DIR"] = str(db_dir)
+            log.info("Starting publisher database update...")
+            result = subprocess.run(
+                [sys.executable, str(merge_script), "--download", "--merge"],
+                env=env, capture_output=True, text=True, timeout=3600,
+            )
+            if result.returncode == 0:
+                log.info("Publisher database update completed successfully")
+            else:
+                log.error(f"Publisher database update failed: {result.stderr[-500:]}")
+            raw_dir = db_dir / "raw" / "publishers"
+            if raw_dir.exists():
+                shutil.rmtree(raw_dir)
+                log.info("Cleaned up publisher raw data directory")
+        except Exception as e:
+            log.error(f"Publisher database update failed: {e}", exc_info=True)
+
+    threading.Thread(target=do_update, daemon=True).start()
+    return jsonify({"ok": True, "message": "Publisher database update started in background"})
 
 @app.route("/api/settings", methods=["GET"])
 def api_get_settings():

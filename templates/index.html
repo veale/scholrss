@@ -374,6 +374,76 @@
     transition: background 0.15s;
   }
 
+  .book-section {
+    margin-top: 2.5rem;
+  }
+
+  .book-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .book-card {
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0.9rem 0;
+    background: transparent;
+  }
+
+  .book-card .book-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .book-card .book-title {
+    font-size: 1rem;
+    font-style: italic;
+    font-family: var(--serif);
+    color: var(--text);
+    line-height: 1.35;
+  }
+
+  .book-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .book-meta {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+
+  .book-card .book-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.55rem;
+    font-size: 0.75rem;
+  }
+
+  .book-card .book-feed-url {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-top: 0.4rem;
+    word-break: break-all;
+  }
+
+  .chip {
+    padding: 0.15rem 0.4rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+
   .journal-card:first-child {
     border-top: 1px solid var(--border);
   }
@@ -781,7 +851,8 @@
       <a href="/opml?internal=1" class="btn btn-sm" title="OPML using INTERNAL_URL — for container-to-container readers">OPML (internal)</a>
       {% endif %}
       <button class="btn btn-sm" onclick="refreshAll()">Refresh all</button>
-      <button class="btn btn-sm" onclick="updateJournalDb(this)">Update DB</button>
+      <button class="btn btn-sm" onclick="updateJournalDb(this)">Update journal DB</button>
+      <button class="btn btn-sm" onclick="updatePublisherDb(this)">Update publisher DB</button>
       <button class="btn btn-sm btn-accent" onclick="togglePanel()">+ Add journal</button>
     </div>
   </header>
@@ -827,6 +898,7 @@
       <button class="search-tab" data-mode="bulk" onclick="setSearchMode('bulk')">Bulk import</button>
       <button class="search-tab" data-mode="filtered" onclick="setSearchMode('filtered')">Filtered feed</button>
       <button class="search-tab" data-mode="ssrn" onclick="setSearchMode('ssrn')">SSRN search</button>
+      <button class="search-tab" data-mode="books" onclick="setSearchMode('books')">Books</button>
     </div>
     <div class="search-row" id="searchRow">
       <div class="ac-wrap" id="acWrap">
@@ -891,6 +963,47 @@
         document.getElementById('ffS2VenueRow').style.display = this.checked ? 'block' : 'none';
       });</script>
       <button class="btn btn-accent" onclick="addFilteredFeed()" id="ffBtn">Create filtered feed</button>
+    </div>
+    <div id="bookRow" style="display:none;">
+      <div style="font-size:0.82rem;color:var(--text-dim);margin-bottom:0.8rem;line-height:1.5;font-style:italic;">
+        Track books via publisher chips, keywords, and OpenAlex work previews.
+      </div>
+      <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">Publishers</label>
+      <div id="bookChips" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.5rem;"></div>
+      <div class="ac-wrap" id="bookAcWrap" style="position:relative;margin-bottom:0.5rem;">
+        <input type="text" id="bookPublisherInput" autocomplete="off"
+               placeholder="Search publishers (type a name)"
+               style="width:100%;font-family:var(--serif);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);">
+        <div class="ac-dropdown" id="bookAcDropdown"></div>
+      </div>
+      <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">Label</label>
+      <input type="text" id="bookLabel" placeholder="Feed label (for slug generation)"
+             style="width:100%;font-family:var(--serif);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);margin-bottom:0.5rem;">
+      <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">Keywords (comma-separated)</label>
+      <input type="text" id="bookKeywords" placeholder="e.g. history, biology"
+             style="width:100%;font-family:var(--serif);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);margin-bottom:0.5rem;">
+      <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">Exclude keywords (comma-separated)</label>
+      <input type="text" id="bookExcludeKeywords" placeholder="e.g. romance"
+             style="width:100%;font-family:var(--serif);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);margin-bottom:0.5rem;">
+      <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">Include</label>
+      <div style="display:flex;gap:1rem;align-items:center;margin-bottom:0.6rem;flex-wrap:wrap;font-size:0.8rem;">
+        <label style="margin:0;"><input type="checkbox" id="bookTypeBook" checked> Books</label>
+        <label style="margin:0;"><input type="checkbox" id="bookTypeChapter"> Book chapters</label>
+      </div>
+      <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap;">
+        <label style="font-size:0.75rem;color:var(--text-dim);margin:0;">
+          <input type="radio" name="bookMatch" value="any" checked> match any keyword (OR)
+        </label>
+        <label style="font-size:0.75rem;color:var(--text-dim);margin:0;">
+          <input type="radio" name="bookMatch" value="all"> match all keywords (AND)
+        </label>
+      </div>
+      <div id="bookActions" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+        <button class="btn" onclick="previewBookFeed()" id="bookPreviewBtn">Preview books</button>
+        <button class="btn btn-accent" onclick="saveBookFeed()" id="bookSaveBtn">Save feed</button>
+      </div>
+      <div id="bookPreview" style="font-size:0.82rem;color:var(--text-dim);"></div>
+      <div id="bookPreviewList" style="margin-top:0.5rem;display:grid;gap:0.35rem;font-size:0.82rem;color:var(--text);"></div>
     </div>
     <div class="search-results" id="searchResults"></div>
   </div>
@@ -1000,6 +1113,45 @@
     {% endfor %}
   </div>
 
+  {% if book_feeds %}
+  <section class="book-section">
+    <div class="journals-header">
+      <h2>Book feeds ({{ book_feeds|length }})</h2>
+    </div>
+    <div class="book-grid">
+      {% for feed_id, info in book_feeds.items() %}
+      <div class="book-card" id="book-card-{{ feed_id }}">
+        <div class="book-top">
+          <div class="book-title">{{ info.label or feed_id }}</div>
+          <div class="book-actions">
+            <a class="btn btn-sm" href="{{ base_url }}/feed/book/{{ feed_id }}">Atom</a>
+            <a class="btn btn-sm" href="{{ base_url }}/feed/book/{{ feed_id }}?format=rss">RSS</a>
+            <a class="btn btn-sm" href="{{ base_url }}/feed/book/{{ feed_id }}/json">JSON</a>
+            <button class="btn btn-sm" onclick="refreshBookFeed('{{ feed_id }}')">↻ Refresh</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteBookFeed('{{ feed_id }}')">Remove</button>
+          </div>
+        </div>
+        <div class="book-meta">
+          <div>Types: <strong>{{ info.types | join(', ') or 'book' }}</strong></div>
+          <div>Publishers: <strong>{{ info.publishers | length }}</strong></div>
+          <div>Works: <strong>{{ book_stats[feed_id].count }}</strong></div>
+          <div>Abstracts: <strong class="has-abstract">{{ book_stats[feed_id].with_abstract }}</strong></div>
+          <div>Updated: <strong>{{ book_stats[feed_id].updated[:16] if book_stats[feed_id].updated != 'never' else 'pending…' }}</strong></div>
+        </div>
+        <div class="book-tags">
+          {% for kw in info.keywords or [] %}<span class="chip">Keyword: {{ kw }}</span>{% endfor %}
+          {% for kw in info.exclude_keywords or [] %}<span class="chip">Exclude: {{ kw }}</span>{% endfor %}
+          {% for p in info.publishers or [] %}<span class="chip">{{ p.name or p.id }}</span>{% endfor %}
+        </div>
+        <div class="book-feed-url">
+          Feed: <a href="{{ base_url }}/feed/book/{{ feed_id }}">{{ base_url }}/feed/book/{{ feed_id }}</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
   <!-- Logs Panel -->
   <details class="logs-panel" style="margin-top:2rem;border-top:1px solid var(--border);padding-top:1rem;">
     <summary style="cursor:pointer;font-size:0.85rem;color:var(--text-dim);">Logs</summary>
@@ -1047,6 +1199,14 @@
 let searchMode = 'name';
 let acTimer = null;
 let acActive = -1;
+let bookAcTimer = null;
+let bookAcActive = -1;
+const bookPublisherInput = document.getElementById('bookPublisherInput');
+const bookAcDropdown = document.getElementById('bookAcDropdown');
+const bookChipsEl = document.getElementById('bookChips');
+const bookPublishers = [];
+const bookPreviewEl = document.getElementById('bookPreview');
+const bookPreviewList = document.getElementById('bookPreviewList');
 
 function togglePanel() {
   document.getElementById('addPanel').classList.toggle('open');
@@ -1093,7 +1253,13 @@ function setSearchMode(mode) {
       document.getElementById('ffS2Venue').value = '';
       document.getElementById('ffS2VenueRow').style.display = 'none';
     }
+  } else if (mode === 'books') {
+    searchRow.style.display = 'none';
+    bulkRow.style.display = 'none';
+    filteredRow.style.display = 'none';
+    document.getElementById('bookRow').style.display = 'block';
   } else {
+    document.getElementById('bookRow').style.display = 'none';
     searchRow.style.display = 'flex';
     bulkRow.style.display = 'none';
     filteredRow.style.display = 'none';
@@ -1111,6 +1277,181 @@ function setSearchMode(mode) {
     input.value = '';
   }
   document.getElementById('searchResults').innerHTML = '';
+}
+
+async function previewBookFeed() {
+  const preview = bookPreviewEl;
+  const list = bookPreviewList;
+  list.innerHTML = '';
+  preview.textContent = 'Previewing book feed…';
+  const config = collectBookFeedConfig();
+  if (!config.types.length) {
+    preview.textContent = 'Select at least one type (Books or Book chapters).';
+    return;
+  }
+  if (!config.publishers.length && !config.keywords.length) {
+    preview.textContent = 'Add at least one publisher or keyword to preview results.';
+    return;
+  }
+  try {
+    const response = await fetch('/api/books/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      preview.textContent = data.error || 'Preview failed.';
+      return;
+    }
+    if (!data.works.length) {
+      preview.textContent = 'No matching works found (try different keywords).';
+      return;
+    }
+    preview.textContent = `Showing ${data.works.length} sample works from ${data.from_date || 'lookback window'}.`;
+    list.innerHTML = data.works.map(renderBookPreviewItem).join('');
+  } catch (err) {
+    preview.textContent = `Preview failed: ${err.message}`;
+  }
+}
+
+function renderBookPreviewItem(work) {
+  const authors = (work.authors || []).slice(0, 3).join(', ') + ((work.authors || []).length > 3 ? ' et al.' : '');
+  return `
+    <div style="border:1px solid var(--border);border-radius:4px;padding:0.4rem;">
+      <div style="font-weight:bold;">${work.url ? `<a href="${escAttr(work.url)}" target="_blank" rel="noopener">${escHtml(work.title || 'Untitled')}</a>` : escHtml(work.title || 'Untitled')}</div>
+      <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:0.15rem;">${authors}</div>
+      <div style="font-size:0.75rem;color:var(--text-dim);">${escHtml(work.date || '')}</div>
+    </div>`;
+}
+
+async function saveBookFeed() {
+  const preview = bookPreviewEl;
+  preview.textContent = 'Saving book feed…';
+  const config = collectBookFeedConfig();
+  if (!config.types.length) {
+    preview.textContent = 'Select at least one type (Books or Book chapters).';
+    return;
+  }
+  if (!config.publishers.length) {
+    preview.textContent = 'Cannot save without publishers.';
+    return;
+  }
+  try {
+    const response = await fetch('/api/books/feed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      preview.textContent = data.error || 'Save failed.';
+      return;
+    }
+    preview.textContent = `Book feed ${data.feed_id} saved.`;
+    toast(`Saved book feed ${data.feed_id}.`);
+  } catch (err) {
+    preview.textContent = `Save failed: ${err.message}`;
+  }
+}
+
+function collectBookFeedConfig() {
+  const types = [];
+  if (document.getElementById('bookTypeBook').checked)    types.push('book');
+  if (document.getElementById('bookTypeChapter').checked) types.push('book-chapter');
+  return {
+    publishers: bookPublishers.map(p => ({ id: p.id, name: p.name })),
+    label: document.getElementById('bookLabel').value.trim(),
+    keywords: document.getElementById('bookKeywords').value
+      .split(',').map(s => s.trim()).filter(s => s),
+    exclude_keywords: document.getElementById('bookExcludeKeywords').value
+      .split(',').map(s => s.trim()).filter(s => s),
+    types,
+    keywords_match: (document.querySelector('input[name="bookMatch"]:checked') || {}).value || 'any'
+  };
+}
+
+bookPublisherInput.addEventListener('input', () => {
+  clearTimeout(bookAcTimer);
+  const q = bookPublisherInput.value.trim();
+  if (q.length < 2) { bookAcDropdown.classList.remove('open'); return; }
+  bookAcTimer = setTimeout(() => bookAcFetch(q), 150);
+});
+
+bookPublisherInput.addEventListener('keydown', (e) => {
+  if (!bookAcDropdown.classList.contains('open')) return;
+  const items = bookAcDropdown.querySelectorAll('.ac-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    bookAcActive = Math.min(bookAcActive + 1, items.length - 1);
+    bookAcHighlight(items);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    bookAcActive = Math.max(bookAcActive - 1, -1);
+    bookAcHighlight(items);
+  } else if (e.key === 'Enter' && bookAcActive >= 0) {
+    e.preventDefault();
+    items[bookAcActive]?.click();
+  } else if (e.key === 'Escape') {
+    bookAcDropdown.classList.remove('open');
+    bookAcActive = -1;
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#bookAcWrap')) {
+    bookAcDropdown.classList.remove('open');
+    bookAcActive = -1;
+  }
+});
+
+function bookAcHighlight(items) {
+  items.forEach((el, i) => el.classList.toggle('active', i === bookAcActive));
+}
+
+async function bookAcFetch(q) {
+  try {
+    const r = await fetch(`/api/books/autocomplete?q=${encodeURIComponent(q)}`);
+    const data = await r.json();
+    bookAcActive = -1;
+    let html = '';
+    if (data.length) {
+      html = data.map(p => `<div class="ac-item" onclick="addBookPublisher('${escAttr(p.id)}','${escAttr(p.name)}')">`
+        + `<div class="ac-item-info"><div class="ac-item-title">${escHtml(p.name)}</div>`
+        + `<div class="ac-item-meta">${p.hierarchy_level || ''}</div></div>`
+        + `<button class="btn btn-sm btn-accent" tabindex="-1">Add</button></div>`).join('');
+    } else {
+      html = '<div class="ac-hint">No matches.</div>';
+    }
+    bookAcDropdown.innerHTML = html;
+    bookAcDropdown.classList.add('open');
+  } catch (e) {
+    bookAcDropdown.innerHTML = `<div class="ac-hint" style="color:var(--red)">Error: ${e.message}</div>`;
+    bookAcDropdown.classList.add('open');
+  }
+}
+
+function addBookPublisher(id, name) {
+  if (bookPublishers.some(p => p.id === id)) return;
+  bookPublishers.push({ id, name });
+  renderBookChips();
+  bookPublisherInput.value = '';
+  bookAcDropdown.classList.remove('open');
+  bookAcActive = -1;
+}
+
+function renderBookChips() {
+  bookChipsEl.innerHTML = bookPublishers.map(p =>
+    `<span class="chip">${escHtml(p.name)} <button onclick="removeBookPublisher('${escAttr(p.id)}')">×</button></span>`
+  ).join('');
+}
+
+function removeBookPublisher(id) {
+  const idx = bookPublishers.findIndex(p => p.id === id);
+  if (idx >= 0) {
+    bookPublishers.splice(idx, 1);
+    renderBookChips();
+  }
 }
 
 // ── Autocomplete ──────────────────────────
@@ -1564,6 +1905,26 @@ async function refreshJournal(issn, btn) {
   setTimeout(() => { btn.innerHTML = orig; }, 2000);
 }
 
+async function refreshBookFeed(feed_id) {
+  try {
+    await fetch(`/api/refresh/book/${feed_id}`, { method: 'POST' });
+    toast(`Refreshing book feed ${feed_id}…`);
+  } catch (e) {
+    toast(`Error: ${e.message}`, true);
+  }
+}
+
+async function deleteBookFeed(feed_id) {
+  if (!confirm('Remove this book feed?')) return;
+  try {
+    await fetch(`/api/books/feed/${feed_id}`, { method: 'DELETE' });
+    document.getElementById(`book-card-${feed_id}`)?.remove();
+    toast('Book feed removed.');
+  } catch (e) {
+    toast(`Error: ${e.message}`, true);
+  }
+}
+
 async function toggleJournalExpand(event, issn) {
   // Ignore clicks that bubbled from buttons/links inside the header
   if (event.target.closest('.jc-actions')) return;
@@ -1752,6 +2113,21 @@ async function updateJournalDb(btn) {
     toast(`Error: ${e.message}`, true);
   }
   setTimeout(() => { btn.innerHTML = orig; }, 2000);
+}
+
+async function updatePublisherDb(btn) {
+  if (!confirm('Rebuild publisher DB from OpenAlex? This downloads ~10 MB and takes a minute or two.')) return;
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+  try {
+    const r = await fetch('/api/update-publisher-db', { method: 'POST' });
+    const data = await r.json();
+    toast(data.message || 'Publisher DB rebuild started.');
+  } catch (e) {
+    toast(`Error: ${e.message}`, true);
+  } finally {
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Update publisher DB'; }, 3000);
+  }
 }
 
 async function refreshAll() {

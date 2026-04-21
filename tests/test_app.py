@@ -531,6 +531,219 @@ class TestFeedGeneration:
         assert scholrss.generate_feed("9999-9999") is None
 
 
+class TestBookFeeds:
+    def test_books_preview_accepts_keywords_only(self, client):
+        with patch("app.openalex_book_works", return_value=[]):
+            rv = client.post("/api/books/preview", json={"keywords": ["ai"]})
+        assert rv.status_code == 200
+
+    def test_books_preview_rejects_empty(self, client):
+        rv = client.post("/api/books/preview", json={})
+        assert rv.status_code == 400
+
+    def test_books_preview_success(self, client):
+        mock_works = [{"doi": "10.1234/book", "title": "Book One", "authors": ["Author"],
+                       "date": "2026-04-15T00:00:00+00:00", "abstract": "Test", "url": "https://doi.org/10.1234/book",
+                       "source": "openalex"}]
+        with patch("app.openalex_book_works", return_value=mock_works) as mock_query:
+            payload = {
+                "publishers": [{"id": "P123", "name": "Example Publisher"}],
+                "keywords": ["ai"],
+            }
+            rv = client.post("/api/books/preview", json=payload)
+        assert rv.status_code == 200
+        assert rv.get_json()["works"] == mock_works
+        mock_query.assert_called_once()
+
+    def test_books_feed_creation(self, client):
+        payload = {
+            "label": "AI Books",
+            "publishers": [{"id": "P123", "name": "Example Publisher"}],
+            "keywords": ["ai"]
+        }
+        rv = client.post("/api/books/feed", json=payload)
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert data["ok"] is True
+        feeds = scholrss.load_book_feeds()
+        assert data["feed_id"] in feeds
+        assert feeds[data["feed_id"]]["label"] == "AI Books"
+
+    def test_refresh_book_feed(self, client):
+        feed_id = "ai_books"
+        scholrss.save_book_feeds({
+            feed_id: {
+                "publishers": [{"id": "P123", "name": "Example Publisher"}],
+                "label": "AI Books",
+                "keywords": ["ai"],
+            }
+        })
+        with patch.object(scholrss.threading.Thread, "start"):
+            rv = client.post(f"/api/refresh/book/{feed_id}")
+        assert rv.status_code == 200
+        assert rv.get_json()["feed_id"] == feed_id
+
+    def test_refresh_book_feed_missing(self, client):
+        rv = client.post("/api/refresh/book/does_not_exist")
+        assert rv.status_code == 404
+
+    def test_delete_book_feed(self, client):
+        feed_id = "delete_books"
+        scholrss.save_book_feeds({
+            feed_id: {
+                "publishers": [{"id": "P123", "name": "Example Publisher"}],
+                "label": "Delete Books",
+                "keywords": ["ai"],
+            }
+        })
+        cache = {
+            "publishers": [{"id": "P123", "name": "Example Publisher"}],
+            "works": [{
+                "doi": "10.1234/book",
+                "title": "Book Title",
+                "authors": ["Author"],
+                "date": "2026-04-15T00:00:00+00:00",
+                "abstract": "Test abstract",
+                "url": "https://doi.org/10.1234/book",
+                "source": "openalex",
+            }],
+        }
+        scholrss.book_feed_cache_path(feed_id).write_text(json.dumps(cache))
+        rv = client.delete(f"/api/books/feed/{feed_id}")
+        assert rv.status_code == 200
+        assert not scholrss.book_feed_cache_path(feed_id).exists()
+        assert feed_id not in scholrss.load_book_feeds()
+
+    def test_opml_includes_book_feed(self, client):
+        feed_id = "opml_books"
+        scholrss.save_book_feeds({
+            feed_id: {
+                "publishers": [{"id": "P123", "name": "OPML Publisher"}],
+                "label": "OPML Books",
+                "keywords": ["ai"],
+            }
+        })
+        rv = client.get("/opml")
+        assert rv.status_code == 200
+        assert b"OPML Books" in rv.data
+        assert feed_id.encode() in rv.data
+
+    def test_generate_book_feed(self, client):
+        feed_id = "generated_books"
+        cache = {
+            "label": "Generated Books",
+            "publishers": [{"id": "P123", "name": "Example Publisher"}],
+            "keywords": ["ai"],
+            "works": [{
+                "doi": "10.1234/book",
+                "title": "Beautiful Book",
+                "authors": ["Author Name"],
+                "date": "2026-04-15T00:00:00+00:00",
+                "abstract": "Test abstract",
+                "url": "https://doi.org/10.1234/book",
+                "source": "openalex",
+            }],
+            "updated": "2026-04-20T00:00:00+00:00",
+        }
+        scholrss.book_feed_cache_path(feed_id).write_text(json.dumps(cache))
+        fg = scholrss.generate_book_feed(feed_id)
+        assert fg is not None
+        xml = fg.atom_str(pretty=True).decode()
+        assert "Generated Books" in xml
+        assert "Beautiful Book" in xml
+
+    def test_book_query_builds_filter_with_publisher_lineage(self):
+        with patch("app.requests.get") as mock_get:
+            mock_get.return_value.status_code = 200
+            mock_get.return_value.json.return_value = {"results": []}
+            scholrss.openalex_book_works({
+                "publisher_ids": ["P123", "P456"],
+                "types": ["book", "book-chapter"],
+                "keywords": ["ethics"],
+                "keywords_match": "any",
+                "from_date": "2025-01-01",
+            }, limit=10)
+            called_filter = mock_get.call_args.kwargs["params"]["filter"]
+            assert "primary_location.source.publisher_lineage:P123|P456" in called_filter
+            assert "type:book|book-chapter" in called_filter
+            assert "title_and_abstract.search:ethics" in called_filter
+            assert "from_publication_date:2025-01-01" in called_filter
+
+    def test_book_query_all_match_produces_separate_clauses(self):
+        with patch("app.requests.get") as mock_get:
+            mock_get.return_value.status_code = 200
+            mock_get.return_value.json.return_value = {"results": []}
+            scholrss.openalex_book_works({
+                "publisher_ids": ["P123"],
+                "keywords": ["ethics", "fairness"],
+                "keywords_match": "all",
+            }, limit=10)
+            called_filter = mock_get.call_args.kwargs["params"]["filter"]
+            assert "title_and_abstract.search:ethics" in called_filter
+            assert "title_and_abstract.search:fairness" in called_filter
+            assert "ethics|fairness" not in called_filter
+
+    def test_book_feed_id_slugifies_label(self, client):
+        import re
+        payload = {
+            "label": "AI & Ethics: A Reader",
+            "publishers": [{"id": "P123", "name": "Routledge"}],
+            "keywords": ["ai"],
+        }
+        rv = client.post("/api/books/feed", json=payload)
+        assert rv.status_code == 200
+        feed_id = rv.get_json()["feed_id"]
+        assert " " not in feed_id
+        assert re.match(r"^[a-z0-9_]+$", feed_id)
+
+    def test_book_feed_slug_collision(self, client):
+        payload = {
+            "label": "History Books",
+            "publishers": [{"id": "P123", "name": "Routledge"}],
+        }
+        r1 = client.post("/api/books/feed", json=payload)
+        r2 = client.post("/api/books/feed", json=payload)
+        assert r1.get_json()["feed_id"] != r2.get_json()["feed_id"]
+        assert r2.get_json()["feed_id"].endswith("_2")
+
+    def test_publisher_name_preserved_on_save(self, client):
+        payload = {
+            "label": "Test",
+            "publishers": [{"id": "P4310319965", "name": "Routledge"}],
+        }
+        rv = client.post("/api/books/feed", json=payload)
+        feed_id = rv.get_json()["feed_id"]
+        saved = scholrss.load_book_feeds()[feed_id]
+        assert saved["publishers"][0]["name"] == "Routledge"
+
+    def test_keywords_match_all_reaches_filter(self, client):
+        payload = {
+            "label": "AND test",
+            "publishers": [{"id": "P123", "name": "Test Pub"}],
+            "keywords": ["a", "b"],
+            "keywords_match": "all",
+        }
+        rv = client.post("/api/books/feed", json=payload)
+        feed_id = rv.get_json()["feed_id"]
+        feeds = scholrss.load_book_feeds()
+        with patch("app.requests.get") as mock_get:
+            mock_get.return_value.status_code = 200
+            mock_get.return_value.json.return_value = {"results": []}
+            scholrss.update_book_feed(feed_id, feeds[feed_id])
+        called_filter = mock_get.call_args.kwargs["params"]["filter"]
+        assert called_filter.count("title_and_abstract.search:") == 2
+
+    @pytest.mark.integration
+    def test_book_query_live_openalex_publisher_lineage(self):
+        works = scholrss.openalex_book_works({
+            "publisher_ids": ["P4310320990"],
+            "types": ["book"],
+            "from_date": "2024-01-01",
+        }, limit=5)
+        assert len(works) > 0
+        assert all(w.get("title") for w in works)
+
+
 class TestSemanticScholar:
     def test_batch_abstracts_empty(self):
         result = scholrss.semantic_scholar_batch_abstracts([])

@@ -100,6 +100,9 @@ ScholRSS includes an MCP (Model Context Protocol) server so LLMs can query your 
 | `/feed/{issn}` | GET | Atom feed (`?format=rss` for RSS 2.0) |
 | `/feed/{issn}/json` | GET | Raw JSON feed data |
 | `/opml` | GET | OPML export of all feeds |
+| `/api/books/autocomplete?q=` | GET | Publisher autocomplete (FTS5 book publisher database) |
+| `/api/books/preview` | POST | Preview candidate works for a book feed config `{publishers, keywords, types, match}` |
+| `/api/books/feed` | POST | Persist a book feed definition `{publishers, label, keywords, types, match}` |
 | `/api/autocomplete?q=` | GET | Local journal autocomplete (FTS5) |
 | `/api/search/journal?q=` | GET | Online journal search via CrossRef |
 | `/api/search/doi?doi=` | GET | Look up journal from a DOI |
@@ -152,6 +155,10 @@ This queries both OpenAlex (with the correct source ID) and Semantic Scholar (re
 
 To track several independent slices of the same mega-journal (e.g. one SSRN feed for "privacy" and another for "AI safety"), open the Add Journal panel and switch to the **Filtered feed** tab. Give each variant a label and its own keywords/authors — every submission creates a separate entry keyed by `<issn>__<slug>` with its own cache, feed URL (`/feed/1556-5068__privacy`, `/feed/1556-5068__ai_safety`, …), and OPML line. The original unfiltered entry keeps working unchanged.
 
+## Book feeds
+
+Books (and book chapters) can be tracked via the new **Books** tab. Define a set of publishers, optional keywords/exclusions, document how they match (ANY/ALL), and preview the candidate works that OpenAlex would return. Saving the configuration persists it in `book_feeds.json`, populates a dedicated cache file (`cache/book__{feed_id}.json`), and makes the stream available via `/feed/book/{feed_id}` (Atom/RSS/JSON) plus the OPML export. A background refresh thread keeps the cache up to date on the same schedule that journals use, and `/api/refresh/book/{feed_id}` lets you trigger an on-demand run. Publisher autocomplete is backed by `bookpublishers.db`, generated with `publisher_merge.py`.
+
 ## Abstract Enrichment Pipeline
 
 For each journal refresh:
@@ -185,6 +192,7 @@ pip install pytest
 pytest tests/ -v                       # all tests
 pytest tests/ -v -m "not integration"  # unit tests only (fast, no API calls)
 pytest tests/ -v -m integration        # integration tests (hits real APIs)
+pytest tests/ -v -m "not integration"  # rerun after adding tests (covers book feed APIs)
 ```
 
 ## Cosmos Setup
