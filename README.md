@@ -53,6 +53,8 @@ A self-hosted scholarly RSS feed generator that pulls article metadata from **Cr
 | `LOOKBACK_DAYS` | `365` | Default lookback window (overridden by UI setting) |
 | `MAX_ARTICLES` | `100` | Max articles fetched/cached per journal (1–1000; overridden by UI setting) |
 | `DATA_DIR` | `/data` | Where journals config and cache are stored |
+| `JOURNALS_DB` | `${DATA_DIR}/journals.db` | Path to the journal autocomplete DB. Override only if you want to share a DB between containers. |
+| `BOOK_PUBLISHERS_DB` | `${DATA_DIR}/bookpublishers.db` | Path to the book publisher autocomplete DB. Same caveat. |
 
 ## Data Storage
 
@@ -61,8 +63,22 @@ All runtime data lives in the bind-mounted `./data` directory:
 - `journals.json` — tracked journals
 - `settings.json` — UI-configurable settings (lookback days, etc.)
 - `cache/` — cached article data per journal (JSON files)
+- `journals.db` — journal autocomplete database (~58 MB)
+- `bookpublishers.db` — book publisher autocomplete database (~10 MB)
 
-The journal autocomplete database (`journals/journals.db`, ~58MB) is baked into the Docker image. Use the **Update DB** button in the UI to rebuild it from online sources.
+### Database storage
+
+The journal and book-publisher autocomplete databases live in `DATA_DIR` (i.e. your bind-mounted `/data` directory).
+
+On first boot, if these files don't yet exist in `DATA_DIR`, ScholRSS copies the image-baked copies from `/app/journals/` into place. After that, every **Update journal DB** / **Update publisher DB** run writes back to `DATA_DIR`, so rebuilt databases **persist across `docker pull` and container recreation**.
+
+To force a re-migration (for example, after the image ships a fresher baked database and you want to adopt it), stop the container, delete the DB file from your bind mount, and restart:
+
+```bash
+docker compose down
+rm /path/to/your/data/bookpublishers.db
+docker compose up -d
+```
 
 ## MCP Server
 

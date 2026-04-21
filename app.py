@@ -17,8 +17,10 @@ from feedgen.feed import FeedGenerator
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/data"))
 JOURNALS_FILE = DATA_DIR / "journals.json"
 CACHE_DIR = DATA_DIR / "cache"
-JOURNALS_DB = Path(os.environ.get("JOURNALS_DB", Path(__file__).parent / "journals" / "journals.db"))
-BOOK_PUBLISHERS_DB = Path(os.environ.get("BOOK_PUBLISHERS_DB", Path(__file__).parent / "journals" / "bookpublishers.db"))
+_BUNDLED_JOURNALS_DB = Path(__file__).parent / "journals" / "journals.db"
+_BUNDLED_PUBLISHERS_DB = Path(__file__).parent / "journals" / "bookpublishers.db"
+JOURNALS_DB = Path(os.environ.get("JOURNALS_DB", DATA_DIR / "journals.db"))
+BOOK_PUBLISHERS_DB = Path(os.environ.get("BOOK_PUBLISHERS_DB", DATA_DIR / "bookpublishers.db"))
 MAILTO = os.environ.get("MAILTO", "scholrss@example.com")
 OPENALEX_API_KEY = os.environ.get("OPENALEX_API_KEY", "")
 BASE_URL = os.environ.get("BASE_URL", "http://localhost:8844")
@@ -1522,27 +1524,31 @@ def api_update_journal_db():
         return jsonify({"error": "journal_merge.py not found"}), 404
 
     def do_update():
+        import tempfile
+        scratch = Path(tempfile.mkdtemp(prefix="scholrss-journal-merge-"))
         try:
-            db_dir = JOURNALS_DB.parent
-            db_dir.mkdir(parents=True, exist_ok=True)
             env = os.environ.copy()
-            env["JOURNAL_DATA_DIR"] = str(db_dir)
-            log.info("Starting journal database update...")
+            env["JOURNAL_DATA_DIR"] = str(scratch)
+            log.info(f"Starting journal database update (scratch: {scratch})...")
             result = subprocess.run(
                 [sys.executable, str(merge_script), "--download", "--all", "--merge"],
                 env=env, capture_output=True, text=True, timeout=3600,
             )
-            if result.returncode == 0:
-                log.info("Journal database update completed successfully")
-            else:
+            if result.returncode != 0:
                 log.error(f"Journal database update failed: {result.stderr[-500:]}")
-            # Clean up raw data directory
-            raw_dir = db_dir / "raw"
-            if raw_dir.exists():
-                shutil.rmtree(raw_dir)
-                log.info("Cleaned up raw data directory")
+                return
+            built = scratch / "journals.db"
+            if not built.exists():
+                log.error("Journal merge completed but no DB file was produced")
+                return
+            JOURNALS_DB.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(built), str(JOURNALS_DB))
+            log.info(f"Journal database update completed → {JOURNALS_DB} "
+                     f"({JOURNALS_DB.stat().st_size / 1024 / 1024:.1f} MB)")
         except Exception as e:
             log.error(f"Journal database update failed: {e}", exc_info=True)
+        finally:
+            shutil.rmtree(scratch, ignore_errors=True)
 
     threading.Thread(target=do_update, daemon=True).start()
     return jsonify({"ok": True, "message": "Journal database update started in background"})
@@ -1557,26 +1563,31 @@ def api_update_publisher_db():
         return jsonify({"error": "publisher_merge.py not found"}), 404
 
     def do_update():
+        import tempfile
+        scratch = Path(tempfile.mkdtemp(prefix="scholrss-pub-merge-"))
         try:
-            db_dir = BOOK_PUBLISHERS_DB.parent
-            db_dir.mkdir(parents=True, exist_ok=True)
             env = os.environ.copy()
-            env["JOURNAL_DATA_DIR"] = str(db_dir)
-            log.info("Starting publisher database update...")
+            env["JOURNAL_DATA_DIR"] = str(scratch)
+            log.info(f"Starting publisher database update (scratch: {scratch})...")
             result = subprocess.run(
                 [sys.executable, str(merge_script), "--download", "--merge"],
                 env=env, capture_output=True, text=True, timeout=3600,
             )
-            if result.returncode == 0:
-                log.info("Publisher database update completed successfully")
-            else:
+            if result.returncode != 0:
                 log.error(f"Publisher database update failed: {result.stderr[-500:]}")
-            raw_dir = db_dir / "raw" / "publishers"
-            if raw_dir.exists():
-                shutil.rmtree(raw_dir)
-                log.info("Cleaned up publisher raw data directory")
+                return
+            built = scratch / "bookpublishers.db"
+            if not built.exists():
+                log.error("Publisher merge completed but no DB file was produced")
+                return
+            BOOK_PUBLISHERS_DB.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(built), str(BOOK_PUBLISHERS_DB))
+            log.info(f"Publisher database update completed → {BOOK_PUBLISHERS_DB} "
+                     f"({BOOK_PUBLISHERS_DB.stat().st_size / 1024 / 1024:.1f} MB)")
         except Exception as e:
             log.error(f"Publisher database update failed: {e}", exc_info=True)
+        finally:
+            shutil.rmtree(scratch, ignore_errors=True)
 
     threading.Thread(target=do_update, daemon=True).start()
     return jsonify({"ok": True, "message": "Publisher database update started in background"})
@@ -1676,6 +1687,38 @@ def api_clear_logs():
 ensure_dirs()
 
 
+def _migrate_dbs_to_data_dir():
+    """Copy image-baked DBs to DATA_DIR on first boot so they survive image pulls.
+
+    No-op once the files exist in DATA_DIR; never overwrites an existing file.
+    """
+    import shutil
+    try:
+        test = DATA_DIR / ".write_test"
+        test.write_text("ok")
+        test.unlink()
+    except OSError as e:
+        log.error(f"DATA_DIR {DATA_DIR} is not writable — DB migration and rebuilds will fail: {e}")
+        return
+    pairs = [
+        (_BUNDLED_JOURNALS_DB, JOURNALS_DB),
+        (_BUNDLED_PUBLISHERS_DB, BOOK_PUBLISHERS_DB),
+    ]
+    for bundled, target in pairs:
+        if target.exists():
+            continue
+        if not bundled.exists():
+            log.info(f"DB migration: bundled {bundled.name} not present; skipping")
+            continue
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(bundled, target)
+            log.info(f"DB migration: copied {bundled} → {target} "
+                     f"({target.stat().st_size / 1024 / 1024:.1f} MB)")
+        except Exception as e:
+            log.error(f"DB migration failed for {bundled}: {e}")
+
+
 def _migrate_clean_existing_abstracts():
     """One-shot pass over cached articles to normalise abstracts.
 
@@ -1755,6 +1798,7 @@ def _migrate_fix_openalex_urls():
 
 
 _migrate_fix_openalex_urls()
+_migrate_dbs_to_data_dir()
 
 # Start background scheduler only once (gunicorn may fork multiple workers)
 # We use an env flag to ensure only one scheduler runs

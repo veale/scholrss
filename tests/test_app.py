@@ -744,6 +744,39 @@ class TestBookFeeds:
         assert all(w.get("title") for w in works)
 
 
+class TestDbMigration:
+    def test_migration_copies_bundled_when_data_dir_empty(self, tmp_path, monkeypatch):
+        bundled = tmp_path / "bundled.db"
+        bundled.write_bytes(b"fake-sqlite-content")
+        target = tmp_path / "data" / "bundled.db"
+        monkeypatch.setattr(scholrss, "_BUNDLED_PUBLISHERS_DB", bundled)
+        monkeypatch.setattr(scholrss, "BOOK_PUBLISHERS_DB", target)
+        monkeypatch.setattr(scholrss, "_BUNDLED_JOURNALS_DB", tmp_path / "nope.db")
+        monkeypatch.setattr(scholrss, "JOURNALS_DB", tmp_path / "nope_target.db")
+        monkeypatch.setattr(scholrss, "DATA_DIR", tmp_path)
+
+        scholrss._migrate_dbs_to_data_dir()
+
+        assert target.exists()
+        assert target.read_bytes() == b"fake-sqlite-content"
+
+    def test_migration_never_overwrites_existing(self, tmp_path, monkeypatch):
+        bundled = tmp_path / "bundled.db"
+        bundled.write_bytes(b"new-version")
+        target = tmp_path / "data" / "bundled.db"
+        target.parent.mkdir()
+        target.write_bytes(b"user-version")
+        monkeypatch.setattr(scholrss, "_BUNDLED_PUBLISHERS_DB", bundled)
+        monkeypatch.setattr(scholrss, "BOOK_PUBLISHERS_DB", target)
+        monkeypatch.setattr(scholrss, "_BUNDLED_JOURNALS_DB", tmp_path / "nope.db")
+        monkeypatch.setattr(scholrss, "JOURNALS_DB", tmp_path / "nope_target.db")
+        monkeypatch.setattr(scholrss, "DATA_DIR", tmp_path)
+
+        scholrss._migrate_dbs_to_data_dir()
+
+        assert target.read_bytes() == b"user-version"
+
+
 class TestSemanticScholar:
     def test_batch_abstracts_empty(self):
         result = scholrss.semantic_scholar_batch_abstracts([])
