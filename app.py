@@ -218,10 +218,19 @@ def _parse_crossref_date(item):
 
 
 def crossref_latest_works(issn, from_date, rows=100):
-    """Fetch recent works from CrossRef for a given ISSN."""
+    """Fetch recent works from CrossRef for a given ISSN.
+
+    We intentionally don't pass ``from-pub-date`` to CrossRef: that filter
+    checks the ``issued`` field, which for some journals (e.g. Utrecht Law
+    Review, 1871-515X) only carries year resolution — so a mid-year cutoff
+    like 2025-04-21 drops everything from 2025 even though ``published-print``
+    shows Sept/Oct 2025. Instead we sort by ``published`` desc, over-fetch,
+    and rely on the client-side clip (using _parse_crossref_date, which
+    prefers published-print/online) to apply the lookback window.
+    """
     url = "https://api.crossref.org/works"
     params = {
-        "filter": f"issn:{issn},from-pub-date:{from_date},type:journal-article",
+        "filter": f"issn:{issn},type:journal-article",
         "sort": "published",
         "order": "desc",
         "rows": max(1, min(1000, rows)),
