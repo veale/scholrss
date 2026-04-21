@@ -1128,6 +1128,7 @@
             <a class="btn btn-sm" href="{{ base_url }}/feed/book/{{ feed_id }}?format=rss">RSS</a>
             <a class="btn btn-sm" href="{{ base_url }}/feed/book/{{ feed_id }}/json">JSON</a>
             <button class="btn btn-sm" onclick="refreshBookFeed('{{ feed_id }}')">↻ Refresh</button>
+            <button class="btn btn-sm" onclick='editBookFeed({{ feed_id | tojson }}, {{ info | tojson }})' title="Edit feed">✎ Edit</button>
             <button class="btn btn-sm btn-danger" onclick="deleteBookFeed('{{ feed_id }}')">Remove</button>
           </div>
         </div>
@@ -1201,6 +1202,7 @@ let acTimer = null;
 let acActive = -1;
 let bookAcTimer = null;
 let bookAcActive = -1;
+let bookEditingFeedId = null;
 const bookPublisherInput = document.getElementById('bookPublisherInput');
 const bookAcDropdown = document.getElementById('bookAcDropdown');
 const bookChipsEl = document.getElementById('bookChips');
@@ -1333,13 +1335,16 @@ async function saveBookFeed() {
     preview.textContent = 'Select at least one type (Books or Book chapters).';
     return;
   }
-  if (!config.publishers.length) {
-    preview.textContent = 'Cannot save without publishers.';
+  if (!config.publishers.length && !config.keywords.length) {
+    preview.textContent = 'Cannot save without publishers or keywords.';
     return;
   }
+  const isEdit = !!bookEditingFeedId;
+  const url = isEdit ? `/api/books/feed/${bookEditingFeedId}` : '/api/books/feed';
+  const method = isEdit ? 'PUT' : 'POST';
   try {
-    const response = await fetch('/api/books/feed', {
-      method: 'POST',
+    const response = await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config),
     });
@@ -1349,10 +1354,74 @@ async function saveBookFeed() {
       return;
     }
     preview.textContent = `Book feed ${data.feed_id} saved.`;
-    toast(`Saved book feed ${data.feed_id}.`);
+    toast(isEdit ? `Updated book feed ${data.feed_id}. Re-fetching…` : `Saved book feed ${data.feed_id}.`);
+    if (isEdit) {
+      cancelBookEdit();
+      setTimeout(() => location.reload(), 1500);
+    }
   } catch (err) {
     preview.textContent = `Save failed: ${err.message}`;
   }
+}
+
+function editBookFeed(feed_id, info) {
+  bookEditingFeedId = feed_id;
+  // Open the add panel and switch to books tab
+  const panel = document.getElementById('addPanel');
+  if (panel && !panel.classList.contains('open')) panel.classList.add('open');
+  setSearchMode('books');
+
+  // Populate form fields from the stored feed info
+  document.getElementById('bookLabel').value = info.label || '';
+  document.getElementById('bookKeywords').value = (info.keywords || []).join(', ');
+  document.getElementById('bookExcludeKeywords').value = (info.exclude_keywords || []).join(', ');
+  const types = info.types || ['book'];
+  document.getElementById('bookTypeBook').checked = types.includes('book');
+  document.getElementById('bookTypeChapter').checked = types.includes('book-chapter');
+  const match = info.keywords_match || info.match || 'any';
+  const matchRadio = document.querySelector(`input[name="bookMatch"][value="${match}"]`);
+  if (matchRadio) matchRadio.checked = true;
+
+  // Replace current publisher chips with those from the feed
+  bookPublishers.length = 0;
+  for (const p of (info.publishers || [])) {
+    bookPublishers.push({ id: p.id, name: p.name || p.id });
+  }
+  renderBookChips();
+
+  // Swap Save button to indicate edit mode, add a Cancel button
+  const saveBtn = document.getElementById('bookSaveBtn');
+  saveBtn.textContent = `Update feed "${feed_id}"`;
+  const actions = document.getElementById('bookActions');
+  if (!document.getElementById('bookCancelEditBtn')) {
+    const cancel = document.createElement('button');
+    cancel.id = 'bookCancelEditBtn';
+    cancel.className = 'btn';
+    cancel.textContent = 'Cancel edit';
+    cancel.onclick = cancelBookEdit;
+    actions.appendChild(cancel);
+  }
+  bookPreviewEl.textContent = `Editing feed "${feed_id}". Feed URL stays the same after save.`;
+  bookPreviewList.innerHTML = '';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelBookEdit() {
+  bookEditingFeedId = null;
+  // Clear form
+  document.getElementById('bookLabel').value = '';
+  document.getElementById('bookKeywords').value = '';
+  document.getElementById('bookExcludeKeywords').value = '';
+  document.getElementById('bookTypeBook').checked = true;
+  document.getElementById('bookTypeChapter').checked = false;
+  const anyRadio = document.querySelector('input[name="bookMatch"][value="any"]');
+  if (anyRadio) anyRadio.checked = true;
+  bookPublishers.length = 0;
+  renderBookChips();
+  document.getElementById('bookSaveBtn').textContent = 'Save feed';
+  document.getElementById('bookCancelEditBtn')?.remove();
+  bookPreviewEl.textContent = '';
+  bookPreviewList.innerHTML = '';
 }
 
 function collectBookFeedConfig() {

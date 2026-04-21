@@ -52,6 +52,7 @@ A self-hosted scholarly RSS feed generator that pulls article metadata from **Cr
 | `UPDATE_INTERVAL_HOURS` | `24` | Hours between automatic feed refreshes (used when no daily refresh time is set) |
 | `LOOKBACK_DAYS` | `365` | Default lookback window (overridden by UI setting) |
 | `MAX_ARTICLES` | `100` | Max articles fetched/cached per journal (1–1000; overridden by UI setting) |
+| `BOOK_FETCH_EDITORS` | `1` | When set, book-chapter entries get a best-effort editor list by fetching the parent book. Disable to save API calls for chapter-heavy feeds. |
 | `DATA_DIR` | `/data` | Where journals config and cache are stored |
 | `JOURNALS_DB` | `${DATA_DIR}/journals.db` | Path to the journal autocomplete DB. Override only if you want to share a DB between containers. |
 | `BOOK_PUBLISHERS_DB` | `${DATA_DIR}/bookpublishers.db` | Path to the book publisher autocomplete DB. Same caveat. |
@@ -174,6 +175,15 @@ To track several independent slices of the same mega-journal (e.g. one SSRN feed
 ## Book feeds
 
 Books (and book chapters) can be tracked via the new **Books** tab. Define a set of publishers, optional keywords/exclusions, document how they match (ANY/ALL), and preview the candidate works that OpenAlex would return. Saving the configuration persists it in `book_feeds.json`, populates a dedicated cache file (`cache/book__{feed_id}.json`), and makes the stream available via `/feed/book/{feed_id}` (Atom/RSS/JSON) plus the OPML export. A background refresh thread keeps the cache up to date on the same schedule that journals use, and `/api/refresh/book/{feed_id}` lets you trigger an on-demand run. Publisher autocomplete is backed by `bookpublishers.db`, generated with `publisher_merge.py`.
+
+### Bibliographic annotations
+
+Book and book-chapter entries surface bibliographic context in both title and summary:
+
+- Books show `(Publisher)` after the title, plus `Publisher: <name>` in the summary footer.
+- Book chapters show `(Publisher, Parent Volume Title)` after the title, plus `In: <volume>` / `Editors: <names>` / `Publisher: <name>` in the summary footer.
+
+Editors are inferred from OpenAlex `authorships` on the parent-book lookup, which is best-effort because OpenAlex has no dedicated editors field. If parent lookup is unavailable or fails, the editors line is omitted silently. Set `BOOK_FETCH_EDITORS=0` to disable editor lookups entirely.
 
 ## Abstract Enrichment Pipeline
 

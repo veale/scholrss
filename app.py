@@ -30,6 +30,7 @@ LOOKBACK_DAYS_DEFAULT = int(os.environ.get("LOOKBACK_DAYS", 365))
 MAX_ARTICLES_DEFAULT = int(os.environ.get("MAX_ARTICLES", 100))
 SETTINGS_FILE = DATA_DIR / "settings.json"
 BOOK_FEEDS_FILE = DATA_DIR / "book_feeds.json"
+BOOK_FETCH_EDITORS = os.environ.get("BOOK_FETCH_EDITORS", "1").lower() in ("1", "true", "yes")
 
 # ── Abstract cleaning ──────────────────────────────────────────────────────
 # Strip JATS/HTML tags and a leading "Abstract" heading that publishers sometimes
@@ -69,6 +70,8 @@ logging.getLogger().addHandler(_file_handler)
 app = Flask(__name__)
 _journals_lock = threading.Lock()
 _book_feeds_lock = threading.Lock()
+_parent_editors_cache = {}
+_parent_editors_lock = threading.Lock()
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -442,6 +445,49 @@ def openalex_enrich_abstract(doi):
     except Exception:
         return ""
 
+
+def _fetch_book_editors(source_id):
+    """Best-effort lookup of editor names for a parent book source.
+
+    OpenAlex has no dedicated editors field. For chapter works, we fetch a
+    representative book work from the same source and treat its authorships as
+    editor-like attribution.
+    """
+    if not BOOK_FETCH_EDITORS or not source_id:
+        return []
+
+    with _parent_editors_lock:
+        if source_id in _parent_editors_cache:
+            return _parent_editors_cache[source_id]
+
+    editors = []
+    source_id = source_id.rstrip("/").split("/")[-1]
+    try:
+        url = "https://api.openalex.org/works"
+        params = {
+            "filter": f"primary_location.source.id:https://openalex.org/{source_id.lower()},type:book",
+            "per-page": 1,
+            "sort": "publication_date:desc",
+        }
+        params.update(openalex_params())
+        r = requests.get(url, params=params, headers=openalex_headers(), timeout=15)
+        if r.status_code == 200:
+            results = r.json().get("results") or []
+            if results:
+                for auth in (results[0].get("authorships") or []):
+                    name = (auth.get("author") or {}).get("display_name")
+                    if name:
+                        editors.append(name)
+        else:
+            log.info(f"Editor lookup for {source_id} returned {r.status_code}")
+        time.sleep(0.15)
+    except Exception as e:
+        log.warning(f"Editor lookup failed for {source_id}: {e}")
+
+    with _parent_editors_lock:
+        _parent_editors_cache[source_id] = editors
+    return editors
+
 def _openalex_work_to_record(w):
     """Normalise an OpenAlex /works result into our internal work dict."""
     doi_url = w.get("doi") or ""
@@ -479,6 +525,13 @@ def _openalex_work_to_record(w):
     oa_id = (w.get("id") or "").rstrip("/").split("/")[-1]
     url = doi_url or (f"https://openalex.org/{oa_id}" if oa_id else "")
 
+    source = (w.get("primary_location") or {}).get("source") or {}
+    source_id = (source.get("id") or "").rstrip("/").split("/")[-1]
+    source_type = source.get("type") or ""
+    source_display_name = source.get("display_name") or ""
+    publisher_name = source.get("host_organization_name") or ""
+    work_type = (w.get("type") or "").lower()
+
     return {
         "doi": doi,
         "title": title,
@@ -487,6 +540,11 @@ def _openalex_work_to_record(w):
         "abstract": abstract,
         "url": url,
         "source": "openalex",
+        "type": work_type,
+        "publisher": publisher_name,
+        "parent_source_id": source_id,
+        "parent_title": source_display_name if work_type == "book-chapter" else "",
+        "source_type": source_type,
     }
 
 
@@ -833,6 +891,19 @@ def update_book_feed(feed_id, feed_info):
     if len(works) != before:
         log.info(f"  Clipped {before - len(works)} works published before {cutoff.date()}")
 
+    if BOOK_FETCH_EDITORS:
+        for w in works:
+            if w.get("type") == "book-chapter" and w.get("parent_source_id"):
+                w["editors"] = _fetch_book_editors(w["parent_source_id"])
+            else:
+                w["editors"] = []
+    else:
+        for w in works:
+            w["editors"] = []
+
+    editor_hits = sum(1 for w in works if w.get("editors"))
+    log.info(f"  Editors populated for {editor_hits}/{len(works)} works")
+
     works.sort(key=lambda x: x.get("date"), reverse=True)
     cache = {
         "feed_id": feed_id,
@@ -900,12 +971,50 @@ def scheduler_loop():
 
 # ── RSS Generation ──────────────────────────────────────────────────────────
 
+def _book_title_suffix(work):
+    """Return the parenthesised suffix for book/chapter entries."""
+    wtype = (work.get("type") or "").lower()
+    pub = (work.get("publisher") or "").strip()
+    parent = (work.get("parent_title") or "").strip()
+    if wtype == "book" and pub:
+        return f" ({pub})"
+    if wtype == "book-chapter" and (pub or parent):
+        if pub and parent:
+            return f" ({pub}, {parent})"
+        return f" ({pub or parent})"
+    return ""
+
+
+def _book_context_lines(work):
+    """Return summary footer context lines for book/chapter works."""
+    wtype = (work.get("type") or "").lower()
+    if wtype not in ("book", "book-chapter"):
+        return []
+
+    lines = []
+    parent = (work.get("parent_title") or "").strip()
+    editors = work.get("editors") or []
+    pub = (work.get("publisher") or "").strip()
+
+    if wtype == "book-chapter" and parent:
+        lines.append(f"In: {parent}")
+    if editors:
+        shown = ", ".join(editors[:5])
+        if len(editors) > 5:
+            shown += f" et al. ({len(editors)} editors)"
+        lines.append(f"Editors: {shown}")
+    if pub:
+        lines.append(f"Publisher: {pub}")
+    return lines
+
 def _populate_feed_entries(fg, works):
     max_entries = min(get_max_articles(), 50)
     for work in works[:max_entries]:
         fe = fg.add_entry()
+        title = work["title"]
+        suffix = _book_title_suffix(work)
+        fe.title(f"{title}{suffix}" if suffix else title)
         fe.id(work["url"] or work["doi"] or work["title"])
-        fe.title(work["title"])
         if work["url"]:
             fe.link(href=work["url"])
 
@@ -921,12 +1030,18 @@ def _populate_feed_entries(fg, works):
 
         summary_parts = []
         if work["authors"]:
-            summary_parts.append(", ".join(work["authors"][:5]))
+            byline = ", ".join(work["authors"][:5])
             if len(work["authors"]) > 5:
-                summary_parts[-1] += f" et al. ({len(work['authors'])} authors)"
+                byline += f" et al. ({len(work['authors'])} authors)"
+            summary_parts.append(byline)
         if work["abstract"]:
             summary_parts.append("")
             summary_parts.append(work["abstract"])
+
+        context_lines = _book_context_lines(work)
+        if context_lines:
+            summary_parts.append("")
+            summary_parts.extend(context_lines)
 
         fe.summary("\n".join(summary_parts) if summary_parts else "No abstract available.")
 
@@ -1359,6 +1474,26 @@ def api_refresh_book_feed(feed_id):
     if feed_id not in book_feeds:
         return jsonify({"error": "not found"}), 404
     threading.Thread(target=update_book_feed, args=(feed_id, book_feeds[feed_id]), daemon=True).start()
+    return jsonify({"ok": True, "feed_id": feed_id})
+
+
+@app.route("/api/books/feed/<feed_id>", methods=["PUT"])
+def api_update_book_feed(feed_id):
+    """Update an existing book feed in place (keeps feed_id / URL stable)."""
+    if not _valid_feed_id(feed_id):
+        return jsonify({"error": "invalid feed id"}), 400
+    book_feeds = load_book_feeds()
+    if feed_id not in book_feeds:
+        return jsonify({"error": "not found"}), 404
+    payload = request.get_json() or {}
+    config = _normalize_book_feed_payload(payload)
+    if not config["publishers"] and not config["keywords"]:
+        return jsonify({"error": "At least one publisher or keyword is required."}), 400
+    existing = book_feeds[feed_id]
+    config["added"] = existing.get("added") or datetime.now(timezone.utc).isoformat()
+    book_feeds[feed_id] = config
+    save_book_feeds(book_feeds)
+    threading.Thread(target=update_book_feed, args=(feed_id, config), daemon=True).start()
     return jsonify({"ok": True, "feed_id": feed_id})
 
 

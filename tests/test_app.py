@@ -632,7 +632,7 @@ class TestBookFeeds:
         feed_id = "generated_books"
         cache = {
             "label": "Generated Books",
-            "publishers": [{"id": "P123", "name": "Example Publisher"}],
+            "publishers": [{"id": "P123", "name": "Routledge"}],
             "keywords": ["ai"],
             "works": [{
                 "doi": "10.1234/book",
@@ -642,6 +642,10 @@ class TestBookFeeds:
                 "abstract": "Test abstract",
                 "url": "https://doi.org/10.1234/book",
                 "source": "openalex",
+                "type": "book",
+                "publisher": "Routledge",
+                "parent_title": "",
+                "editors": [],
             }],
             "updated": "2026-04-20T00:00:00+00:00",
         }
@@ -650,7 +654,8 @@ class TestBookFeeds:
         assert fg is not None
         xml = fg.atom_str(pretty=True).decode()
         assert "Generated Books" in xml
-        assert "Beautiful Book" in xml
+        assert "Beautiful Book (Routledge)" in xml
+        assert "Publisher: Routledge" in xml
 
     def test_book_query_builds_filter_with_publisher_lineage(self):
         with patch("app.requests.get") as mock_get:
@@ -837,6 +842,127 @@ class TestOpenAlexEnrich:
         with patch("app.requests.get", return_value=mock_response):
             result = scholrss.openalex_enrich_abstract("10.1234/test")
         assert result == ""
+
+
+class TestOpenAlexBookMetadata:
+    def test_openalex_record_extracts_publisher_and_parent_for_chapter(self):
+        raw = {
+            "id": "https://openalex.org/W123",
+            "doi": "https://doi.org/10.1234/chap",
+            "title": "Fairness in Foundation Models",
+            "type": "book-chapter",
+            "publication_date": "2025-03-15",
+            "authorships": [{"author": {"display_name": "Jane Smith"}}],
+            "primary_location": {
+                "source": {
+                    "id": "https://openalex.org/S4306519632",
+                    "display_name": "Handbook of AI Ethics",
+                    "host_organization_name": "Oxford University Press",
+                    "type": "book series",
+                }
+            },
+        }
+        rec = scholrss._openalex_work_to_record(raw)
+        assert rec["type"] == "book-chapter"
+        assert rec["publisher"] == "Oxford University Press"
+        assert rec["parent_title"] == "Handbook of AI Ethics"
+        assert rec["parent_source_id"] == "S4306519632"
+
+    def test_openalex_record_omits_parent_for_books(self):
+        raw = {
+            "id": "https://openalex.org/W456",
+            "title": "Democracy in Crisis",
+            "type": "book",
+            "publication_date": "2025-03-15",
+            "authorships": [{"author": {"display_name": "Jane Smith"}}],
+            "primary_location": {
+                "source": {
+                    "display_name": "Routledge Politics",
+                    "host_organization_name": "Routledge",
+                    "type": "ebook platform",
+                }
+            },
+        }
+        rec = scholrss._openalex_work_to_record(raw)
+        assert rec["publisher"] == "Routledge"
+        assert rec["parent_title"] == ""
+
+    def test_fetch_book_editors_uses_cache(self, monkeypatch):
+        scholrss._parent_editors_cache.clear()
+        calls = []
+
+        class FakeResp:
+            status_code = 200
+
+            def json(self):
+                return {
+                    "results": [{
+                        "authorships": [
+                            {"author": {"display_name": "Alice Lee"}},
+                            {"author": {"display_name": "Bob Chen"}},
+                        ]
+                    }]
+                }
+
+        def fake_get(url, params=None, headers=None, timeout=None):
+            calls.append(params["filter"])
+            return FakeResp()
+
+        monkeypatch.setattr(scholrss.requests, "get", fake_get)
+        monkeypatch.setattr(scholrss.time, "sleep", lambda *_: None)
+
+        a = scholrss._fetch_book_editors("S123")
+        b = scholrss._fetch_book_editors("S123")
+        assert a == ["Alice Lee", "Bob Chen"]
+        assert b == ["Alice Lee", "Bob Chen"]
+        assert len(calls) == 1
+
+    def test_fetch_book_editors_skipped_when_flag_off(self, monkeypatch):
+        scholrss._parent_editors_cache.clear()
+        monkeypatch.setattr(scholrss, "BOOK_FETCH_EDITORS", False)
+        monkeypatch.setattr(
+            scholrss.requests,
+            "get",
+            lambda *a, **k: pytest.fail("should not call API"),
+        )
+        assert scholrss._fetch_book_editors("S123") == []
+
+    def test_title_suffix_book(self):
+        w = {"type": "book", "publisher": "Routledge", "parent_title": ""}
+        assert scholrss._book_title_suffix(w) == " (Routledge)"
+
+    def test_title_suffix_chapter_with_both(self):
+        w = {"type": "book-chapter", "publisher": "OUP", "parent_title": "Handbook"}
+        assert scholrss._book_title_suffix(w) == " (OUP, Handbook)"
+
+    def test_title_suffix_chapter_publisher_only(self):
+        w = {"type": "book-chapter", "publisher": "OUP", "parent_title": ""}
+        assert scholrss._book_title_suffix(w) == " (OUP)"
+
+    def test_title_suffix_journal_article_unchanged(self):
+        w = {"type": "article", "publisher": "Elsevier", "parent_title": ""}
+        assert scholrss._book_title_suffix(w) == ""
+
+    def test_context_lines_full_chapter(self):
+        w = {
+            "type": "book-chapter",
+            "publisher": "OUP",
+            "parent_title": "Handbook of AI Ethics",
+            "editors": ["Alice Lee", "Bob Chen"],
+        }
+        assert scholrss._book_context_lines(w) == [
+            "In: Handbook of AI Ethics",
+            "Editors: Alice Lee, Bob Chen",
+            "Publisher: OUP",
+        ]
+
+    def test_context_lines_book_no_editors(self):
+        w = {"type": "book", "publisher": "Routledge", "parent_title": "", "editors": []}
+        assert scholrss._book_context_lines(w) == ["Publisher: Routledge"]
+
+    def test_context_lines_empty_for_articles(self):
+        w = {"type": "article", "publisher": "Elsevier"}
+        assert scholrss._book_context_lines(w) == []
 
 
 # ── Integration Tests (hit real APIs) ──────────────────────────────────────
