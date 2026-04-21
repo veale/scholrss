@@ -85,7 +85,16 @@ def download_publishers():
 
 
 def parse_id(raw_id):
+    """Normalize OpenAlex IDs from either string or object form.
+
+    OpenAlex publisher snapshots now sometimes represent related IDs as objects,
+    e.g. {"id": "https://openalex.org/P...", "display_name": "..."}.
+    """
     if not raw_id:
+        return ""
+    if isinstance(raw_id, dict):
+        raw_id = raw_id.get("id") or raw_id.get("openalex") or ""
+    if not isinstance(raw_id, str):
         return ""
     return raw_id.rstrip("/").split("/")[-1]
 
@@ -134,7 +143,8 @@ def merge_publishers():
 
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
-    cur.execute("PRAGMA journal_mode=WAL")
+    # Keep the DB self-contained in one file so the updater can move it atomically.
+    cur.execute("PRAGMA journal_mode=DELETE")
     cur.execute("DROP TABLE IF EXISTS publishers")
     cur.execute("DROP TABLE IF EXISTS publishers_fts")
     cur.execute("CREATE TABLE publishers (\n"
