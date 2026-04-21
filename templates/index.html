@@ -848,9 +848,23 @@
         Create a new filtered feed variant. Ideal for mega-journals where a plain feed would be unusable —
         stack as many as you like on the same ISSN. Uses OpenAlex server-side filtering.
       </div>
-      <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">ISSN of source journal</label>
-      <input type="text" id="ffIssn" placeholder="e.g. 1556-5068 (SSRN) or 2331-8422 (arXiv)"
-             style="width:100%;font-family:var(--mono);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);margin-bottom:0.5rem;">
+      <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">Source journal</label>
+      <div class="search-tabs" style="margin-bottom:0.35rem;">
+        <button type="button" class="search-tab active" data-ffmode="name" onclick="setFfMode('name')">By name</button>
+        <button type="button" class="search-tab" data-ffmode="issn" onclick="setFfMode('issn')">By ISSN</button>
+        <button type="button" class="search-tab" data-ffmode="doi" onclick="setFfMode('doi')">From a DOI</button>
+      </div>
+      <div class="ac-wrap" id="ffAcWrap" style="position:relative;">
+        <input type="text" id="ffJournalInput" autocomplete="off"
+               placeholder="Start typing a journal name..."
+               style="width:100%;font-family:var(--serif);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);">
+        <div class="ac-dropdown" id="ffAcDropdown"></div>
+      </div>
+      <div id="ffSelected" style="display:none;font-size:0.78rem;color:var(--text-dim);margin:0.35rem 0 0.5rem;">
+        Selected: <strong id="ffSelectedLabel" style="color:var(--text);"></strong>
+        <button type="button" class="btn btn-sm" onclick="clearFfSelection()" style="margin-left:0.4rem;">change</button>
+      </div>
+      <input type="hidden" id="ffIssn">
       <label style="display:block;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.2rem;">Label (shown alongside the journal title)</label>
       <input type="text" id="ffLabel" placeholder="e.g. Privacy &amp; regulation"
              style="width:100%;font-family:var(--serif);font-size:0.85rem;padding:0.35rem 0;background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);margin-bottom:0.5rem;">
@@ -1062,7 +1076,7 @@ function setSearchMode(mode) {
     filteredRow.style.display = 'block';
     if (mode === 'ssrn') {
       // Pre-fill SSRN defaults (all editable)
-      document.getElementById('ffIssn').value = '1556-5068';
+      setFfSelection('1556-5068', 'SSRN Electronic Journal', 'Elsevier BV');
       document.getElementById('ffSourceId').value = 'S4210172589';
       document.getElementById('ffUseS2').checked = true;
       document.getElementById('ffS2Venue').value = 'SSRN';
@@ -1071,6 +1085,13 @@ function setSearchMode(mode) {
       document.getElementById('ffKeywords').value = '';
       document.getElementById('ffAuthors').value = '';
       document.getElementById('ffKeywords').focus();
+    } else {
+      // Plain filtered tab — reset any residual SSRN preset selection
+      clearFfSelection();
+      document.getElementById('ffSourceId').value = '';
+      document.getElementById('ffUseS2').checked = false;
+      document.getElementById('ffS2Venue').value = '';
+      document.getElementById('ffS2VenueRow').style.display = 'none';
     }
   } else {
     searchRow.style.display = 'flex';
@@ -1288,8 +1309,151 @@ async function doBulkImport() {
   btn.textContent = 'Import all';
 }
 
+// ── Filtered-feed journal selector (name / issn / doi) ────────
+let ffMode = 'name';
+let ffAcTimer = null;
+let ffSelection = null; // { issn, title, publisher }
+
+function setFfMode(mode) {
+  ffMode = mode;
+  document.querySelectorAll('[data-ffmode]').forEach(t =>
+    t.classList.toggle('active', t.dataset.ffmode === mode));
+  const input = document.getElementById('ffJournalInput');
+  const placeholders = {
+    name: 'Start typing a journal name...',
+    issn: 'Enter ISSN, then press Enter (e.g. 0028-0836)',
+    doi:  'Enter a DOI, then press Enter (e.g. 10.1038/nature12373)',
+  };
+  input.placeholder = placeholders[mode] || '';
+  input.value = '';
+  document.getElementById('ffAcDropdown').classList.remove('open');
+}
+
+function setFfSelection(issn, title, publisher) {
+  ffSelection = { issn: issn || '', title: title || '', publisher: publisher || '' };
+  document.getElementById('ffIssn').value = ffSelection.issn;
+  const label = `${title || issn}${issn ? ' · ' + issn : ''}${publisher ? ' · ' + publisher : ''}`;
+  document.getElementById('ffSelectedLabel').textContent = label;
+  document.getElementById('ffSelected').style.display = 'block';
+  document.getElementById('ffAcWrap').style.display = 'none';
+  document.getElementById('ffAcDropdown').classList.remove('open');
+}
+
+function clearFfSelection() {
+  ffSelection = null;
+  document.getElementById('ffIssn').value = '';
+  document.getElementById('ffSelected').style.display = 'none';
+  document.getElementById('ffAcWrap').style.display = '';
+  document.getElementById('ffJournalInput').value = '';
+  document.getElementById('ffAcDropdown').classList.remove('open');
+}
+
+(function setupFfSelector() {
+  const input = document.getElementById('ffJournalInput');
+  const dd = document.getElementById('ffAcDropdown');
+  if (!input) return;
+
+  input.addEventListener('input', () => {
+    if (ffMode !== 'name') return;
+    clearTimeout(ffAcTimer);
+    const q = input.value.trim();
+    if (q.length < 2) { dd.classList.remove('open'); return; }
+    ffAcTimer = setTimeout(() => ffAcFetch(q), 150);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const q = input.value.trim();
+    if (!q) return;
+    if (ffMode === 'issn') ffLookupIssn(q);
+    else if (ffMode === 'doi') ffLookupDoi(q);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#ffAcWrap')) dd.classList.remove('open');
+  });
+})();
+
+async function ffAcFetch(q) {
+  const dd = document.getElementById('ffAcDropdown');
+  try {
+    const r = await fetch(`/api/autocomplete?q=${encodeURIComponent(q)}`);
+    const data = await r.json();
+    let html = '';
+    if (data.length) {
+      html = data.map(j => {
+        const issns = j.issn || [];
+        const issnFirst = issns[0] || '';
+        const tags = issns.slice(0, 3).map(i => `<span class="sr-issn">${i}</span>`).join(' ');
+        const meta = [tags];
+        if (j.publisher) meta.push(escHtml(j.publisher));
+        if (j.works_count) meta.push(`${j.works_count.toLocaleString()} works`);
+        return `<div class="ac-item" onclick="setFfSelection('${escAttr(issnFirst)}','${escAttr(j.title)}','${escAttr(j.publisher || '')}')">`
+          + `<div class="ac-item-info">`
+          + `<div class="ac-item-title">${escHtml(j.title)}</div>`
+          + `<div class="ac-item-meta">${meta.join(' · ')}</div>`
+          + `</div><button class="btn btn-sm btn-accent" tabindex="-1">Use</button></div>`;
+      }).join('');
+    } else {
+      html = '<div class="ac-hint">No local matches. Try the ISSN or DOI tab.</div>';
+    }
+    dd.innerHTML = html;
+    dd.classList.add('open');
+  } catch (e) {
+    dd.innerHTML = `<div class="ac-hint" style="color:var(--red)">Error: ${e.message}</div>`;
+    dd.classList.add('open');
+  }
+}
+
+async function ffLookupIssn(issn) {
+  const dd = document.getElementById('ffAcDropdown');
+  dd.innerHTML = '<div class="ac-hint"><span class="spinner"></span> Looking up ISSN…</div>';
+  dd.classList.add('open');
+  try {
+    const r = await fetch(`/api/autocomplete?q=${encodeURIComponent(issn)}`);
+    const data = await r.json();
+    const m = (data || []).find(j => (j.issn || []).some(i => i === issn));
+    if (m) { setFfSelection(issn, m.title, m.publisher || ''); return; }
+    const cr = await fetch(`https://api.crossref.org/journals/${encodeURIComponent(issn)}?mailto=scholrss`);
+    if (cr.ok) {
+      const d = await cr.json();
+      const msg = d.message || {};
+      setFfSelection(issn, msg.title || issn, msg.publisher || '');
+    } else {
+      dd.innerHTML = '<div class="ac-hint">ISSN not found. You can still submit it raw:</div>'
+        + `<div class="ac-item" onclick="setFfSelection('${escAttr(issn)}','${escAttr(issn)}','')">`
+        + `<div class="ac-item-info"><div class="ac-item-title">Use ISSN ${escHtml(issn)} as-is</div></div>`
+        + `<button class="btn btn-sm" tabindex="-1">Use</button></div>`;
+    }
+  } catch (e) {
+    dd.innerHTML = `<div class="ac-hint" style="color:var(--red)">Error: ${e.message}</div>`;
+  }
+}
+
+async function ffLookupDoi(doi) {
+  const dd = document.getElementById('ffAcDropdown');
+  dd.innerHTML = '<div class="ac-hint"><span class="spinner"></span> Resolving DOI…</div>';
+  dd.classList.add('open');
+  try {
+    const r = await fetch(`/api/search/doi?doi=${encodeURIComponent(doi)}`);
+    const data = await r.json();
+    if (data.error || !data.issn || !data.issn.length) {
+      dd.innerHTML = '<div class="ac-hint">No journal found for that DOI.</div>';
+      return;
+    }
+    setFfSelection(data.issn[0], data.title || data.issn[0], data.publisher || '');
+  } catch (e) {
+    dd.innerHTML = `<div class="ac-hint" style="color:var(--red)">Error: ${e.message}</div>`;
+  }
+}
+
 async function addFilteredFeed() {
-  const issn = document.getElementById('ffIssn').value.trim();
+  if (!ffSelection || !ffSelection.issn) {
+    toast('Pick a source journal (by name, ISSN, or DOI) first', true);
+    return;
+  }
+  const { issn, title, publisher } = ffSelection;
   const label = document.getElementById('ffLabel').value.trim();
   const keywords = document.getElementById('ffKeywords').value
     .split(',').map(s => s.trim()).filter(s => s);
@@ -1300,7 +1464,6 @@ async function addFilteredFeed() {
   const s2_venue = document.getElementById('ffS2Venue').value.trim();
   const matchEl = document.querySelector('input[name="ffMatch"]:checked');
   const match = matchEl ? matchEl.value : 'any';
-  if (!issn) { toast('ISSN is required', true); return; }
   if (!keywords.length && !authors.length) {
     toast('Add at least one keyword or author', true);
     return;
@@ -1308,16 +1471,6 @@ async function addFilteredFeed() {
   const btn = document.getElementById('ffBtn');
   const orig = btn.textContent;
   btn.innerHTML = '<span class="spinner"></span> Creating…';
-
-  // Best-effort title/publisher lookup so the card displays nicely. Falls
-  // back to the raw ISSN if nothing found.
-  let title = issn, publisher = '';
-  try {
-    const r = await fetch(`/api/autocomplete?q=${encodeURIComponent(issn)}`);
-    const data = await r.json();
-    const match = (data || []).find(j => (j.issn || []).some(i => i === issn));
-    if (match) { title = match.title; publisher = match.publisher || ''; }
-  } catch (e) { /* non-fatal */ }
 
   try {
     const r = await fetch('/api/journal/filtered', {
@@ -1328,7 +1481,7 @@ async function addFilteredFeed() {
     const data = await r.json();
     if (data.ok) {
       toast(`Created filtered feed ${data.feed_id}. Fetching via OpenAlex…`);
-      document.getElementById('ffIssn').value = '';
+      clearFfSelection();
       document.getElementById('ffLabel').value = '';
       document.getElementById('ffKeywords').value = '';
       document.getElementById('ffAuthors').value = '';
