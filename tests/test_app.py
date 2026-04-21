@@ -587,6 +587,35 @@ class TestBookFeeds:
         rv = client.post("/api/refresh/book/does_not_exist")
         assert rv.status_code == 404
 
+    def test_reannotate_book_feed(self, client):
+        feed_id = "reann_feed"
+        info = {
+            "publishers": [{"id": "P123", "name": "Example Publisher"}],
+            "label": "Reann Feed",
+            "keywords": ["ai"],
+        }
+        scholrss.save_book_feeds({feed_id: info})
+        scholrss.book_feed_cache_path(feed_id).write_text(json.dumps({"works": []}))
+        with patch.object(scholrss.threading.Thread, "start"):
+            rv = client.post(f"/api/books/feed/{feed_id}/reannotate")
+        assert rv.status_code == 200
+        assert rv.get_json()["ok"] is True
+        assert not scholrss.book_feed_cache_path(feed_id).exists()
+
+    def test_reannotate_all_book_feeds(self, client):
+        feeds = {
+            "f1": {"publishers": [{"id": "P1", "name": "A"}], "label": "A", "keywords": ["x"]},
+            "f2": {"publishers": [{"id": "P2", "name": "B"}], "label": "B", "keywords": ["y"]},
+        }
+        scholrss.save_book_feeds(feeds)
+        scholrss.book_feed_cache_path("f1").write_text(json.dumps({"works": []}))
+        scholrss.book_feed_cache_path("f2").write_text(json.dumps({"works": []}))
+        with patch.object(scholrss.threading.Thread, "start"):
+            rv = client.post("/api/books/reannotate-all")
+        assert rv.status_code == 200
+        assert rv.get_json()["ok"] is True
+        assert rv.get_json()["count"] == 2
+
     def test_delete_book_feed(self, client):
         feed_id = "delete_books"
         scholrss.save_book_feeds({
@@ -845,28 +874,66 @@ class TestOpenAlexEnrich:
 
 
 class TestOpenAlexBookMetadata:
-    def test_openalex_record_extracts_publisher_and_parent_for_chapter(self):
+    def test_openalex_record_uses_raw_source_name_for_chapter(self):
         raw = {
-            "id": "https://openalex.org/W123",
-            "doi": "https://doi.org/10.1234/chap",
-            "title": "Fairness in Foundation Models",
+            "id": "https://openalex.org/W7140207896",
+            "title": "Discrimination in the COVID-19 Response in Paraguay",
             "type": "book-chapter",
-            "publication_date": "2025-03-15",
-            "authorships": [{"author": {"display_name": "Jane Smith"}}],
+            "publication_date": "2026-03-24",
+            "authorships": [{"author": {"display_name": "Sebastian Codas Salinas"}}],
             "primary_location": {
+                "id": "doi:10.1093/oxfordhb/9780197761427.013.0025",
+                "raw_source_name": "The Oxford Handbook of Program Evaluation in the Global South",
                 "source": {
-                    "id": "https://openalex.org/S4306519632",
-                    "display_name": "Handbook of AI Ethics",
+                    "id": "https://openalex.org/S4306463708",
+                    "display_name": "Oxford University Press eBooks",
                     "host_organization_name": "Oxford University Press",
-                    "type": "book series",
+                    "type": "ebook platform",
                 }
             },
         }
         rec = scholrss._openalex_work_to_record(raw)
-        assert rec["type"] == "book-chapter"
         assert rec["publisher"] == "Oxford University Press"
-        assert rec["parent_title"] == "Handbook of AI Ethics"
-        assert rec["parent_source_id"] == "S4306519632"
+        assert rec["parent_title"] == "The Oxford Handbook of Program Evaluation in the Global South"
+        assert "eBooks" not in rec["parent_title"]
+
+    def test_openalex_record_falls_back_to_display_name_for_book_series(self):
+        raw = {
+            "id": "https://openalex.org/W999",
+            "title": "Chapter X",
+            "type": "book-chapter",
+            "publication_date": "2025-01-01",
+            "authorships": [],
+            "primary_location": {
+                "raw_source_name": "",
+                "source": {
+                    "display_name": "Lecture Notes in Computer Science",
+                    "host_organization_name": "Springer Nature",
+                    "type": "book series",
+                },
+            },
+        }
+        rec = scholrss._openalex_work_to_record(raw)
+        assert rec["parent_title"] == "Lecture Notes in Computer Science"
+
+    def test_openalex_record_omits_parent_title_for_ebook_platform_without_raw_name(self):
+        raw = {
+            "id": "https://openalex.org/W999",
+            "title": "Some Chapter",
+            "type": "book-chapter",
+            "publication_date": "2025-01-01",
+            "authorships": [],
+            "primary_location": {
+                "raw_source_name": "",
+                "source": {
+                    "display_name": "Elsevier eBooks",
+                    "host_organization_name": "Elsevier BV",
+                    "type": "ebook platform",
+                },
+            },
+        }
+        rec = scholrss._openalex_work_to_record(raw)
+        assert rec["parent_title"] == ""
 
     def test_openalex_record_omits_parent_for_books(self):
         raw = {
@@ -888,44 +955,41 @@ class TestOpenAlexBookMetadata:
         assert rec["parent_title"] == ""
 
     def test_fetch_book_editors_uses_cache(self, monkeypatch):
-        scholrss._parent_editors_cache.clear()
+        scholrss._editor_cache.clear()
         calls = []
 
         class FakeResp:
             status_code = 200
 
             def json(self):
-                return {
-                    "results": [{
-                        "authorships": [
-                            {"author": {"display_name": "Alice Lee"}},
-                            {"author": {"display_name": "Bob Chen"}},
-                        ]
-                    }]
-                }
+                return {"message": {"editor": [
+                    {"given": "Alice", "family": "Lee"},
+                    {"given": "Bob", "family": "Chen"},
+                ]}}
 
         def fake_get(url, params=None, headers=None, timeout=None):
-            calls.append(params["filter"])
+            calls.append(url)
             return FakeResp()
 
         monkeypatch.setattr(scholrss.requests, "get", fake_get)
         monkeypatch.setattr(scholrss.time, "sleep", lambda *_: None)
 
-        a = scholrss._fetch_book_editors("S123")
-        b = scholrss._fetch_book_editors("S123")
+        work = {"doi": "10.1093/oxfordhb/9780197761427.013.0025", "primary_location_doi": ""}
+        a = scholrss._fetch_book_editors(work)
+        b = scholrss._fetch_book_editors(work)
         assert a == ["Alice Lee", "Bob Chen"]
         assert b == ["Alice Lee", "Bob Chen"]
         assert len(calls) == 1
 
     def test_fetch_book_editors_skipped_when_flag_off(self, monkeypatch):
-        scholrss._parent_editors_cache.clear()
+        scholrss._editor_cache.clear()
         monkeypatch.setattr(scholrss, "BOOK_FETCH_EDITORS", False)
         monkeypatch.setattr(
             scholrss.requests,
             "get",
             lambda *a, **k: pytest.fail("should not call API"),
         )
-        assert scholrss._fetch_book_editors("S123") == []
+        assert scholrss._fetch_book_editors({"doi": "10.1234/test"}) == []
 
     def test_title_suffix_book(self):
         w = {"type": "book", "publisher": "Routledge", "parent_title": ""}

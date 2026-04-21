@@ -70,8 +70,17 @@ logging.getLogger().addHandler(_file_handler)
 app = Flask(__name__)
 _journals_lock = threading.Lock()
 _book_feeds_lock = threading.Lock()
-_parent_editors_cache = {}
-_parent_editors_lock = threading.Lock()
+_editor_cache = {}
+_editor_cache_lock = threading.Lock()
+
+_PARENT_DOI_STRIPPERS = [
+    # OUP Oxford Handbooks: .../<isbn>.<chapter> -> .../<isbn>
+    (re.compile(r"^(10\.1093/oxfordhb/\d+)\.\d+(?:\.\d+)?$", re.IGNORECASE), r"\1"),
+    # Springer chapters: 10.1007/978-..._N -> 10.1007/978-...
+    (re.compile(r"^(10\.1007/978-\d+-\d+-\d+-\d+)_\d+$", re.IGNORECASE), r"\1"),
+    # Elsevier chapters: 10.1016/B978-... .... -> 10.1016/B978-...
+    (re.compile(r"^(10\.1016/[Bb]978-[\d-]+\w?)\.[\d\-]+$", re.IGNORECASE), r"\1"),
+]
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -446,46 +455,76 @@ def openalex_enrich_abstract(doi):
         return ""
 
 
-def _fetch_book_editors(source_id):
-    """Best-effort lookup of editor names for a parent book source.
+def _derive_parent_book_dois(chapter_doi):
+    """Yield candidate parent-book DOIs from chapter DOI patterns."""
+    if not chapter_doi:
+        return
+    doi = chapter_doi.strip().lower()
+    for pattern, replacement in _PARENT_DOI_STRIPPERS:
+        candidate = pattern.sub(replacement, doi)
+        if candidate != doi:
+            yield candidate
 
-    OpenAlex has no dedicated editors field. For chapter works, we fetch a
-    representative book work from the same source and treat its authorships as
-    editor-like attribution.
-    """
-    if not BOOK_FETCH_EDITORS or not source_id:
+
+def _crossref_editors_for_doi(doi):
+    """Return structured editors from a Crossref work record, if present."""
+    if not doi:
+        return []
+    try:
+        url = f"https://api.crossref.org/works/{doi}"
+        r = requests.get(url, headers=crossref_headers(), timeout=15)
+        if r.status_code != 200:
+            return []
+        msg = (r.json() or {}).get("message") or {}
+        editors = msg.get("editor") or []
+        out = []
+        for ed in editors:
+            given = (ed.get("given") or "").strip()
+            family = (ed.get("family") or "").strip()
+            name = (given + " " + family).strip() or (ed.get("name") or "").strip()
+            if name:
+                out.append(name)
+        return out
+    except Exception as e:
+        log.info(f"Crossref editor lookup failed for {doi}: {e}")
         return []
 
-    with _parent_editors_lock:
-        if source_id in _parent_editors_cache:
-            return _parent_editors_cache[source_id]
+
+def _work_chapter_doi(work):
+    """Extract a chapter DOI from cached work fields."""
+    primary_location_doi = (work.get("primary_location_doi") or "").strip()
+    if primary_location_doi.lower().startswith("doi:"):
+        return primary_location_doi[4:].strip().lower()
+    doi = (work.get("doi") or "").strip().lower()
+    return doi
+
+
+def _fetch_book_editors(work):
+    """Best-effort editor lookup for chapter works via Crossref metadata."""
+    if not BOOK_FETCH_EDITORS:
+        return []
+
+    chapter_doi = _work_chapter_doi(work)
+    if not chapter_doi:
+        return []
+
+    with _editor_cache_lock:
+        if chapter_doi in _editor_cache:
+            return _editor_cache[chapter_doi]
 
     editors = []
-    source_id = source_id.rstrip("/").split("/")[-1]
     try:
-        url = "https://api.openalex.org/works"
-        params = {
-            "filter": f"primary_location.source.id:https://openalex.org/{source_id.lower()},type:book",
-            "per-page": 1,
-            "sort": "publication_date:desc",
-        }
-        params.update(openalex_params())
-        r = requests.get(url, params=params, headers=openalex_headers(), timeout=15)
-        if r.status_code == 200:
-            results = r.json().get("results") or []
-            if results:
-                for auth in (results[0].get("authorships") or []):
-                    name = (auth.get("author") or {}).get("display_name")
-                    if name:
-                        editors.append(name)
-        else:
-            log.info(f"Editor lookup for {source_id} returned {r.status_code}")
+        editors = _crossref_editors_for_doi(chapter_doi)
+        if not editors:
+            for parent_doi in _derive_parent_book_dois(chapter_doi):
+                editors = _crossref_editors_for_doi(parent_doi)
+                if editors:
+                    break
         time.sleep(0.15)
-    except Exception as e:
-        log.warning(f"Editor lookup failed for {source_id}: {e}")
+    finally:
+        with _editor_cache_lock:
+            _editor_cache[chapter_doi] = editors
 
-    with _parent_editors_lock:
-        _parent_editors_cache[source_id] = editors
     return editors
 
 def _openalex_work_to_record(w):
@@ -525,12 +564,21 @@ def _openalex_work_to_record(w):
     oa_id = (w.get("id") or "").rstrip("/").split("/")[-1]
     url = doi_url or (f"https://openalex.org/{oa_id}" if oa_id else "")
 
-    source = (w.get("primary_location") or {}).get("source") or {}
+    primary_location = w.get("primary_location") or {}
+    source = primary_location.get("source") or {}
     source_id = (source.get("id") or "").rstrip("/").split("/")[-1]
-    source_type = source.get("type") or ""
-    source_display_name = source.get("display_name") or ""
-    publisher_name = source.get("host_organization_name") or ""
+    source_type = (source.get("type") or "").strip()
+    source_display_name = (source.get("display_name") or "").strip()
+    raw_source_name = (primary_location.get("raw_source_name") or "").strip()
+    publisher_name = (source.get("host_organization_name") or "").strip()
     work_type = (w.get("type") or "").lower()
+
+    parent_title = ""
+    if work_type == "book-chapter":
+        if raw_source_name:
+            parent_title = raw_source_name
+        elif source_type in ("book series", "conference", "other"):
+            parent_title = source_display_name
 
     return {
         "doi": doi,
@@ -543,8 +591,9 @@ def _openalex_work_to_record(w):
         "type": work_type,
         "publisher": publisher_name,
         "parent_source_id": source_id,
-        "parent_title": source_display_name if work_type == "book-chapter" else "",
+        "parent_title": parent_title,
         "source_type": source_type,
+        "primary_location_doi": primary_location.get("id") or "",
     }
 
 
@@ -893,8 +942,8 @@ def update_book_feed(feed_id, feed_info):
 
     if BOOK_FETCH_EDITORS:
         for w in works:
-            if w.get("type") == "book-chapter" and w.get("parent_source_id"):
-                w["editors"] = _fetch_book_editors(w["parent_source_id"])
+            if w.get("type") == "book-chapter":
+                w["editors"] = _fetch_book_editors(w)
             else:
                 w["editors"] = []
     else:
@@ -902,7 +951,7 @@ def update_book_feed(feed_id, feed_info):
             w["editors"] = []
 
     editor_hits = sum(1 for w in works if w.get("editors"))
-    log.info(f"  Editors populated for {editor_hits}/{len(works)} works")
+    log.info(f"  Editors resolved for {editor_hits}/{len(works)} works")
 
     works.sort(key=lambda x: x.get("date"), reverse=True)
     cache = {
@@ -1509,6 +1558,39 @@ def api_delete_book_feed(feed_id):
     if cache_path.exists():
         cache_path.unlink()
     return jsonify({"ok": True})
+
+
+@app.route("/api/books/feed/<feed_id>/reannotate", methods=["POST"])
+def api_reannotate_book_feed(feed_id):
+    if not _valid_feed_id(feed_id):
+        return jsonify({"error": "invalid feed id"}), 400
+    feeds = load_book_feeds()
+    if feed_id not in feeds:
+        return jsonify({"error": "not found"}), 404
+    cache_path = book_feed_cache_path(feed_id)
+    if cache_path.exists():
+        cache_path.unlink()
+    threading.Thread(target=update_book_feed, args=(feed_id, feeds[feed_id]), daemon=True).start()
+    return jsonify({"ok": True, "feed_id": feed_id})
+
+
+@app.route("/api/books/reannotate-all", methods=["POST"])
+def api_reannotate_all_book_feeds():
+    def do_all():
+        feeds = load_book_feeds()
+        for feed_id, info in feeds.items():
+            try:
+                cache_path = book_feed_cache_path(feed_id)
+                if cache_path.exists():
+                    cache_path.unlink()
+                update_book_feed(feed_id, info)
+                time.sleep(1)
+            except Exception as e:
+                log.error(f"Re-annotate failed for {feed_id}: {e}")
+
+    feeds = load_book_feeds()
+    threading.Thread(target=do_all, daemon=True).start()
+    return jsonify({"ok": True, "count": len(feeds)})
 
 @app.route("/api/journal/<issn>/filter", methods=["PUT"])
 def api_set_journal_filter(issn):

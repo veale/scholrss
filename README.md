@@ -52,7 +52,7 @@ A self-hosted scholarly RSS feed generator that pulls article metadata from **Cr
 | `UPDATE_INTERVAL_HOURS` | `24` | Hours between automatic feed refreshes (used when no daily refresh time is set) |
 | `LOOKBACK_DAYS` | `365` | Default lookback window (overridden by UI setting) |
 | `MAX_ARTICLES` | `100` | Max articles fetched/cached per journal (1–1000; overridden by UI setting) |
-| `BOOK_FETCH_EDITORS` | `1` | When set, book-chapter entries get a best-effort editor list by fetching the parent book. Disable to save API calls for chapter-heavy feeds. |
+| `BOOK_FETCH_EDITORS` | `1` | When set, book-chapter entries get a best-effort editor list from Crossref (chapter DOI and derived parent-book DOI). Disable to save API calls for chapter-heavy feeds. |
 | `DATA_DIR` | `/data` | Where journals config and cache are stored |
 | `JOURNALS_DB` | `${DATA_DIR}/journals.db` | Path to the journal autocomplete DB. Override only if you want to share a DB between containers. |
 | `BOOK_PUBLISHERS_DB` | `${DATA_DIR}/bookpublishers.db` | Path to the book publisher autocomplete DB. Same caveat. |
@@ -120,6 +120,8 @@ ScholRSS includes an MCP (Model Context Protocol) server so LLMs can query your 
 | `/api/books/autocomplete?q=` | GET | Publisher autocomplete (FTS5 book publisher database) |
 | `/api/books/preview` | POST | Preview candidate works for a book feed config `{publishers, keywords, types, match}` |
 | `/api/books/feed` | POST | Persist a book feed definition `{publishers, label, keywords, types, match}` |
+| `/api/books/feed/{id}/reannotate` | POST | Clear one book-feed cache and re-fetch to apply latest title/publisher/editor annotations |
+| `/api/books/reannotate-all` | POST | Clear all book-feed caches and re-fetch them in the background |
 | `/api/autocomplete?q=` | GET | Local journal autocomplete (FTS5) |
 | `/api/search/journal?q=` | GET | Online journal search via CrossRef |
 | `/api/search/doi?doi=` | GET | Look up journal from a DOI |
@@ -183,7 +185,21 @@ Book and book-chapter entries surface bibliographic context in both title and su
 - Books show `(Publisher)` after the title, plus `Publisher: <name>` in the summary footer.
 - Book chapters show `(Publisher, Parent Volume Title)` after the title, plus `In: <volume>` / `Editors: <names>` / `Publisher: <name>` in the summary footer.
 
-Editors are inferred from OpenAlex `authorships` on the parent-book lookup, which is best-effort because OpenAlex has no dedicated editors field. If parent lookup is unavailable or fails, the editors line is omitted silently. Set `BOOK_FETCH_EDITORS=0` to disable editor lookups entirely.
+Parent-volume title for chapters comes from OpenAlex `primary_location.raw_source_name`, which avoids showing ebook-platform labels like "Elsevier eBooks" as if they were book titles.
+
+Editors come from Crossref's structured `editor` field (queried on the chapter DOI and then on conservative derived parent-book DOI candidates). Many publishers do not provide machine-readable editor metadata, so the editors line is omitted silently when unavailable. Set `BOOK_FETCH_EDITORS=0` to disable editor lookups entirely.
+
+### Recent fixes
+
+**Fixed**
+
+- Book-chapter parent volume titles no longer use ebook-platform names (e.g. "Oxford University Press eBooks"). ScholRSS now prefers OpenAlex `primary_location.raw_source_name` and falls back cautiously.
+- Book-chapter editor lookup now uses Crossref editor metadata instead of OpenAlex source-based heuristics, avoiding unrelated-editor matches on large ebook platforms.
+
+**Added**
+
+- `POST /api/books/feed/{id}/reannotate` and `POST /api/books/reannotate-all` to re-fetch cached book feeds and apply corrected annotations without deleting/recreating feeds.
+- A UI button to run "Re-annotate all book feeds" from the main header controls.
 
 ## Abstract Enrichment Pipeline
 

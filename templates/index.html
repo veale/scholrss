@@ -853,6 +853,10 @@
       <button class="btn btn-sm" onclick="refreshAll()">Refresh all</button>
       <button class="btn btn-sm" onclick="updateJournalDb(this)">Update journal DB</button>
       <button class="btn btn-sm" onclick="updatePublisherDb(this)">Update publisher DB</button>
+      <button class="btn btn-sm" onclick="reannotateAllBookFeeds(this)"
+              title="Re-fetch every book feed to pick up the latest parent-title and publisher annotations">
+        Re-annotate all book feeds
+      </button>
       <button class="btn btn-sm btn-accent" onclick="togglePanel()">+ Add journal</button>
     </div>
   </header>
@@ -2196,6 +2200,22 @@ async function updatePublisherDb(btn) {
     toast(`Error: ${e.message}`, true);
   } finally {
     setTimeout(() => { btn.disabled = false; btn.textContent = 'Update publisher DB'; }, 3000);
+  }
+}
+
+async function reannotateAllBookFeeds(btn) {
+  if (!confirm('Re-fetch all book feeds? This clears their caches and re-queries OpenAlex + Crossref.')) return;
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = 'Running...';
+  try {
+    const r = await fetch('/api/books/reannotate-all', { method: 'POST' });
+    const data = await r.json();
+    toast(`Re-annotating ${data.count || 0} book feed(s) in the background.`);
+  } catch (e) {
+    toast(`Error: ${e.message}`, true);
+  } finally {
+    setTimeout(() => { btn.disabled = false; btn.textContent = orig; }, 5000);
   }
 }
 
