@@ -1133,6 +1133,7 @@
             <a class="btn btn-sm" href="{{ base_url }}/feed/book/{{ feed_id }}/json">JSON</a>
             <button class="btn btn-sm" onclick="refreshBookFeed('{{ feed_id }}')">↻ Refresh</button>
             <button class="btn btn-sm" onclick='editBookFeed({{ feed_id | tojson }}, {{ info | tojson }})' title="Edit feed">✎ Edit</button>
+            <button class="btn btn-sm" onclick='cloneBookPublishers({{ info | tojson }})' title="Start a new feed using these publishers">⎘ New with these publishers</button>
             <button class="btn btn-sm btn-danger" onclick="deleteBookFeed('{{ feed_id }}')">Remove</button>
           </div>
         </div>
@@ -1407,6 +1408,23 @@ function editBookFeed(feed_id, info) {
   }
   bookPreviewEl.textContent = `Editing feed "${feed_id}". Feed URL stays the same after save.`;
   bookPreviewList.innerHTML = '';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cloneBookPublishers(info) {
+  // Start a fresh feed pre-loaded with just the publishers from `info`.
+  cancelBookEdit();
+  const panel = document.getElementById('addPanel');
+  if (panel && !panel.classList.contains('open')) panel.classList.add('open');
+  setSearchMode('books');
+  bookPublishers.length = 0;
+  for (const p of (info.publishers || [])) {
+    bookPublishers.push({ id: p.id, name: p.name || p.id });
+  }
+  renderBookChips();
+  bookPreviewEl.textContent = `Loaded ${bookPublishers.length} publishers. Add a label and keywords, then Save feed.`;
+  bookPreviewList.innerHTML = '';
+  document.getElementById('bookLabel').focus();
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
